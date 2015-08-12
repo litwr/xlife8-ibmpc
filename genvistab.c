@@ -1,0 +1,1 @@
+/home/micro/bk/xlife-bk0011/genvistab.c

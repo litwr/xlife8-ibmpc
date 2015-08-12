@@ -1,0 +1,231 @@
+vermax   = 24     ;192
+hormax   = 20     ;160
+total    = hormax*vermax+1
+tilesize = 62
+plainbox = hormax*vermax*tilesize+tiles
+;statusline = 197
+;videostart = 16384+12+128
+
+left     = 8      ;all directions
+ul       = 10     ;not zero!
+up       = 12
+ur       = 14
+right    = 16
+dr       = 18
+down     = 20
+dle      = 22
+next     = 24
+count0   = 26
+count1   = 30
+count2   = 34
+count3   = 38
+count4   = 42
+count5   = 46
+count6   = 50
+count7   = 54
+video    = 58
+sum      = 60
+
+         macro tile {
+l0       db 0
+l1       db 0
+l2       db 0
+l3       db 0
+l4       db 0
+l5       db 0
+l6       db 0
+l7       db 0
+left     dw 0	;+8
+ul       dw 0
+up       dw 0        ;+12
+ur       dw 0
+right    dw 0        ;+16
+dr       dw 0
+down     dw 0        ;+20
+dl       dw 0
+next     dw 0        ;+24
+         rb 32       ;+26, count0
+video    dw 0        ;+58
+sum      db 0        ;+60
+         db 0        ;free
+}
+
+boxsz_xmin = i1
+boxsz_ymin = saved
+boxsz_curx = temp          ;boxsz_sizex
+boxsz_cury = temp2         ;boxsz_sizey
+xcut       = temp2
+ycut       = temp2+1
+x8poscp    = temp
+y8poscp    = temp+1
+y8byte     = saved
+
+macro vidmacp one,two {
+;;          mov one(r0),r2
+;;          mov one+2(r0),r4
+;;          bic #^B1110011100111111,r2
+;;          mov r2,r3
+;;          swab r3
+;;          aslb r3   ;sets CY=0
+;;          bis r3,r2
+;;          mov r1,r3
+;;          rorb r3    ;uses CY=0
+;;          asrb r3
+;;          asrb r3
+;;          asrb r3
+;;          movb r3,r3
+;;          bisb r2,r3
+;;          mov #tovideo,@#pageport
+;;if two
+;;          movb vistabpc(r3),@r5
+;;else
+;;          movb vistabpc(r3),two(r5)
+;;endif
+;;          bic #^B1111110011100111,r4
+;;          asl r4
+;;          asl r4
+;;          asl r4
+;;          mov r4,r3
+;;          swab r3
+;;          asl r3
+;;          bis r3,r4
+;;          movb r1,r3
+;;          bic #^B1111111111110000,r3
+;;          bisb r4,r3
+;;          movb vistabpc(r3),two+1(r5)
+;;          mov #todata,@#pageport
+}
+
+macro genmac one {
+;;         movb count'one+3(r0),r5
+         xor bx,bx
+         mov bl,[si+count#one+3]
+;;         movb gentab(r5),r1
+         mov al,[bx+gentab]
+;;         bic #^B1111111111111100,r1
+         and ax,3
+
+;;         movb count'one+2(r0),r5
+         mov bl,[si+count#one+2]
+;;         movb gentab(r5),r5
+         mov bl,[bx+gentab]
+;;         bic #^B1111111111110011,r5
+         and bl,0ch
+;;         bis r5,r1
+         or al,bl
+
+;;         movb count'one+1(r0),r5
+         mov bl,[si+count#one+1]
+;;         movb gentab(r5),r5
+         mov bl,[bx+gentab]
+;;         bic #^B1111111111001111,r5
+         and bl,30h
+;;         bis r5,r1
+         or al,bl
+
+;;         movb count'one(r0),r5
+         mov bl,[si+count#one]
+;;         movb gentab(r5),r5
+         mov bl,[bx+gentab]
+;;         bic #^B1111111100111111,r5
+         and bl,0c0h
+;;         bis r5,r1
+         or al,bl
+
+;;         movb r1,one(r0)
+         mov [si+one],al
+;;         movb tab3(r1),r2
+         mov bx,tab3
+         xlatb
+         or al,al
+         jz @f
+
+;;         movb r2,sum(r0)
+         mov [si+sum],al
+;;         cmpb #2,@#mode
+         cmp [mode],2
+         jz @f
+
+         cellsum @f
+@@:
+}
+
+macro cellsum l1 {     ;in: al, ah = 0
+;;         mov #<cellcnt+4>,r1
+         mov bx,cellcnt+4
+;;         movb (r1),r3
+         mov cl,[bx]
+;;         add r2,r3
+         add al,cl
+         aaa
+;;         movb r3,(r1)
+         mov [bx],al
+         jnc l1
+
+         incbcd l1
+         incbcd l1
+         incbcd l1
+         incbcd l1
+;;l1:
+}
+
+macro incbcd l1 {
+         dec bx
+         mov al,[bx]
+         adc al,0
+         aaa
+         mov [bx],al
+         jnc l1
+}
+
+macro inibcd one,two {
+        mov bx,two
+@@:     mov byte [bx+one-1],0
+        dec bx
+        jnz @b
+}
+
+macro setcount one {
+;;         mov one(r0),r1
+         mov bx,[si+one]
+;;         mov r1,r2
+         mov di,bx
+;;         bic r3,r1
+         and bx,cx
+;;         movb r1,two(r0)
+         mov [si+count#one],bl
+;;         swab r1
+;;         movb r1,two+4(r0)
+         mov [si+count#one+4],bh
+;;         mov r2,r1
+         mov bx,di
+;;         bic r4,r1
+         and bx,dx
+;;         asr r1
+         shr bx,1
+;;         movb r1,two+1(r0)
+         mov [si+count#one+1],bl
+;;         swab r1
+;;         movb r1,two+5(r0)
+         mov [si+count#one+5],bh
+;;         mov r2,r1
+         mov bx,di
+;;         bic r5,r1
+         and bx,bp
+;;         asl r1
+         shl bx,1
+;;         movb r1,two+2(r0)
+         mov [si+count#one+2],bl
+;;         swab r1
+;;         movb r1,two+6(r0)
+         mov [si+count#one+6],bh
+;;         mov r2,r1
+         mov bx,di
+;;         bic #^B1111110011111100,r1
+         and bx,ax
+;;         movb r1,two+3(r0)
+         mov [si+count#one+3],bl
+;;         swab r1
+;;         movb r1,two+7(r0)
+         mov [si+count#one+7],bh
+}
