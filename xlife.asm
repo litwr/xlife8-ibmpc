@@ -33,17 +33,26 @@ start:   mov ax,0b800h
          mov ax,4    ;set video mode #4 = 320x200x4
          int 10h
 
+     mov [mode],1
      mov si,tiles
      mov [startp],si
      mov word [si+next],1
      mov byte [si+sum],1
-     mov byte [si+2],14
+     ;mov byte [si+2],81h
+     ;mov byte [si+3],81h
+     ;mov byte [si+4],81h
+     mov byte [si+0],0e7h
+     mov byte [si+7],038h
+     ;mov byte [si+1],60h
+     ;mov byte [si+2],18h
+     ;mov byte [si+3],18h
      mov [tilecnt],1
 
 crsrflash2: 
          ;;call @#crsrflash
 mainloop: 
          ;call dispatcher
+    call getkey
          mov al,[mode]
          or al,al
          jz crsrflash2
@@ -83,7 +92,7 @@ mainloop:
          include 'video-base.s'
          include 'video.s'
          include 'utils.s'
-;          include 'interface.s'
+         include 'interface.s'
 
 ;benchirq0: mov @#saved,r0
 ;           mov @#timerport2,r1
@@ -152,12 +161,12 @@ generate:
 ;;5$:      tstb sum(r0)
          cmp byte [si+sum],0
          jnz .c1
-         jmp .lnext        ;opotimize for i8088???
+         jmp .lnext        ;optimize for i8088???
 
 ;*cont3
 .c1:     xor bx,bx
 ;;         movb @r0,r1
-         or bl,byte [si]            ;top row, later saved at 6502 X
+         or bl,byte [si]            ;top row
 
          ;*beq ldown
          jz .c3
@@ -166,15 +175,15 @@ generate:
          mov di,[si+up]
 
 ;;         asl r1
-         shl bl,1
+         shl bx,1
 ;;         mov tab1213(r1),r3
          mov cx,[bx+tab1213]
 ;;         mov tab1011(r1),r4
          mov dx,[bx+tab1011]
 ;;         add r3,count7+2(r2)
-         add cx,[di+count7+2]
+         add [di+count7+2],cx
 ;;         add r4,count7(r2)
-         add dx,[di+count7]
+         add [di+count7],dx
 
 ;;         add r3,count1+2(r0)
          add [si+count1+2],cx
@@ -191,7 +200,7 @@ generate:
 
 ;*ldown:
 .c3:
-         mov bl,[si+7]            ;top row, later saved at 6502 X
+         mov bl,[si+7]            ;bottom row
          or bl,bl
          ;*beq lleft
          jz .c4
@@ -206,9 +215,9 @@ generate:
          mov dx,[bx+tab1011]
 
 ;;         add r3,count0+2(r2)
-         add [si+count0+2],cx
+         add [di+count0+2],cx
 ;;         add r4,count0(r2)
-         add [si+count0],dx
+         add [di+count0],dx
 
 ;;         add r3,count6+2(r0)
          add [si+count6+2],cx
@@ -547,8 +556,8 @@ generate:
 ;*l2
 .c23:
 ;;         movb 5(r0),r1
-         mov bl,[si+5]
-         or bl,bl
+         xor bx,bx
+         or bl,[si+5]
          jz .c24
 
 ;;         asl r1
@@ -575,8 +584,8 @@ generate:
 ;*l3
 .c24:
 ;;         movb 4(r0),r1
-         mov bl,[si+4]
-         or bl,bl
+         xor bx,bx
+         or bl,[si+4]
          jz .c25
 
 ;;         asl r1
@@ -603,8 +612,8 @@ generate:
 ;*l4
 .c25:
 ;;         movb 3(r0),r1
-         mov bl,[si+3]
-         or bl,bl
+         xor bx,bx
+         or bl,[si+3]
          jz .c26
 
 ;;         asl r1
@@ -631,8 +640,8 @@ generate:
 ;*l5
 .c26:
 ;;         movb 2(r0),r1
-         mov bl,[si+2]
-         or bl,bl
+         xor bx,bx
+         or bl,[si+2]
          jz .c27
 
 ;;         asl r1
@@ -659,8 +668,8 @@ generate:
 ;*l6
 .c27:
 ;;         movb 1(r0),r1
-         mov bl,[si+1]
-         or bl,bl
+         xor bx,bx
+         or bl,[si+1]
          jz .lnext
 
 ;;         asl r1
@@ -762,7 +771,10 @@ cleanup0:
           add di,bx
           xor ax,ax
           mov cx,16
-          rep stosw
+.c2c:
+          mov [di],ax
+          add di,2
+          loop .c2c
 ;;          mov next(r0),r1
 ;;          clr next(r0)
 ;;          mov r1,r0
@@ -832,7 +844,7 @@ ydir      db 0
 clncnt    db 0
 ;palette  db 0      ;not word aligned???
 pseudoc   db 0
-mode      db 1      ;0-stop, 1-run, 2-hide, 3-exit
+mode      db 0      ;0-stop, 1-run, 2-hide, 3-exit
 zoom      db 0
 fn        db 0,0,0,0,0,0,0,0,0,0,0,0
 density   db 3         ;must follow fn
