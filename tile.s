@@ -69,8 +69,6 @@ chkadd2: ;;tst next(r5)
 ;;         bne exit2
          jnz exit2
 
-;;         ;*rts
-
 ;;;*addnode2 .block
 addnode2:                 ;in: R5
 ;;         ;*dey

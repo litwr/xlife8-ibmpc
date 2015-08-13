@@ -38,11 +38,12 @@ start:   mov ax,0b800h
      mov [startp],si
      mov word [si+next],1
      mov byte [si+sum],1
-     ;mov byte [si+2],81h
-     ;mov byte [si+3],81h
-     ;mov byte [si+4],81h
-     mov byte [si+0],0e7h
-     mov byte [si+7],038h
+     mov byte [si+0],0e0h
+     mov byte [si+1],80h
+     mov byte [si+2],40h
+     ;mov byte [si+3],40h
+     ;mov byte [si+0],0e7h
+     ;mov byte [si+7],0e7h
      ;mov byte [si+1],60h
      ;mov byte [si+2],18h
      ;mov byte [si+3],18h
@@ -52,7 +53,7 @@ crsrflash2:
          ;;call @#crsrflash
 mainloop: 
          ;call dispatcher
-    call getkey
+    ;call getkey
          mov al,[mode]
          or al,al
          jz crsrflash2
@@ -167,9 +168,7 @@ generate:
 .c1:     xor bx,bx
 ;;         movb @r0,r1
          or bl,byte [si]            ;top row
-
-         ;*beq ldown
-         jz .c3
+         jz .ldown
 
 ;;         mov up(r0),r2       ;adjcell=r2, this line replaces iniadjc call!
          mov di,[si+up]
@@ -198,12 +197,10 @@ generate:
          add [si+count0],ax
          call chkadd
 
-;*ldown:
-.c3:
-         mov bl,[si+7]            ;bottom row
-         or bl,bl
-         ;*beq lleft
-         jz .c4
+.ldown:
+         xor bx,bx
+         or bl,[si+7]            ;bottom row
+         jz .lleft
 
 ;;         mov down(r0),r2          ;adjcell=r2
          mov di,[si+down]
@@ -232,8 +229,7 @@ generate:
          add [si+count7],ax
          call chkadd
 
-;*lleft
-.c4:
+.lleft:
 ;;         mov left(r0),r2          ;adjcell=r2
          mov di,[si+left]
 
@@ -382,7 +378,6 @@ generate:
          add [di+count7+2],dx
 .c14:    call chkaddt
 
-         ;*ldy #right
 ;;         mov right(r0),r2          ;adjcell=r2
          mov di,[si+right]
 ;;         mov #8,r4                ;item to add
@@ -400,7 +395,7 @@ generate:
 
          inc cx
 ;;         mov ur(r0),r5          ;adjcell2=r5
-         mov bp,[si]
+         mov bp,[si+ur]
 
 ;;         add r4,count7(r5)
          add [ds:bp+count7],dx
@@ -751,7 +746,7 @@ cleanup0:
          test byte [bx+sum],0ffh
 
 ;*         beq delel
-          jz .c2
+         jz .delel
 
 ;;          mov r0,r2     ;save pointer to previous
           mov si,bx
@@ -763,8 +758,7 @@ cleanup0:
 
           retn
 
-;*delel
-.c2:     dec [tilecnt]
+.delel:   dec [tilecnt]
 ;;          mov #count0,r1
           mov di,count0
 ;;          add r0,r1
@@ -782,18 +776,17 @@ cleanup0:
           mov bx,ax
 ;;          tst r2
           or si,si
-          jz .c3
+          jz .del1st
 
 ;;         mov r1,next(r2)
          mov [si+next],ax
 ;;         dec r1
-         dec bx
+         dec ax
          jnz .c1
 
 .c4:     retn
 
-;*del1st
-.c3:
+.del1st:
 ;;         mov r1,@#startp
          mov [startp],bx
 
