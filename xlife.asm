@@ -33,14 +33,13 @@ start:   mov ax,0b800h
          mov ax,4    ;set video mode #4 = 320x200x4
          int 10h
 
-     mov [mode],1
      mov si,tiles
      mov [startp],si
      mov word [si+next],1
      mov byte [si+sum],1
-     mov byte [si+0],0e0h
-     mov byte [si+1],80h
-     mov byte [si+2],40h
+     mov byte [si+0],80h
+     mov byte [si+1],60h
+     mov byte [si+2],0c0h
      ;mov byte [si+3],40h
      ;mov byte [si+0],0e7h
      ;mov byte [si+7],0e7h
@@ -48,12 +47,12 @@ start:   mov ax,0b800h
      ;mov byte [si+2],18h
      ;mov byte [si+3],18h
      mov [tilecnt],1
+     call showscn
 
 crsrflash2: 
          ;;call @#crsrflash
 mainloop: 
-         ;call dispatcher
-    ;call getkey
+         call dispatcher
          mov al,[mode]
          or al,al
          jz crsrflash2
@@ -61,6 +60,8 @@ mainloop:
          cmp al,3
          jnz .c3
 
+         mov ax,3
+         int 10h
          int 20h    ;directly to DOS?
 
 .c3:     cmp [tilecnt],0

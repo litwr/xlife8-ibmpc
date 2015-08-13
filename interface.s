@@ -1,54 +1,53 @@
-getkey:  ;;movb @#kbdbuf,r0    ;waitkey
-;;         beq getkey
-
-;;         clrb @#kbdbuf
-;;exit11:  return
-
-         xor ah,ah
+getkey:  xor ah,ah
          int 16h
          retn
 
-;;getkey2: movb @#kbdbuf,r0
-;;         beq exit11
+getkey2: mov ah,1
+         int 16h
+         jnz getkey
 
-;;kbddelay:mov #20000,r1
-;;1$:      bit #64,@#pageport
-;;         bne 2$
+         xor ax,ax
+         retn
+         
 
-;;         sob r1,1$
-;;         mov #2000,@#kbddelay+2
-;;         br 3$
-
-;;2$:      clrb @#kbdbuf
-;;         mov #20000,@#kbddelay+2
-;;3$:      return
-
-dispatcher: ;;call @#getkey2
+dispatcher: call getkey2
 ;;dispat0: cmpb #'g,r0
 ;;         bne 3$
+         cmp al,'g'
+         jnz .c3
 
 ;;         tstb @#mode
 ;;         beq 2$
+         cmp [mode],0
+         jz .c2
 
 ;;53$:     decb @#mode
 ;;         beq 40$
+.c53:    dec [mode]
+         jz .c40
 
 ;;         call @#initxt
 ;;         call @#showtopology
 ;;         call @#xyout
 ;;         br 40$
+         jmp .c40
 
 ;;2$:      incb @#mode
 ;;40$:     jmp @#showmode
+.c2:       inc [mode]
+.c40:
+       retn
 
-;;3$:      cmpb #'Q,r0
-;;         bne 5$
+.c3:     cmp al,'Q'
+         jnz .c5
 
-;;         movb #3,@#mode
-;;101$:    return
+         mov [mode],3
+.c101:   retn
 
 ;;5$:      cmpb #'h,r0
 ;;         bne 4$
+.c5:     cmp al,'h'
+         jnz .c4
 
 ;;         cmpb #2,@#mode
 ;;         beq 53$
@@ -59,6 +58,8 @@ dispatcher: ;;call @#getkey2
 
 ;;4$:      cmpb #'T,r0
 ;;         bne 6$
+.c4:     cmp al,'T'
+         jnz .c6
 
 ;;         tstb @#topology
 ;;         beq 84$
@@ -71,25 +72,27 @@ dispatcher: ;;call @#getkey2
 ;;         incb @#topology
 ;;86$:     jmp @#showtopology
 
-;;6$:      cmpb #'o,r0
-;;         bne 7$
+.c6:     cmp al,'o'
+         jnz .c7
 
-;;         tstb @#mode
-;;         bne 101$
+         cmp [mode],0
+         jnz .c101
 
-;;         tst @#tilecnt
-;;         bne 108$
+         cmp [tilecnt],0
+         jnz .c108
 
-;;         call @#incgen
-;;         br 202$
+         call incgen
+         ;jmp .c202
 
-;;108$:    call @#zerocc
-;;         call @#generate
-;;         call @#showscn
-;;         jmp @#cleanup
+.c108:   call zerocc
+         call generate
+         call showscn
+         jmp cleanup
 
 ;;7$:      cmpb #'?,r0
 ;;         bne 8$
+.c7:     cmp al,'?'
+         jnz .c8
 
 ;;         cmpb #2,@#mode
 ;;         beq 8$
@@ -98,6 +101,8 @@ dispatcher: ;;call @#getkey2
 
 ;;8$:      cmpb #'C,r0
 ;;         bne 10$
+.c8:     cmp al,'C'
+         jnz .c10
 
 ;;         tst @#tilecnt
 ;;         bne 201$
@@ -109,6 +114,8 @@ dispatcher: ;;call @#getkey2
 
 ;;10$:     cmpb #'E,r0
 ;;         bne 11$
+.c10:    cmp al,'E'
+         jnz .c11
 
 ;;         decb @#pseudoc
 ;;         beq 111$
@@ -118,12 +125,16 @@ dispatcher: ;;call @#getkey2
 
 ;;11$:     cmpb #'!,r0
 ;;         bne 12$
+.c11:    cmp al,'!'
+         jnz .c12
 
 ;;         call @#random
 ;;         jmp @#showscn
 
 ;;12$:     cmpb #'%,r0
 ;;         bne 14$
+.c12:    cmp al,'%'
+         jnz .c14
 
 ;;         cmpb #2,@#mode
 ;;         beq 14$
@@ -132,6 +143,8 @@ dispatcher: ;;call @#getkey2
 ;;14$:     cmpb #'B,r0
 ;;         beq 159$
 ;;         jmp @#15$
+.c14:    cmp al,'B'
+         jnz .c15
 
 ;;159$:    call @#insteps
 ;;         mov @#temp2,@#x0
@@ -288,6 +301,8 @@ dispatcher: ;;call @#getkey2
 
 ;;15$:     cmpb #'R,r0
 ;;         bne 16$
+.c15:    cmp al,'R'
+         jnz .c16
 
 ;;         call @#totext
 ;;         call @#inborn
@@ -308,6 +323,8 @@ dispatcher: ;;call @#getkey2
 
 ;;16$:     cmpb #25,r0    ;cursor right
 ;;         bne 160$
+.c16:    cmp ax,4d00h   ;cursor right
+         jnz .c160
 
 ;;;*         jsr crsrclr
 ;;;*         ldy #right
@@ -348,6 +365,8 @@ dispatcher: ;;call @#getkey2
 
 ;;160$:    cmpb #8,r0   ;cursor left
 ;;         bne 161$
+.c160:   cmp ax,4b00h ;cursor left
+         jnz .c161
 
 ;;;*         jsr crsrclr
 ;;;*         ldy #left
@@ -423,6 +442,8 @@ dispatcher: ;;call @#getkey2
 
 ;;161$:    cmpb #26,r0   ;cursor up
 ;;         bne 162$
+.c161:   cmp ax,4800h  ;cursor up
+         jnz .c162
 
 ;;;*         jsr crsrclr
 ;;;*         ldy #up
@@ -462,6 +483,8 @@ dispatcher: ;;call @#getkey2
 
 ;;162$:    cmpb #27,r0   ;cursor down
 ;;         bne 17$
+.c162:   cmp ax,5000h  ;cursor down
+         jnz .c17
 
 ;;;*         jsr crsrclr
 ;;;*         ldy #down
@@ -500,6 +523,8 @@ dispatcher: ;;call @#getkey2
 
 ;;17$:     cmpb #32,r0   ;space
 ;;         bne 170$
+.c17:    cmp al,' '    ;space
+         jnz .c170
 
 ;;;*         #assign16 adjcell,crsrtile
 ;;         mov @#crsrtile,r2
@@ -548,6 +573,8 @@ dispatcher: ;;call @#getkey2
 
 ;;170$:    cmpb #'.,r0
 ;;         bne 171$
+.c170:   cmp al,'.'
+         jnz .c171
 
 ;;;*         jsr crsrclr
 ;;         call @#crsrclr
@@ -584,6 +611,8 @@ dispatcher: ;;call @#getkey2
 
 ;;171$:    cmpb #12,r0      ;home
 ;;         bne 172$
+.c171:   cmp ax,4700h    ;home
+         jnz .c172
 
 ;;;*         jsr crsrclr
 ;;         call @#crsrclr
@@ -605,6 +634,8 @@ dispatcher: ;;call @#getkey2
 
 ;;172$:    cmpb #'l,r0
 ;;         bne 173$
+.c172:   cmp al,'l'
+         jnz .c173
 
 ;;;*         lda zoom
 ;;;*         pha
@@ -638,6 +669,8 @@ dispatcher: ;;call @#getkey2
 
 ;;173$:     cmpb #'L,r0
 ;;         bne 174$
+.c173:   cmp al,'L'
+         jnz .c174
 
 ;;;*         lda fnlen
 ;;;*         bne cont17v
@@ -664,8 +697,8 @@ dispatcher: ;;call @#getkey2
 ;;;*         jmp cont17w
 ;;         br 303$
 
-;;174$:    cmpb #'+,r0
-;;         bne 175$
+.c174:   cmp al,'+'
+         jnz .c175
 
 ;;;*zoomin   jsr crsrclr
 ;;;*         jsr savebl     ;sets YR to 255
@@ -681,8 +714,8 @@ dispatcher: ;;call @#getkey2
 ;;         call @#setviewport
 ;;271$:    jmp @#tograph0
 
-;;175$:    cmpb #'-,r0
-;;         bne 176$
+.c175:   cmp al,'-'
+         jnz .c176
 
 ;;         tstb @#zoom
 ;;         beq 100$
@@ -690,32 +723,32 @@ dispatcher: ;;call @#getkey2
 ;;319$:    clrb @#zoom
 ;;         br 271$
 
-;;176$:    cmpb #'V,r0
-;;         bne 177$
+.c176:   cmp al,'V'
+         jnz .c177
 
 ;;         jmp @#showcomm
 
-;;177$:    cmpb #'v,r0
-;;         bne 178$
+.c177:   cmp al,'v'
+         jnz .c178
 
 ;;         jmp @#infov
 
-;;178$:    cmpb #'Z,r0
-;;         bne 179$
+.c178:   cmp al,'Z'
+         jnz .c179
 
 ;;         call @#totext
 ;;         call @#chgcolors
 ;;220$:    jmp @#tograph
 
-;;179$:    cmpb #'X,r0
-;;         bne 18$
+.c179:   cmp al,'X'
+         jnz .c18
 
 ;;         call @#totext
 ;;         call @#setpalette
 ;;         br 220$
 
-;;18$:     cmpb #'S,r0
-;;         bne 20$
+.c18:    cmp al,'S'
+         jnz .c20
 
 ;;         call @#boxsz
 ;;         beq 20$
@@ -728,7 +761,7 @@ dispatcher: ;;call @#getkey2
 
 ;;;*cont20   clc
 ;;;*         rts
-;;20$:     return
+.c20:      retn
 
 ;;;*shift    lda $543   ;shift st
 ;;;*         beq cont20
