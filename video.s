@@ -302,16 +302,26 @@ xyout:   ;mov #tovideo,@#pageport
 ;         mov #todata,@#pageport
 ;         return
 
-infoout: ;mov #tovideo,@#pageport    ;must be before showtinfo
-;         mov #gencnt,r0
-;         mov #7,r1
-;         mov #<statusline*64+16384+2>,r2
-;         call @#digiout
+infoout: ;;must be before showtinfo
+;;         mov #gencnt,r0
+         mov bx,gencnt
 
-;         mov #cellcnt,r0
-;         mov #5,r1
-;         mov #<statusline*64+16384+18>,r2
-;         call @#digiout
+;;         mov #7,r1
+         mov dx,7
+
+;;         mov #<statusline*64+16384+2>,r2
+         mov di,192*40+14h+2
+         call digiout
+
+;;         mov #cellcnt,r0
+         mov bx,cellcnt
+
+;;         mov #5,r1
+         mov dx,5
+
+;;         mov #<statusline*64+16384+18>,r2
+         mov di,192*40+14h+18
+         call digiout
 
 ;showtinfo  proc          ;must be after infoout
 ;           local cont1,cont2
@@ -374,11 +384,11 @@ showtinfo:  ;mov #tinfo,r0
 ;           ld de,$c79e
 ;           jp digiout
 
-;2$:         mov #3,r1
-;            mov #<statusline*64+16384+30>,r2
-;            call @#digiout
-;            mov #todata,@#pageport
-;            return
+;;2$:         mov #3,r1
+;;            mov #<statusline*64+16384+30>,r2
+;;            call @#digiout
+;;            mov #todata,@#pageport
+           retn
 
 calcx:   ;movb @#crsrbit,r1  ;$80 -> 0, $40 -> 1, ...
 ;         bis #65280,r1      ;$ff00, IN: R1, OUT: R1
@@ -617,7 +627,7 @@ showscnz:
 
 gexit:    ;;jmp @#crsrset
 
-showscn:  ;;call @#infoout
+showscn:  call infoout
 
 ;;          tstb @#zoom
 ;;          bne showscnz

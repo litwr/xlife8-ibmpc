@@ -180,9 +180,9 @@ macro incbcd l1 {
 
 macro inibcd one,two {
         mov bx,two
-@@:     mov byte [bx+one-1],0
+@@:     mov byte [bx+one],bh
         dec bx
-        jnz @b
+        jns @b
 }
 
 macro setcount one {

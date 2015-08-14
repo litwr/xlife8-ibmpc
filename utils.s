@@ -8,19 +8,8 @@
 zerocc:   inibcd cellcnt,4
           ret
 
-;;zerogc:   inibcd gencnt,6
-;;          return
-
-;;mul5:     mov r1,r0  ;r2:r1*5
-;;          mov r2,r5
-;;          asl r1
-;;          rol r2
-;;          asl r1
-;;          rol r2
-;;          add r0,r1
-;;          adc r2
-;;          add r5,r2
-;;          return
+zerogc:   inibcd gencnt,6
+          retn
 
 ;;incben:   movb -(r1),r5
 ;;          inc r5
