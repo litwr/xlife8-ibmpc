@@ -1,50 +1,51 @@
-clear:    ;;call @#zerocc
-;;          call @#zerogc
+clear:    call zerocc
+          call zerogc
 ;;          mov @#startp,r0
+          mov si,[startp]
+
 ;;10$:      tstb sum(r0)
 ;;          beq 11$
+.c10:     xor ax,ax
+          cmp al,[si+sum]
+          jz .c11
 
 ;;          clrb sum(r0)
 ;;          clr @r0
 ;;          clr 2(r0)
 ;;          clr 4(r0)
 ;;          clr 6(r0)
+          mov [si+sum],al
+          mov [si],ax
+          mov [si+2],ax
+          mov [si+4],ax
+          mov [si+6],ax
+
 ;;11$:      mov next(r0),r0
 ;;          cmp r0,#1
 ;;          bne 10$
+.c11:     mov si,[si+next]
+          cmp si,1
+          jnz .c10
 
-;;          call @#showscn
-;;          call @#cleanup0
-;;          jmp @#infoout
+          call showscn
+          call cleanup0
+          jmp infoout
 
-;;;*chkaddt  lda t1
 chkaddt: ;;tst r3
-;;         ;*beq exit2
 ;;         beq exit2
          or cx,cx
          jz exit2
 
-;;;*chkadd   ldy #next
-;;         ;*lda (adjcell),y
-;;         ;*iny
-;;         ;*ora (adjcell),y
 chkadd:  ;;tst next(r2)
 ;;         bne exit2
          cmp word [di+next],0
          jnz exit2
 
-addnode:                  ;in: R2
-;;         ;*dey
-;;         ;*lda startp
-;;         ;*sta (adjcell),y
-;;         ;*iny
-;;         ;*lda startp+1
-;;         ;*sta (adjcell),y
+addnode:
 ;;         mov @#startp,next(r2)
          mov ax,[startp]
          mov [di+next],ax
 
-;;         ;*#assign16 startp,adjcell
 ;;         mov r2,@#startp
          mov [startp],di
 

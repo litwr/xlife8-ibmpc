@@ -603,6 +603,7 @@ showscnz:
 ;;         br 16$
 
 gexit:    ;;jmp @#crsrset
+       retn
 
 showscn:  call infoout
 

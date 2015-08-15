@@ -82,15 +82,13 @@ dispatcher: call getkey2
          jnz .c108
 
          call incgen
-         ;jmp .c202
+         jmp .c202
 
 .c108:   call zerocc
          call generate
          call showscn
          jmp cleanup
 
-;;7$:      cmpb #'?,r0
-;;         bne 8$
 .c7:     cmp al,'?'
          jnz .c8
 
@@ -99,21 +97,18 @@ dispatcher: call getkey2
 
 ;;         jmp @#help
 
-;;8$:      cmpb #'C,r0
-;;         bne 10$
 .c8:     cmp al,'C'
          jnz .c10
 
 ;;         tst @#tilecnt
 ;;         bne 201$
+         cmp [tilecnt],0
+         jnz .c201
 
-;;         call @#zerogc
-;;202$:    jmp @#infoout
+         call zerogc
+.c202:   jmp infoout
+.c201:   jmp clear
 
-;;201$:    jmp @#clear
-
-;;10$:     cmpb #'E,r0
-;;         bne 11$
 .c10:    cmp al,'E'
          jnz .c11
 
@@ -123,8 +118,6 @@ dispatcher: call getkey2
 ;;         movb #1,@#pseudoc
 ;;111$:    jmp @#showscn
 
-;;11$:     cmpb #'!,r0
-;;         bne 12$
 .c11:    cmp al,'!'
          jnz .c12
 

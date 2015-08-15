@@ -28,13 +28,6 @@ initxt: mov ah,2
         mov ax,9*256+'Y'
         int 10h
 
-          ;;mov #65535,r2   ;draw frame
-          ;;mov #20,r3
-          ;;mov #16384+12+64,r1
-          ;;mov #16384+12+<64*194>,r0
-;;1$:       mov r2,(r1)+
-          ;;mov r2,(r0)+
-          ;;sob r3,1$
         mov ax,0c003h    ;draw frame vertical borders
         mov di,19
         mov si,19+2000h
@@ -46,14 +39,6 @@ initxt: mov ah,2
         add di,80
         loop .c1
         retn
-
-          ;;mov #194,r3
-          ;;mov #16384+11+64,r1
-;;2$:       movb #192,@r1
-          ;;movb #3,41(r1)
-          ;;add #64,r1
-          ;;sob r3,2$
-          ;;jmp @#gexit3
 
 totext:    ;call @#clrscn
            ;mov #toandos,@#pageport

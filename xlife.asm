@@ -64,7 +64,7 @@ mainloop:
 .c3:     cmp [tilecnt],0
          jnz .c4
 
-         mov byte [mode],0
+         mov [mode],0
          call incgen
          ;call initxt
          ;call showtopology
@@ -177,8 +177,10 @@ intr8:   inc [cs:timercnt]
 .c1:     test [cs:timercnt],TIMERV-1
          jz .c2
 
+         push ax
          MOV AL,20H
          OUT 20H,AL
+         pop ax
          iret
 
 .c2:     db  0eah
