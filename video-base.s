@@ -1,29 +1,49 @@
-initxt:   ;clr r1
-          ;mov #18,r2
-          ;emt ^O24
-          ;jsr r3,@#printstr
-          ;.byte 147,'G',0,0
+initxt: mov ah,2
+        mov bx,1   ;color
+        mov dx,24*256
+        int 10h
 
-          ;mov #18,r1
-          ;emt ^O24
-          ;jsr r3,@#printstr
-          ;.byte '%,32,32,32,32,32,'X,32,32,32,'Y,145,0,0
+        mov ax,9*256+'G'
+        mov cx,1
+        int 10h
 
-          ;mov #65535,r2
-          ;mov #20,r3
-          ;mov #16384+12+64,r1
-          ;mov #16384+12+<64*194>,r0
-;1$:       mov r2,(r1)+
-          ;mov r2,(r0)+
-          ;sob r3,1$
+        mov ah,2
+        mov dl,18
+        int 10h
 
-          ;mov #194,r3
-          ;mov #16384+11+64,r1
-;2$:       movb #192,@r1
-          ;movb #3,41(r1)
-          ;add #64,r1
-          ;sob r3,2$
-          ;jmp @#gexit3
+        mov ax,9*256+'%'
+        int 10h
+
+        mov ah,2
+        mov dl,32
+        int 10h
+
+        mov ax,9*256+'X'
+        int 10h
+
+        mov ah,2
+        mov dl,36
+        int 10h
+
+        mov ax,9*256+'Y'
+        int 10h
+        retn
+
+          ;;mov #65535,r2   ;draw frame
+          ;;mov #20,r3
+          ;;mov #16384+12+64,r1
+          ;;mov #16384+12+<64*194>,r0
+;;1$:       mov r2,(r1)+
+          ;;mov r2,(r0)+
+          ;;sob r3,1$
+
+          ;;mov #194,r3
+          ;;mov #16384+11+64,r1
+;;2$:       movb #192,@r1
+          ;;movb #3,41(r1)
+          ;;add #64,r1
+          ;;sob r3,2$
+          ;;jmp @#gexit3
 
 totext:    ;call @#clrscn
            ;mov #toandos,@#pageport
@@ -53,23 +73,30 @@ tograph0:  ;call @#clrscn
            ;call @#showrules2
            ;jmp @#xyout
 
-printstr:  ;movb (r3)+,r0  ;use: r0, r1
-           ;beq 2$
+printstr:  ;;movb (r3)+,r0  ;use: r0, r1
+           ;;beq 2$
+           pop si
+           lodsb
+           cmp al,0
+           jz .c2
 
-           ;cmp #9,r0
-           ;bne 3$
+           ;;cmp #9,r0
+           ;;bne 3$
 
-           ;mov #9,r1
-           ;mov #32,r0
-;1$:        emt ^O16
-           ;sob r1,1$
+           ;;mov #9,r1
+           ;;mov #32,r0
+;;1$:        emt ^O16
+           ;;sob r1,1$
 
-;3$:        emt ^O16
-           ;br printstr
+;;3$:        emt ^O16
+           ;;br printstr
 
-;2$:        inc r3
-           ;bic #1,r3
-           ;rts r3
+;;2$:        inc r3
+           ;;bic #1,r3
+           ;;rts r3
+.c2:       push si
+           retn
+
 
 digiout:        ;;in: r1 - length, r2 - scrpos, r0 - data
                 ;in: dx - length, di - srcpos, bx - data

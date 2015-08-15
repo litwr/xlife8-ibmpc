@@ -302,93 +302,70 @@ xyout:   ;mov #tovideo,@#pageport
 ;         mov #todata,@#pageport
 ;         return
 
-infoout: ;;must be before showtinfo
-;;         mov #gencnt,r0
+infoout: ;must be before showtinfo
          mov bx,gencnt
-
-;;         mov #7,r1
          mov dx,7
 
 ;;         mov #<statusline*64+16384+2>,r2
-         mov di,192*40+14h+2
+         mov di,192*40+2
          call digiout
-
-;;         mov #cellcnt,r0
          mov bx,cellcnt
-
-;;         mov #5,r1
          mov dx,5
 
 ;;         mov #<statusline*64+16384+18>,r2
-         mov di,192*40+14h+18
+         mov di,192*40+18
          call digiout
 
-;showtinfo  proc          ;must be after infoout
-;           local cont1,cont2
-;           ld hl,(tilecnt)
-;           srl h
-;           rr l
-;           srl h
-;           rr l
-;           ld a,l
-;           cp 120
-;           jr nz,cont1
-showtinfo:  ;mov #tinfo,r0
-;            mov @#tilecnt,r3
-;            asr r3
-;            asr r3
-;            cmp #120,r3   ;sets CY=0
-;            bne 1$
+showtinfo:  ;;mov #tinfo,r0  ;must be after infoout
+;;            mov @#tilecnt,r3
+;;            asr r3
+;;            asr r3
+;;            cmp #120,r3   ;sets CY=0
+;;            bne 1$
+            mov bx,tinfo
+            mov si,[tilecnt]
+            shr si,1
+            shr si,1
+            cmp si,120
+            jnz .c1
 
-;           ld a,1
-;           ld (tinfo),a
-;           ld hl,0
-;           ld (tinfo+1),hl
-;           jp cont2
-            ;mov #1,@r0
-            ;clrb 2(r0)
-            ;br 2$
+           ;;mov #1,@r0
+           ;;clrb 2(r0)
+           ;;br 2$
+           mov word [bx],1
+           mov byte [bx+2],0
+           jmp .c2
 
-;cont1      ld hl,$0a0a
-;           ld (tinfo),hl
-;           ld h,high(ttab)
-;           add a,low(ttab)
-;           ld l,a
-;           ld a,(hl)
-;           and $f
-;           ld (tinfo+2),a
-;           ld a,(hl)
-;           and $f0
-;           rrca
-;           rrca
-;           rrca
-;           rrca
-;           jr z,cont2
+;;1$:         mov #2570,@r0      ;$a0a
+;;            movb ttab(r3),r1
+;;            mov r1,r2
+;;            bic #^B11110000,r1
+;;            movb r1,2(r0)
+;;            rorb r2   ;uses CY=0
+;;            asrb r2
+;;            asrb r2
+;;            asrb r2
+;;            beq 2$
+.c1:        mov word [bx],0a0ah
+            mov al,[si+ttab]
+            mov ah,al
+            and al,0fh
+            mov [bx+2],al
+            mov al,ah
+            mov cl,4
+            shr al,cl
+            jz .c2
 
-;1$:         mov #2570,@r0      ;$a0a
-;            movb ttab(r3),r1
-;            mov r1,r2
-;            bic #^B11110000,r1
-;            movb r1,2(r0)
-;            rorb r2   ;uses CY=0
-;            asrb r2
-;            asrb r2
-;            asrb r2
-;            beq 2$
-
-;           ld (tinfo+1),a
 ;;            movb r2,1(r0)
-
-;cont2      ld b,3
-;           ld hl,tinfo
-;           ld de,$c79e
-;           jp digiout
+            mov [bx+1],al
 
 ;;2$:         mov #3,r1
 ;;            mov #<statusline*64+16384+30>,r2
 ;;            call @#digiout
 ;;            mov #todata,@#pageport
-           retn
+.c2:       mov dx,3
+           mov di,192*40+30
+           jmp digiout
 
 calcx:   ;movb @#crsrbit,r1  ;$80 -> 0, $40 -> 1, ...
 ;         bis #65280,r1      ;$ff00, IN: R1, OUT: R1

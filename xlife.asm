@@ -10,25 +10,23 @@
          org 100h
          use16
 
-start:   mov ax,0b800h
-         mov es,ax
-         push cs
+start:   push cs   ;??
          pop ds
-         ;call @#copyr
-         ;mov #^B10010,@#timerport3    ;start timer
-         ;jsr r3,@#printstr
-         ;.byte 155,154,0,0   ;cursor off, 32 chars
+         mov ax,0b800h
+         mov es,ax
+         ;;call @#copyr
+         ;;jsr r3,@#printstr
+         ;;.byte 155,154,0,0   ;cursor off, 32 chars
 
-         ;mov #emptyirq,@#^O100         ;empty timer irq
-         ;mov #3,r2
-         ;call @#setpalette         ;inits also timer interrupt, sets active video page
-         ;incb @#errst
+         ;;mov #3,r2
+         ;;call @#setpalette         ;inits also timer interrupt, sets active video page
+         ;;incb @#errst
          mov [crsrtile],tiles
-         ;call @#tograph
-         ;call @#calccells
-         ;call @#infoout
-         ;mov #crsrirq,@#^O100
-         ;call @#help
+         ;;call @#tograph
+         ;;call @#calccells
+         ;;call @#infoout
+         ;;mov #crsrirq,@#^O100
+         ;;call @#help
 
          mov ax,4    ;set video mode #4 = 320x200x4
          int 10h
@@ -43,10 +41,9 @@ start:   mov ax,0b800h
      ;mov byte [si+3],40h
      ;mov byte [si+0],0e7h
      ;mov byte [si+7],0e7h
-     ;mov byte [si+1],60h
-     ;mov byte [si+2],18h
-     ;mov byte [si+3],18h
+     ;mov byte [si],7
      mov [tilecnt],1
+     call initxt
      call showscn
 
 crsrflash2: 
@@ -132,49 +129,81 @@ mainloop:
 ;         include 'rules.s'
          include 'tile.s'
 
-generate:
-;;         mov @#startp,r0           ;currp=r0
-         mov si,[startp]           ;currp=r0
+TIMERV          EQU     11932       ;1193180Hz/TIMERV=FREQ OF INTR8, approx 99.998 Hz
 
-;;         mov #^B0011111100111111,r3
+start_timer:    CLI                 ;SAVE/SET INTR8 VECTOR
+                xor ax,ax
+                mov [timercnt],ax
+                mov [timercnt+2],ax
+                mov ds,ax
+                mov ax,[8*4]
+                MOV [cs:SAVE8LO],ax
+                mov ax,[8*4+2]
+                MOV [cs:SAVE8HI],ax
+                mov word [8*4],intr8
+                mov [8*4+2],cs
+                push cs
+                pop ds
+                MOV     AL,36H          ;SET TIMER HARDWARE
+                OUT     43H,AL
+                MOV     AL,TIMERV AND 0FFH
+                OUT     40H,AL
+                MOV     AL,TIMERV SHR 8
+                OUT     40H,AL
+                STI
+                RETN
+
+stop_timer:     CLI                 ;SAVE/SET INTR8 VECTOR
+                xor ax,ax
+                mov ds,ax
+                MOV ax,[cs:SAVE8LO]
+                mov [8*4],ax
+                MOV ax,[cs:SAVE8HI]
+                mov [8*4+2],ax
+                push cs
+                pop ds
+                MOV     AL,36H          ;RESTORE TIMER HARDWARE
+                OUT     43H,AL
+                XOR     AL,AL
+                OUT     40H,AL
+                OUT     40H,AL
+                STI
+                RETN
+
+intr8:   inc [cs:timercnt]
+         jnz .c1
+
+         inc [cs:timercnt+2]
+.c1:     DB      0EAH
+SAVE8LO  DW      0
+SAVE8HI  DW      0
+
+generate:mov si,[startp]           ;currp=si
          mov cx,0c0c0h
-;;         mov #^B1100111111001111,r4
          mov dx,3030h
-;;         mov #^B1111001111110011,r5
          mov bp,0c0ch
          mov ax,303h
-.c30:
-         setcount 0
+.c30:    setcount 0
          setcount 2
          setcount 4
          setcount 6
-
-;;         mov next(r0),r0
          mov si,[next+si]
          cmp si,1
-         jz .c31        
+         jz .c31
          jmp .c30
          ;jnz .c30  ;optimize for i8088???
 
-.c31:     
-;;         mov @#startp,r0
-         mov si,[startp]
-.c5:
-;;5$:      tstb sum(r0)
-         cmp byte [si+sum],0
+.c31:    mov si,[startp]
+.c5:     cmp byte [si+sum],0
          jnz .c1
          jmp .lnext        ;optimize for i8088???
 
 ;*cont3
 .c1:     xor bx,bx
-;;         movb @r0,r1
          or bl,byte [si]            ;top row
          jz .ldown
 
-;;         mov up(r0),r2       ;adjcell=r2, this line replaces iniadjc call!
-         mov di,[si+up]
-
-;;         asl r1
+         mov di,[si+up]    ;adjcell=di, this line replaces iniadjc call!
          shl bx,1
 ;;         mov tab1213(r1),r3
          mov cx,[bx+tab1213]
@@ -808,6 +837,7 @@ startp    dw 1
 tilecnt   dw 0
 viewport  dw 0
 crsrtile  dw 0
+timercnt  dw 0, 0
 temp      dw 0
 temp2     dw 0
 ;kbuf:     dw 0
