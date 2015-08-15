@@ -129,7 +129,7 @@ mainloop:
 ;         include 'rules.s'
          include 'tile.s'
 
-TIMERV          EQU     11932       ;1193180Hz/TIMERV=FREQ OF INTR8, approx 99.998 Hz
+TIMERV          EQU     4096       ;1193180Hz/TIMERV=FREQ OF INTR8, approx 291.304 Hz
 
 start_timer:    CLI                 ;SAVE/SET INTR8 VECTOR
                 xor ax,ax
@@ -174,7 +174,14 @@ intr8:   inc [cs:timercnt]
          jnz .c1
 
          inc [cs:timercnt+2]
-.c1:     DB      0EAH
+.c1:     test [cs:timercnt],TIMERV-1
+         jz .c2
+
+         MOV AL,20H
+         OUT 20H,AL
+         iret
+
+.c2:     db  0eah
 SAVE8LO  DW      0
 SAVE8HI  DW      0
 

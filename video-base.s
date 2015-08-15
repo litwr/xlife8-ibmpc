@@ -27,7 +27,6 @@ initxt: mov ah,2
 
         mov ax,9*256+'Y'
         int 10h
-        retn
 
           ;;mov #65535,r2   ;draw frame
           ;;mov #20,r3
@@ -36,6 +35,17 @@ initxt: mov ah,2
 ;;1$:       mov r2,(r1)+
           ;;mov r2,(r0)+
           ;;sob r3,1$
+        mov ax,0c003h    ;draw frame vertical borders
+        mov di,19
+        mov si,19+2000h
+        mov cx,96
+.c1:    mov [es:di],al
+        mov [es:di+2000h],al
+        mov [es:di+41],ah
+        mov [es:di+41+2000h],ah
+        add di,80
+        loop .c1
+        retn
 
           ;;mov #194,r3
           ;;mov #16384+11+64,r1
