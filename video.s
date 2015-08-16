@@ -738,7 +738,8 @@ showscn2: ;;mov @#startp,r0
           ;jnz .l1  ;optimize 8088?
 
 ;;          jmp @#crsrset
-.lz:      jmp crsrset
+.lz:      ;jmp crsrset
+         retn
 
 showscnp: ;;mov @#startp,r0
 ;;1$:       call @#showscnp1
@@ -826,7 +827,7 @@ showscnp1: ;;mov video(r0),r5
 ;;16$:      vidmacp count7,448
 ;;          return
 
-clrscn:   ;;mov #toandos,@#pageport
+;;clrscn:   ;;mov #toandos,@#pageport
 ;;          mov #16384,r0
 ;;          mov #8192,r1
 ;;1$:       clr (r0)+
@@ -841,7 +842,7 @@ clrscn:   ;;mov #toandos,@#pageport
 ;         bne cont1
 ;
 ;         rts
-;
+
 ;cont1    #assign16 currp,startp
 ;loop     ldy #sum
 ;         lda (currp),y
@@ -2506,15 +2507,23 @@ shownum: ;;mov #stringbuf,r0
 ;;         beq 8$
 ;;         br 3$
 
-showbline1:
-;;         jsr r3,@#printstr
-;;         .byte 12
-;;         .asciz "TIME: "
-;;         br shownum
+printfloat: mov si,stringbuf
+            xor cx,cx
+            mov cl,[stringbuf]
+            add si,cx
+            mov ah,2
+.l2:        std
+            lodsb
+            cld
+            cmp cl,ah
+            jnz .l1
 
-showbline2:
-;;        jsr r3,@#printstr
-;;         .byte 's,10
-;;         .asciz "SPEED: "
-;;         br shownum
+            mov dl,'.'
+            push ax
+            int 21h
+            pop ax
+.l1:        mov dl,al
+            int 21h
+            loop .l2
+            retn
 

@@ -568,32 +568,32 @@ random:
 ;;21$:     add #down,r2
 ;;         br 24$
 
-calccells:
-;;         call @#zerocc
-;;         tst @#tilecnt
-;;         bne 12$
-;;         return
+calccells: call zerocc
+         cmp [tilecnt],0
+         jnz .c12
+         retn
 
-;;12$:     mov @#startp,r0
-;;2$:      mov #8,r5
-;;         clr r4
-;;4$:      clr r1
-;;         bisb (r0)+,r1
-;;         beq 5$
+.c12:    mov si,[startp]
+.c2:     mov cx,8
+         xor ax,ax
+.c4:     lodsb
+         or al,al
+         jz .c5
 
-;;         movb tab3(r1),r2
-;;         inc r4
-;;         call @#inctsum
-;;5$:      sob r5,4$
-;;         movb r4,sum-8(r0)
-;;         mov next-8(r0),r0
-;;         cmp #1,r0
-;;         bne 2$
-;;         jmp @#infoout
+         mov bx,tab3
+         xlatb
+         call inctsum
+         mov ah,cl
+.c5:     loop .c4
+         mov [si+sum-8],ah
+         mov si,[si+next-8]
+         cmp si,1
+         jnz .c2
+         jmp infoout
 
-inctsum:            ;in: r2
-;;         cellsum 1$
-;;1$:      return
+inctsum:            ;in: al
+         cellsum .l1
+.l1:     retn
 
 putpixel:     ;IN: x0,y0; USE: R1, R2, R3, R4; DON'T USE: R0,R5
 ;;;x8pos    = adjcell2 = R1 low

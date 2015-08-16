@@ -150,15 +150,10 @@ macro genmac one {
 @@:
 }
 
-macro cellsum l1 {     ;in: al, ah = 0
-;;         mov #<cellcnt+4>,r1
+macro cellsum l1 {     ;in: al
          mov bx,cellcnt+4
-;;         movb (r1),r3
-         mov cl,[bx]
-;;         add r2,r3
-         add al,cl
+         add al,[bx]
          aaa
-;;         movb r3,(r1)
          mov [bx],al
          jnc l1
 

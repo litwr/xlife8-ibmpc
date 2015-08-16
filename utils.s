@@ -2,8 +2,6 @@
 ;zerocnt
 ;zerocc
 ;todec
-;incben
-;mul5
 
 zerocc:   inibcd cellcnt,4
           ret
@@ -11,54 +9,20 @@ zerocc:   inibcd cellcnt,4
 zerogc:   inibcd gencnt,6
           retn
 
-;;incben:   movb -(r1),r5
-;;          inc r5
-;;          cmp #'0+10,r5
-;;          bne 1$
+todec:    mov si,stringbuf+1    ;convert ax to stringbuf
+          mov bx,10
+.l1:      xor dx,dx
+          div bx
+          or dl,'0'
+          mov [si],dl
+          inc si
+          or ax,ax
+          jnz .l1
 
-;;          movb #'0,@r1
-;;          br incben
-
-;;1$:       movb r5,@r1
-;;          return
-
-;;todec:    mov r3,-(sp)  ;r4:r3/10 in decimal
-;;          mov r4,-(sp)
-;;          mov #stringbuf,r1
-;;          mov #10,r2
-;;1$:       movb #'0,(r1)+
-;;          sob r2,1$
-
-;;          mov #10000,r0
-;;          sub #4,r1
-;;          mov r1,r2
-;;5$:       sub r0,r3
-;;          sbc r4
-;;          bcs 6$
-
-;;          call @#incben
-;;          mov r2,r1
-;;          br 5$
-
-;;6$:       add r0,r3
-;;          adc r4
-;;          mov #10,r0
-;;          add #3,r1
-
-;;          mov r1,r2
-;;2$:       sub r0,r3
-;;          bcs 3$
-
-;;          call @#incben
-;;          mov r2,r1
-;;          br 2$
-
-;;3$:       add r0,r3
-;;          add #'0,r3
-;;          movb r3,@r1
-;;4$:       mov (sp)+,r4
-;;          mov (sp)+,r3
-;;          return
+          sub si,stringbuf+1
+          mov ax,si
+          mov [stringbuf],al
+          retn
 
 ;;boxsz:   mov #192,@#boxsz_ymin
 ;;         mov #160,@#boxsz_xmin

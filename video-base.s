@@ -40,58 +40,29 @@ initxt: mov ah,2
         loop .c1
         retn
 
-totext:    ;call @#clrscn
-           ;mov #toandos,@#pageport
-           ;mov #12,r0
-           ;emt ^O16
-exit88:    ;return
-
-galign:    ;mov #10,r0
-;1$:       cmp #^O1330,@#yshift
-           ;beq exit88
-
-           ;emt ^O16
-           ;br 1$
-
-tograph:   ;mov #toandos,@#pageport
-           ;jsr r3,@#printstr
-           ;.byte 145,0
-           ;call @#galign
-
-           ;jsr r3,@#printstr
-           ;.byte 12,0
-tograph0:  ;call @#clrscn
-           ;call @#initxt
-           ;call @#showscn
-           ;call @#showmode
-           ;call @#showtopology
-           ;call @#showrules2
-           ;jmp @#xyout
-
-printstr:  ;;movb (r3)+,r0  ;use: r0, r1
-           ;;beq 2$
-           pop si
-           lodsb
-           cmp al,0
-           jz .c2
-
-           ;;cmp #9,r0
-           ;;bne 3$
-
-           ;;mov #9,r1
-           ;;mov #32,r0
-;;1$:        emt ^O16
-           ;;sob r1,1$
-
-;;3$:        emt ^O16
-           ;;br printstr
-
-;;2$:        inc r3
-           ;;bic #1,r3
-           ;;rts r3
-.c2:       push si
+totext:    mov ax,1    ;set video mode #4 = 40x25x16
+           int 10h
            retn
 
+tograph:   mov ax,4    ;set video mode #4 = 320x200x4
+           int 10h
+tograph0:  call initxt
+           call showscn
+           ;;call @#showmode
+           ;;call @#showtopology
+           ;;call @#showrules2
+           ;call xyout
+           retn
+
+printstr:  pop dx
+           mov si,dx
+.l1:       lodsb
+           cmp al,'$'
+           jnz .l1
+
+           mov ah,9
+           int 21h
+           jmp si
 
 digiout:        ;;in: r1 - length, r2 - scrpos, r0 - data
                 ;in: dx - length, di - srcpos, bx - data

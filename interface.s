@@ -142,6 +142,8 @@ dispatcher: call getkey2
 ;;159$:    call @#insteps
 ;;         mov @#temp2,@#x0
 ;;         beq 142$
+      mov word [x0],500
+      mov [temp2],500
 
 ;;         clr @#lowbench
 ;;         clr @#highbench
@@ -149,121 +151,54 @@ dispatcher: call getkey2
 ;;         bmi 402$
 ;;         jmp @#400$
 
-;;402$:    mov #benchirq,@#^O100
-;;         mov #todata,@#pageport
-;;         mov @#timerport2,@#saved
-;;146$:    tst @#tilecnt
-;;         bne 147$
+.c402:   call start_timer
+.c146:   cmp [tilecnt],0
+         jnz .c147
 
-;;         call @#incgen
-;;         br 148$
+         call incgen
+         jmp .c148
 
-;;147$:    call @#generate
-;;         call @#cleanup
-;;148$:    dec @#x0
-;;         bne 146$
+.c147:   call generate
+         call cleanup
+.c148:   dec word [x0]
+         jnz .c146
 
 ;;401$:    mov #toandos,@#pageport
 ;;         mov #crsrirq,@#^O100
-;;         call @#benchirq0
-;;         call @#totext
-;;         mov @#lowbench,r0
-;;         mov @#highbench,r1
-;;         asl r0
-;;         rol r1
-;;         asl r0
-;;         rol r1
-;;         mov #125*256,r2
-;;         clr r3
-;;         clr r4
-;;143$:    sub r2,r0
-;;         sbc r1
-;;         bcs 141$
+         call stop_timer
+         mov ax,20480    ;=4096*5=TIMERV*5
+         mul [timercnt]
+         mov cx,59659    ;=1193180/20
+         div cx
+         shr cx,1
+         cmp dx,cx
+         jbe .c143
 
-;;         add #256,r3
-;;         adc r4
-;;         br 143$
+         inc ax
+.c143:   push ax
+         call todec      ;takes centiseconds in ax
+         call totext
+         call printstr
+         db 'TIME: $'
+         call printfloat
+         mov ax,[temp2]
+         mov cx,10000
+         mul cx
+         pop cx
+         div cx
+         shr cx,1
+         cmp dx,cx
+         jb .c143a
 
-;;142$:    call @#getkey
-;;         call @#tograph
-;;         jmp @#calccells
+         inc ax
+.c143a:  call todec
+         call printstr
+         db 's',0dh,0ah,'SPEED: $'
+         call printfloat
 
-;;141$:    add r2,r0
-;;         adc r1
-;;         swab r2
-;;144$:    sub r2,r0
-;;         sbc r1
-;;         bcs 145$
-
-;;         add #1,r3
-;;         adc r4
-;;         br 144$
-
-;;145$:    add #62,r0
-;;         adc r3
-;;         adc r4             ;r4:r3 - time in ms
-;;         call @#todec
-;;         call @#showbline1
-;;         mov @#temp2,r1
-;;         mov #6,r0
-;;         mov r1,r5
-;;75$:     cmp r5,#4295
-;;         bcs 154$
-
-;;         ror r5
-;;         asr r4
-;;         ror r3
-;;         dec r0
-;;         br 75$
-
-;;154$:    clr r2
-;;157$:    asl r1
-;;         rol r2
-;;         sob r0,157$
-
-;;         call @#mul5
-;;         call @#mul5
-;;         call @#mul5
-;;156$:    tst r4     ;sets CY=0
-;;         beq 155$
-
-;;         ror r2
-;;         ror r1
-;;         asr r4
-;;         ror r3
-;;         br 156$
-
-;;155$:    call @#mul5
-;;         call @#mul5
-;;         call @#mul5
-;;         mov r3,r0     ;r2:r1/r0 in decimal
-;;         clr r3
-;;         clr r4
-;;183$:    sub r0,r2
-;;         bcs 182$
-
-;;         inc r4
-;;         br 183$
-
-;;182$:    add r0,r2
-;;153$:    sub r0,r1
-;;         sbc r2
-;;         bcs 150$
-
-;;         add #1,r3
-;;         adc r4
-;;         br 153$
-
-;;150$:    clc
-;;         ror r0
-;;         add r0,r1
-;;         bcc 152$
-;; 
-;;         add #1,r3
-;;         adc r4
-;;152$:    call @#todec
-;;         call @#showbline2
-;;         br 142$
+.c142:   call getkey
+         call tograph
+         jmp calccells
 
 ;;400$:    beq 500$
 

@@ -22,29 +22,22 @@ start:   push cs   ;??
          ;;call @#setpalette         ;inits also timer interrupt, sets active video page
          ;;incb @#errst
          mov [crsrtile],tiles
-         ;;call @#tograph
-         ;;call @#calccells
-         ;;call @#infoout
-         ;;mov #crsrirq,@#^O100
-         ;;call @#help
-
-         mov ax,4    ;set video mode #4 = 320x200x4
-         int 10h
-
      mov si,tiles
      mov [startp],si
      mov word [si+next],1
      mov byte [si+sum],1
-     mov byte [si+0],60h
-     mov byte [si+1],0c0h
-     mov byte [si+2],40h
+     mov byte [si+0],80h
+     mov byte [si+1],060h
+     mov byte [si+2],0c0h
      ;mov byte [si+3],40h
      ;mov byte [si+0],0e7h
      ;mov byte [si+7],0e7h
      ;mov byte [si],7
      mov [tilecnt],1
-     call initxt
-     call showscn
+         call tograph
+         ;call calccells
+         ;call infoout
+         ;;call @#help
 
 crsrflash2: 
          ;;call @#crsrflash
@@ -895,8 +888,7 @@ svfn      db 0,0,0,0,0,0,0,0,0,0,0,0
 ;msgrun:   .asciz "RUN "
 ;msgstop:  .asciz "STOP"
 nofnchar db '?%(),./:;<=>[\]|'   ;? - must be the first
-
-;stringbuf: .blkb 19       ;it must be at odd addr!
+stringbuf rb 19
 
 tab3      db 0, 1, 1, 2, 1, 2, 2, 3, 1, 2, 2, 3, 2, 3, 3, 4
           db 1, 2, 2, 3, 2, 3, 3, 4, 2, 3, 3, 4, 3, 4, 4, 5
@@ -928,6 +920,7 @@ ttab      db 0,1,2,3,3,4,5,6,7,8,8,9,16,17,18,19,19,20
 
 bittab    db 1,2,4,8,16,32,64,128
 
+        align 2
 digifont:   ;8th columns are free
          dw 0a00ah,2828h,0a828h,282ah,2828h,2828h,0a00ah,0
          dw 8002h,8002h,800ah,8002h,8002h,8002h,0a82ah,0
@@ -941,7 +934,6 @@ digifont:   ;8th columns are free
          dw 0a00ah,2828h,2828h,0a80ah,2800h,2828h,0a00ah,0
          dw 0,0,0,0,0,0,0                ;space
 
-         align 2
 tiles:
          include 'initiles.s'
 
