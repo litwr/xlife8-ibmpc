@@ -1,3 +1,13 @@
+curon:  mov ah,1
+        mov cx,607h
+        int 10h
+        retn
+
+curoff: mov ah,1
+        mov cx,201fh
+        int 10h
+        retn
+
 initxt: mov ah,2
         mov bx,1   ;color
         mov dx,24*256

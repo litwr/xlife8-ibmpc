@@ -1,71 +1,74 @@
-;insteps: call @#totext
-;         jsr r3,@#printstr
-;         .byte 154,0
-;38$:     jsr r3,@#printstr
-;         .byte 12,146
-;         .ascii "NUMBER OF GENERATIONS: "
-;         .byte 147,0,0
+insteps: call totext
+.c38:    call printstr
+         db ansiclrscn,green,"NUMBER OF GENERATIONS: "
+         db black,'$'         
 
-;3$:      mov #stringbuf,r2
-;         clr r1
-;         clr @#temp
-;1$:      call @#getkey
-;         cmpb #10,r0
-;         beq 11$
+.c3:     mov si,stringbuf
+         xor bx,bx
+         mov [temp2],bx
+.c1:     call getkey
+         cmp al,0dh  ;enter
+         jz .c11
 
-;         cmpb #3,r0    ;KT (esc)
-;         bne 16$
+         cmp al,27   ;esc
+         jnz .c16
+.c20:    jmp curoff
 
-;20$:     jsr r3,@#printstr
-;         .byte 154,0
-;         return
+.c16:    cmp al,8    ;backspace
+         jz .c12
 
-;16$:     cmpb #24,r0    ;backspace=zaboy
-;         beq 12$
+         cmp al,'0'+10
+         jnc .c1
 
-;         cmpb r0,#'0+10
-;         bcc 1$
+         cmp al,'0'
+         jc .c1
 
-;         cmpb r0,#'0
-;         bcs 1$
+         cmp bl,5
+         jz .c1
 
-;         cmpb #5,r1
-;         beq 1$
+         inc bx
+         mov dl,al
+         mov ah,2
+         int 21h
 
-;         inc r1
-;         emt ^O16
-;         sub #'0,r0
-;         movb r0,(r2)+
-;         br 1$
+         sub al,'0'
+         mov [si],al
+         inc si
+         jmp .c1
 
-;12$:     dec r2
-;         dec r1
-;         bmi 3$
+.c12:    dec si
+         dec bx
+         js .c3
 
-;         mov #24,r0
-;         emt ^O16
-;         br 1$
+         push si
+         call printstr
+         db 8,' ',8,'$'
+         pop si
+         jmp .c1
 
-;11$:     tst r1
-;         beq 20$
+.c11:    cmp bl,0
+         jz .c20
 
-;         sub r1,r2          ;convert to binary
-;         clr r4
-;         dec r1
-;         asl r1
-;33$:     movb (r2)+,r3
-;         beq 34$
+         sub si,bx   ;convert to binary
+         xor dx,dx
+         dec bx
+         shl bx,1
+.c33:    lodsb
+         or al,al
+         jz .c34
 
-;         mov tobin(r1),r0
-;32$:     add r0,r4
-;         bcs 38$        ;65535=max
-;         sob r3,32$
+         mov di,[tobin+bx]
+.c32:    add dx,di
+         jc .c38       ;65535=max
 
-;34$:     sub #2,r1
-;         bpl 33$
+         dec al
+         jnz .c32
 
-;         mov r4,@#temp2
-;         br 20$
+.c34:    sub bx,2
+         jns .c33
+
+         mov [temp2],dx
+         jmp .c20
 
 bornstay:
 ;         mov #stringbuf,r4
@@ -221,73 +224,58 @@ inmode:  ;jsr r3,@#printstr
 ;         sub #'1,r0
 ;         return
 
-help:    ;call @#totext
-;         add #14,@#yshift
-;         jsr r3,@#printstr
-;         .ascii "    "
-;         .byte 146,159
-;         .ascii "*** XLIFE COMMANDS ***"
-;         .byte 159,155,10,9,156,'!,156
-;         .ascii " randomize screen"
-;         .byte 10,9,137,156,'%,156
-;         .ascii " set random density - default=42%"
-;         .byte 10,9,156,'+,156,'/,156,'-,156
-;         .ascii " zoom in/out"
-;         .byte 10,9,156,'.,156,'/,156,'C,226,'P,156
-;         .ascii " center/home cursor"
-;         .byte 10,9,156,'?,156
-;         .ascii " show this help"
-;         .byte 10,9,156,'B,156
-;         .ascii " benchmark"
-;         .byte 10,9,156,'C,156
-;         .ascii " clear screen"
-;         .byte 10,9,156,'E,156
-;         .ascii " toggle pseudocolor mode"
-;         .byte 10,9,156,'g,156
-;         .ascii " toggle run/stop mode"
-;         .byte 10,9,156,'h,156
-;         .ascii " toggle hide mode - about 20% faster"
-;         .byte 10,9,156,'l,156
-;         .ascii " load and transform file"
-;         .byte 10,9,156,'L,156
-;         .ascii " reload pattern"
-;         .byte 10,9,156,'o,156
-;         .ascii " one step"
-;         .byte 10,9,156,'Q,156
-;         .ascii " quit"
-;         .byte 10,9,156,'R,156
-;         .ascii " set the rules"
-;         .byte 10,9,156,"S",156
-;         .ascii " save"
-;         .byte 10,9,156,"t",156
-;         .ascii " toggle plain/torus topology"
-;         .byte 10,9,156,"v",156
-;         .ascii " show some info"
-;         .byte 10,9,156,"V",156
-;         .ascii " show comments to the pattern"
-;         .byte 10,9,156,"X",156,"/",156,"Z",156
-;         .ascii " reload/set&save palette"
-;         .byte 10,10,159
-;         .ascii "Use "
-;         .byte 159,156
-;         .ascii "cursor keys"
-;         .byte 156,159
-;         .ascii " to set the position and "
-;         .byte 159,156
-;         .ascii "space key"
-;         .byte 156,159
-;         .ascii " to toggle the current cell. "
-;         .ascii "Use "
-;         .byte 159,156
-;         .ascii "AP2"
-;         .byte 156,159
-;         .ascii " to speed up the movement"
-;         .byte 159,0
-;         call @#getkey
-;         jsr r3,@#printstr
-;         .byte 155,0
-;         mov #^O1330,@#yshift
-;         jmp @#tograph
+help:    call totext
+         call printstr
+         db 9,bold,'*** XLIFE COMMANDS ***',normal
+         db 0dh,10,red,'!',green
+         db ' randomize screen'
+         db 0dh,10,red,'%',green
+         db ' set random density - default=42%'
+         db 0dh,10,red,'+',green,'/',red,'-',green
+         db ' zoom in/out'
+         db 0dh,10,red,'.',green,'/',red,'Home',green
+         db ' center/home cursor'
+         db 0dh,10,red,'?',green
+         db ' show this help'
+         db 0dh,10,red,'B',green
+         db ' benchmark'
+         db 0dh,10,red,'C',green
+         db ' clear screen'
+         db 0dh,10,red,'E',green
+         db ' toggle pseudocolor mode'
+         db 0dh,10,red,'g',green
+         db ' toggle run/stop mode'
+         db 0dh,10,red,'h',green
+         db ' toggle hide mode - about 20% faster'
+         db 0dh,10,red,'l',green
+         db ' load and transform file'
+         db 0dh,10,red,'L',green
+         db ' reload pattern'
+         db 0dh,10,red,'o',green
+         db ' one step'
+         db 0dh,10,red,'Q',green
+         db ' quit'
+         db 0dh,10,red,'R',green
+         db ' set the rules'
+         db 0dh,10,red,'S',green
+         db ' save'
+         db 0dh,10,red,'t',green
+         db ' toggle plain/torus topology'
+         db 0dh,10,red,'v',green
+         db ' show some info'
+         db 0dh,10,red,'V',green
+         db ' show comments to the pattern'
+         db 0dh,10,red,'X',green,'/',red,'Z',green
+         db ' reload/set&save palette'
+         db 0dh,10,0dh,10,black
+         db 'Use ',red,'cursor keys'
+         db black, ' to set the position and '
+         db red, 'space key', black
+         db ' to toggle the current cell. '
+         db 'Use ',red, 'shift', black
+         db ' to speed up the movement$'
+         call getkey
+         jmp tograph
 
 xyout:   ;mov #tovideo,@#pageport
 ;         mov #xcrsr,r0

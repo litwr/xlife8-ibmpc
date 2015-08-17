@@ -60,6 +60,15 @@ x8poscp    = temp
 y8poscp    = temp+1
 y8byte     = saved
 
+black equ 27,'[37m'
+red equ 27,'[31m'
+green equ 27,'[32m'
+blue equ 27,'[34m'
+purple equ 27,'[35m'
+bold equ 27,'[1m'
+normal equ 27,'[0m'
+ansiclrscn equ 27,'[2J'
+
 macro vidmacp one,two {
 ;;          mov one(r0),r2
 ;;          mov one+2(r0),r4

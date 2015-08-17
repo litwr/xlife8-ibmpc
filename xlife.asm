@@ -15,9 +15,6 @@ start:   push cs   ;??
          mov ax,0b800h
          mov es,ax
          ;;call @#copyr
-         ;;jsr r3,@#printstr
-         ;;.byte 155,154,0,0   ;cursor off, 32 chars
-
          ;;mov #3,r2
          ;;call @#setpalette         ;inits also timer interrupt, sets active video page
          ;;incb @#errst
@@ -34,10 +31,9 @@ start:   push cs   ;??
      ;mov byte [si+7],0e7h
      ;mov byte [si],7
      mov [tilecnt],1
-         call tograph
          ;call calccells
          ;call infoout
-         ;;call @#help
+         call help
 
 crsrflash2: 
          ;;call @#crsrflash
@@ -843,12 +839,10 @@ timercnt  dw 0, 0
 temp      dw 0
 temp2     dw 0
 ;kbuf:     dw 0
-saved:      dw 0
-;lowbench:   dw 0
-;highbench:   dw 0
-;tobin:      dw 1,10,100,1000,10000
-live     dw 12
-born     dw 8
+saved     dw 0
+tobin     dw 1,10,100,1000,10000
+live      dw 12
+born      dw 8
 
 x0        db 0   ;word aligned
 y0        db 0

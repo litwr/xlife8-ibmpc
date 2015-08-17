@@ -44,8 +44,6 @@ dispatcher: call getkey2
          mov [mode],3
 .c101:   retn
 
-;;5$:      cmpb #'h,r0
-;;         bne 4$
 .c5:     cmp al,'h'
          jnz .c4
 
@@ -56,8 +54,6 @@ dispatcher: call getkey2
 ;;         call @#clrscn
 ;;         jmp @#showmode
 
-;;4$:      cmpb #'T,r0
-;;         bne 6$
 .c4:     cmp al,'T'
          jnz .c6
 
@@ -92,16 +88,13 @@ dispatcher: call getkey2
 .c7:     cmp al,'?'
          jnz .c8
 
-;;         cmpb #2,@#mode
-;;         beq 8$
-
-;;         jmp @#help
+         cmp [mode],2
+         jz .c8
+         jmp help
 
 .c8:     cmp al,'C'
          jnz .c10
 
-;;         tst @#tilecnt
-;;         bne 201$
          cmp [tilecnt],0
          jnz .c201
 
@@ -124,8 +117,6 @@ dispatcher: call getkey2
 ;;         call @#random
 ;;         jmp @#showscn
 
-;;12$:     cmpb #'%,r0
-;;         bne 14$
 .c12:    cmp al,'%'
          jnz .c14
 
@@ -142,8 +133,12 @@ dispatcher: call getkey2
 ;;159$:    call @#insteps
 ;;         mov @#temp2,@#x0
 ;;         beq 142$
-      mov word [x0],500
-      mov [temp2],500
+.c159:   call insteps
+         mov ax,[temp2]
+         or ax,ax
+         jz .c142
+
+         mov word [x0],ax
 
 ;;         clr @#lowbench
 ;;         clr @#highbench
@@ -195,9 +190,10 @@ dispatcher: call getkey2
          call printstr
          db 's',0dh,0ah,'SPEED: $'
          call printfloat
+         call curoff
 
-.c142:   call getkey
-         call tograph
+         call getkey
+.c142:   call tograph
          jmp calccells
 
 ;;400$:    beq 500$
