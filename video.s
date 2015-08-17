@@ -59,9 +59,10 @@ insteps: call totext
 
          mov di,[tobin+bx]
 .c32:    add dx,di
-         jc .c38       ;65535=max
+         jnc .c38a
+         jmp .c38       ;65535=max
 
-         dec al
+.c38a:   dec al
          jnz .c32
 
 .c34:    sub bx,2
@@ -204,25 +205,24 @@ indens:  ;call @#totext
 ;         movb r0,@#density
 ;2$:      jmp @#tograph
 
-inmode:  ;jsr r3,@#printstr
-;         .byte 10,10,146
-;         .ascii "SELECT BENCHMARK MODE"
-;         .byte 10,32,145,'0,146
-;         .ascii " - CALCULATIONS"
-;         .byte 10,32,145,'1,146
-;         .ascii " - VIDEO"
-;         .byte 10,32,145,'2,146
-;         .asciz " - BOTH"
-;         ;.byte 0
-;1$:      call @#getkey
-;         cmpb r0,#'0
-;         bcs 1$
+inmode:  call printstr
+         db 0dh,10,0dh,10,green
+         db 'SELECT BENCHMARK MODE'
+         db 0dh,10,32,red,'0',green
+         db ' - CALCULATIONS'
+         db 0dh,10,32,red,'1',green
+         db ' - VIDEO'
+         db 0dh,10,32,red,'2',green
+         db " - BOTH$"
+.c1:     call getkey
+         cmp al,'0'
+         jc .c1
 
-;         cmpb r0,#'3
-;         bcc 1$
+         cmp al,'3'
+         jnc .c1
 
-;         sub #'1,r0
-;         return
+         sub al,'1'
+         retn
 
 help:    call totext
          call printstr
@@ -274,6 +274,7 @@ help:    call totext
          db ' to toggle the current cell. '
          db 'Use ',red, 'shift', black
          db ' to speed up the movement$'
+         call curoff
          call getkey
          jmp tograph
 
@@ -2498,8 +2499,15 @@ shownum: ;;mov #stringbuf,r0
 printfloat: mov si,stringbuf
             xor cx,cx
             mov cl,[stringbuf]
-            add si,cx
             mov ah,2
+            cmp cl,1
+            jnz .l3
+
+            mov dl,'.'
+            int 21h
+            mov dl,'0'
+            int 21h
+.l3:        add si,cx
 .l2:        std
             lodsb
             cld

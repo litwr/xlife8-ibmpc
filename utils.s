@@ -9,19 +9,23 @@ zerocc:   inibcd cellcnt,4
 zerogc:   inibcd gencnt,6
           retn
 
-todec:    mov si,stringbuf+1    ;convert ax to stringbuf
-          mov bx,10
-.l1:      xor dx,dx
-          div bx
+todec:    mov bx,stringbuf+1    ;convert dx:ax to stringbuf
+          mov si,10
+.l1:      mov cx,ax
+          mov ax,dx
+          xor dx,dx
+          div si
+          xchg ax,cx
+          div si
           or dl,'0'
-          mov [si],dl
-          inc si
-          or ax,ax
+          mov [bx],dl
+          inc bx
+          mov dx,cx
+          or cx,ax
           jnz .l1
 
-          sub si,stringbuf+1
-          mov ax,si
-          mov [stringbuf],al
+          sub bx,stringbuf+1
+          mov [stringbuf],bl
           retn
 
 ;;boxsz:   mov #192,@#boxsz_ymin

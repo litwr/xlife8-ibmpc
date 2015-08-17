@@ -130,21 +130,16 @@ dispatcher: call getkey2
 .c14:    cmp al,'B'
          jnz .c15
 
-;;159$:    call @#insteps
-;;         mov @#temp2,@#x0
-;;         beq 142$
 .c159:   call insteps
          mov ax,[temp2]
          or ax,ax
          jz .c142
 
          mov word [x0],ax
-
-;;         clr @#lowbench
-;;         clr @#highbench
-;;         call @#inmode
-;;         bmi 402$
-;;         jmp @#400$
+         call inmode
+         js .c402
+         jnz .c400
+         jmp .c500
 
 .c402:   call start_timer
 .c146:   cmp [tilecnt],0
@@ -158,73 +153,34 @@ dispatcher: call getkey2
 .c148:   dec word [x0]
          jnz .c146
 
-;;401$:    mov #toandos,@#pageport
-;;         mov #crsrirq,@#^O100
-         call stop_timer
-         mov ax,20480    ;=4096*5=TIMERV*5
-         mul [timercnt]
-         mov cx,59659    ;=1193180/20
-         div cx
-         shr cx,1
-         cmp dx,cx
-         jbe .c143
-
-         inc ax
-.c143:   push ax
-         call todec      ;takes centiseconds in ax
-         call totext
-         call printstr
-         db 'TIME: $'
-         call printfloat
-         mov ax,[temp2]
-         mov cx,10000
-         mul cx
-         pop cx
-         div cx
-         shr cx,1
-         cmp dx,cx
-         jb .c143a
-
-         inc ax
-.c143a:  call todec
-         call printstr
-         db 's',0dh,0ah,'SPEED: $'
-         call printfloat
-         call curoff
-
-         call getkey
+.c401:   call benchcalc
 .c142:   call tograph
          jmp calccells
 
-;;400$:    beq 500$
+.c400:   call tograph
+         call start_timer
 
-;;         call @#tograph
-;;         mov #benchirq,@#^O100
-;;         mov @#timerport2,@#saved
-;;5146$:   tst @#tilecnt
-;;         bne 5147$
+.c5146:  cmp [tilecnt],0
+         jnz .c5147
 
-;;         call @#incgen
-;;         br 5148$
+         call incgen
+         jmp .c5148
 
-;;5147$:   call @#zerocc
-;;         call @#generate
-;;         call @#showscn
-;;         call @#cleanup
-;;5148$:   dec @#x0
-;;         bne 5146$
-;;         jmp @#401$
+.c5147:  call zerocc
+         call generate
+         call showscn
+         call cleanup
+.c5148:  dec word [x0]
+         jnz .c5146
+         jmp .c401
 
-;;500$:    call @#tograph
-;;         mov #benchirq,@#^O100
-;;         mov @#timerport2,@#saved
-;;4147$:   call @#showscn
-;;         dec @#x0
-;;         bne 4147$
-;;         jmp @#401$ 
+.c500:   call tograph
+         call start_timer
+.c4147:  call showscn
+         dec word [x0]
+         jnz .c4147
+         jmp .c401 
 
-;;15$:     cmpb #'R,r0
-;;         bne 16$
 .c15:    cmp al,'R'
          jnz .c16
 
@@ -716,3 +672,48 @@ dispatcher: call getkey2
 
 ;;         mov @r0,@#crsrtile
 ;;20$:     return
+
+benchcalc: call stop_timer
+         mov ax,20480    ;=4096*5=TIMERV*5
+         mul [timercnt]
+         mov cx,59659    ;=1193180/20
+         div cx
+         inc ax
+         shr cx,1
+         cmp dx,cx
+         jbe .c143
+
+         inc ax
+.c143:   push ax
+         xor dx,dx
+         call todec      ;takes centiseconds in ds:ax
+         call totext
+         call printstr
+         db 'TIME: $'
+         call printfloat
+         mov ax,[temp2]
+         mov cx,10000
+         mul cx
+         pop si
+         or si,si
+         jz .c143x
+
+.c143b:  mov cx,ax
+         mov ax,dx
+         xor dx,dx
+         div si
+         xchg ax,cx
+         div si
+         shr si,1
+         cmp dx,si
+         jb .c143a
+
+         inc ax
+.c143a:  mov dx,cx
+         call todec
+         call printstr
+         db 's',0dh,0ah,'SPEED: $'
+         call printfloat
+.c143x:  call curoff
+         jmp getkey
+
