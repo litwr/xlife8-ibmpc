@@ -13,30 +13,27 @@ getkey2: mov ah,1
 dispatcher: call getkey2
 ;;dispat0: cmpb #'g,r0
 ;;         bne 3$
+         mov bx,0ah    ;for g/h-commands bg=10=lightgreen
          cmp al,'g'
          jnz .c3
 
-;;         tstb @#mode
-;;         beq 2$
          cmp [mode],0
          jz .c2
 
-;;53$:     decb @#mode
-;;         beq 40$
-.c53:    dec [mode]
+.c53:    xor bx,bx
+         dec [mode]
          jz .c40
 
-;;         call @#initxt
+         call initxt
 ;;         call @#showtopology
 ;;         call @#xyout
-;;         br 40$
+         mov bx,0ah
          jmp .c40
 
-;;2$:      incb @#mode
-;;40$:     jmp @#showmode
-.c2:       inc [mode]
-.c40:
-       retn
+.c2:     inc [mode]
+.c40:    mov ah,0bh
+         int 10h
+         retn
 
 .c3:     cmp al,'Q'
          jnz .c5
@@ -47,12 +44,16 @@ dispatcher: call getkey2
 .c5:     cmp al,'h'
          jnz .c4
 
-;;         cmpb #2,@#mode
-;;         beq 53$
+         cmp [mode],2
+         jz .c53
 
 ;;         movb #2,@#mode
 ;;         call @#clrscn
 ;;         jmp @#showmode
+         mov [mode],2
+         mov ax,4
+         int 10h
+         retn
 
 .c4:     cmp al,'T'
          jnz .c6
