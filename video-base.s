@@ -58,8 +58,7 @@ tograph:   mov ax,4    ;set video mode #4 = 320x200x4
            int 10h
 tograph0:  call initxt
            call showscn
-           ;;call @#showmode
-           ;;call @#showtopology
+           call showtopology
            ;;call @#showrules2
            ;call xyout
            retn

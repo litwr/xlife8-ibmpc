@@ -111,402 +111,197 @@ addnode2:                 ;in: R5
 ;;;         .bend
 
 torus:
-;;;         jsr totiles     ;top border
-;;;         ldx #hormax
 ;;         mov #tiles,r0
 ;;         mov #hormax,r1
+        mov si,tiles       ;top border
+        mov cx,hormax
 
-;;;l5       ldy #ul
-;;;         lda i1
-;;;         clc
-;;;         adc #<(hormax*(vermax-1)-1)*tilesize
-;;;         sta (i1),y
-;;;         lda i1+1
-;;;         adc #>(hormax*(vermax-1)-1)*tilesize
-;;;         iny
-;;;         sta (i1),y
 ;;5$:      mov r0,r2
 ;;         add #<hormax*<vermax-1>-1>*tilesize,r2
 ;;         mov r2,ul(r0)
+.c5:     lea ax,[si+(hormax*(vermax-1)-1)*tilesize]
+         mov [si+ul],ax
 
-;;;         lda i1
-;;;         adc #<hormax*(vermax-1)*tilesize
-;;;         iny		;up
-;;;         sta (i1),y
-;;;         lda i1+1
-;;;         adc #>hormax*(vermax-1)*tilesize
-;;;         iny
-;;;         sta (i1),y
 ;;         mov r0,r2
 ;;         add #hormax*<vermax-1>*tilesize,r2
 ;;         mov r2,up(r0)
+         lea ax,[si+hormax*(vermax-1)*tilesize]
+         mov [si+up],ax
 
-;;;         lda i1
-;;;         adc #<(hormax*(vermax-1)+1)*tilesize
-;;;         iny		;ur
-;;;         sta (i1),y
-;;;         lda i1+1
-;;;         adc #>(hormax*(vermax-1)+1)*tilesize
-;;;         iny
-;;;         sta (i1),y
 ;;         mov r0,r2
 ;;         add #<hormax*<vermax-1>+1>*tilesize,r2
 ;;         mov r2,ur(r0)
+         lea ax,[si+(hormax*(vermax-1)+1)*tilesize]
+         mov [si+ur],ax
 
-;;;         jsr inctiles
-;;;         dex
-;;;         bne l5
 ;;         add #tilesize,r0
 ;;         sob r1,5$
+         add si,tilesize
+         loop .c5
 
-;;;         lda #<tiles+((vermax-1)*hormax*tilesize)  ;bottom border
-;;;         sta i1
-;;;         lda #>tiles+((vermax-1)*hormax*tilesize)
-;;;         sta i1+1
-;;;         ldx #hormax
 ;;         mov #tiles+<<vermax-1>*hormax*tilesize>,r0
 ;;         mov #hormax,r1
+         mov si,tiles+(vermax-1)*hormax*tilesize
+         mov cx,hormax
 
-;;;l4       ldy #dr
-;;;         lda i1
-;;;         sec
-;;;         sbc #<((vermax-1)*hormax-1)*tilesize
-;;;         sta (i1),y
-;;;         lda i1+1
-;;;         sbc #>((vermax-1)*hormax-1)*tilesize
-;;;         iny
-;;;         sta (i1),y
 ;;4$:      mov r0,r2
 ;;         sub #<<vermax-1>*hormax-1>*tilesize,r2
 ;;         mov r2,dr(r0)
+.c4:     lea ax,[si-((vermax-1)*hormax-1)*tilesize]
+         mov [si+dr],ax
 
-;;;         lda i1
-;;;         sbc #<(vermax-1)*hormax*tilesize
-;;;         iny		;down
-;;;         sta (i1),y
-;;;         lda i1+1
-;;;         sbc #>(vermax-1)*hormax*tilesize
-;;;         iny
-;;;         sta (i1),y
 ;;         mov r0,r2
 ;;         sub #<vermax-1>*hormax*tilesize,r2
 ;;         mov r2,down(r0)
+         lea ax,[si-(vermax-1)*hormax*tilesize]
+         mov [si+down],ax
 
-;;;         lda i1
-;;;         sbc #<((vermax-1)*hormax+1)*tilesize
-;;;         iny		;dl
-;;;         sta (i1),y
-;;;         lda i1+1
-;;;         sbc #>((vermax-1)*hormax+1)*tilesize
-;;;         iny
-;;;         sta (i1),y
 ;;         mov r0,r2
 ;;         sub #<<vermax-1>*hormax+1>*tilesize,r2
 ;;         mov r2,dl(r0)
+         lea ax,[si-((vermax-1)*hormax+1)*tilesize]
+         mov [si+dle],ax
 
-;;;         jsr inctiles
-;;;         dex
-;;;         bne l4
 ;;         add #tilesize,r0
 ;;         sob r1,4$
+         add si,tilesize
+         loop .c4
 
-;;;         jsr totiles    ;left border
-;;;         ldx #vermax
 ;;         mov #tiles,r0
 ;;         mov #vermax,r1
+        mov si,tiles
+        mov cx,vermax
 
-;;;l3       ldy #left
-;;;         lda i1
-;;;         clc
-;;;         adc #<(hormax-1)*tilesize
-;;;         sta (i1),y
-;;;         lda i1+1
-;;;         adc #>(hormax-1)*tilesize
-;;;         iny
-;;;         sta (i1),y
 ;;3$:      mov r0,r2
 ;;         add #<hormax-1>*tilesize,r2
 ;;         mov r2,left(r0)
+.c3:     lea ax,[si+(hormax-1)*tilesize]
+         mov [si+left],ax
 
-;;;         lda i1
-;;;         sec
-;;;         sbc #<tilesize
-;;;         iny		;ul
-;;;         sta (i1),y
-;;;         lda i1+1
-;;;         sbc #>tilesize
-;;;         iny
-;;;         sta (i1),y
 ;;         mov r0,r2
 ;;         sub #tilesize,r2
 ;;         mov r2,ul(r0)
+         lea ax,[si-tilesize]
+         mov [si+ul],ax
 
-;;;         lda i1
-;;;         clc
-;;;         adc #<(2*hormax-1)*tilesize
-;;;         ldy #dl
-;;;         sta (i1),y
-;;;         lda i1+1
-;;;         adc #>(2*hormax-1)*tilesize
-;;;         iny
-;;;         sta (i1),y
 ;;         mov r0,r2
 ;;         add #<2*hormax-1>*tilesize,r2
 ;;         mov r2,dl(r0)
+         lea ax,[si+(2*hormax-1)*tilesize]
+         mov [si+dle],ax
 
-;;;         lda i1
-;;;         adc #<tilesize*hormax
-;;;         sta i1
-;;;         lda i1+1
-;;;         adc #>tilesize*hormax
-;;;         sta i1+1
-;;;         dex
-;;;         bne l3
 ;;         add #hormax*tilesize,r0
 ;;         sob r1,3$
+         add si,hormax*tilesize
+         loop .c3
 
-;;;         lda #<tiles+((hormax-1)*tilesize)  ;right border
-;;;         sta i1
-;;;         lda #>tiles+((hormax-1)*tilesize)
-;;;         sta i1+1
-;;;         ldx #vermax
 ;;         mov #tiles+<<hormax-1>*tilesize>,r0
 ;;         mov #vermax,r1
+         mov si,tiles+(hormax-1)*tilesize
+         mov cx,vermax
 
-;;;l2       ldy #ur
-;;;         lda i1
-;;;         sec
-;;;         sbc #<(2*hormax-1)*tilesize
-;;;         sta (i1),y
-;;;         lda i1+1
-;;;         sbc #>(2*hormax-1)*tilesize
-;;;         iny
-;;;         sta (i1),y
 ;;2$:      mov r0,r2
 ;;         sub #<2*hormax-1>*tilesize,r2
 ;;         mov r2,ur(r0)
+.c2:     lea ax,[si-(2*hormax-1)*tilesize]
+         mov [si+ur],ax
 
-;;;         lda i1
-;;;         sec
-;;;         sbc #<(hormax-1)*tilesize
-;;;         iny		;right
-;;;         sta (i1),y
-;;;         lda i1+1
-;;;         sbc #>(hormax-1)*tilesize
-;;;         iny
-;;;         sta (i1),y
 ;;         mov r0,r2
 ;;         sub #<hormax-1>*tilesize,r2
 ;;         mov r2,right(r0)
+         lea ax,[si-(hormax-1)*tilesize]
+         mov [si+right],ax
 
-;;;         lda i1
-;;;         clc
-;;;         adc #<tilesize
-;;;         iny		;dr
-;;;         sta (i1),y
-;;;         lda i1+1
-;;;         adc #>tilesize
-;;;         iny
-;;;         sta (i1),y
 ;;         mov r0,r2
 ;;         add #tilesize,r2
 ;;         mov r2,dr(r0)
+         lea ax,[si+tilesize]
+         mov [si+dr],ax
 
-;;;         lda i1
-;;;         adc #<tilesize*hormax
-;;;         sta i1
-;;;         lda i1+1
-;;;         adc #>tilesize*hormax
-;;;         sta i1+1
 ;;         add #hormax*tilesize,r0
-
-;;;         dex
-;;;         bne l2
 ;;         sob r1,2$
+         add si,hormax*tilesize
+         loop .c2
 
-;;;         ldy #ul    ;top left corner
-;;;         lda #<tiles + ((hormax*vermax-1)*tilesize)
-;;;         sta tiles,y
-;;;         lda #>tiles + ((hormax*vermax-1)*tilesize)
-;;;         iny
-;;;         sta tiles,y
 ;;         mov #tiles + <<hormax*vermax-1>*tilesize>,@#tiles+ul
-
-;;;         ldy #ur    ;top right corner
-;;;         lda #<tiles+(hormax*(vermax-1)*tilesize)
-;;;         sta tiles+((hormax-1)*tilesize),y
-;;;         lda #>tiles+(hormax*(vermax-1)*tilesize)
-;;;         iny
-;;;         sta tiles+((hormax-1)*tilesize),y
 ;;         mov #tiles + <<hormax*<vermax-1>>*tilesize>,@#tiles+ur+<<hormax-1>*tilesize>
-
-;;;         ldy #dl   ;bottom left corner
-;;;         lda #<tiles+((hormax-1)*tilesize)
-;;;         sta tiles+(hormax*(vermax-1)*tilesize),y
-;;;         lda #>tiles+((hormax-1)*tilesize)
-;;;         iny
-;;;         sta tiles+(hormax*(vermax-1)*tilesize),y
 ;;         mov #tiles+<<hormax-1>*tilesize>,@#tiles+dl+<hormax*<vermax-1>*tilesize>
-
-;;;         ldy #dr   ;bottom right corner
-;;;         lda #<tiles
-;;;         sta tiles+((vermax*hormax-1)*tilesize),y
-;;;         lda #>tiles
-;;;         iny
-;;;         sta tiles+((vermax*hormax-1)*tilesize),y
 ;;         mov #tiles,@#tiles+dr+<<vermax*hormax-1>*tilesize>
-
-;;;         rts
 ;;         return
+         mov word [tiles+ul],tiles + (hormax*vermax-1)*tilesize
+         mov word [tiles+ur+(hormax-1)*tilesize],tiles + hormax*(vermax-1)*tilesize
+         mov word [tiles+dle+hormax*(vermax-1)*tilesize],tiles+(hormax-1)*tilesize
+         mov word [tiles+dr+(vermax*hormax-1)*tilesize],tiles
+         retn
 
 plain:
-;;;         jsr totiles     ;top border
-;;;         ldx #hormax
 ;;         mov #tiles,r0
 ;;         mov #hormax,r1
 ;;         mov #plainbox,r2
+         mov si,tiles
+         mov cx,hormax
+         mov ax,plainbox
 
-;;;l5       ldy #ul
-;;;         lda #<plainbox
-;;;         sta (i1),y
-;;;         lda #>plainbox
-;;;         iny
-;;;         sta (i1),y
-;;;         lda #<plainbox
-;;;         iny		;up
-;;;         sta (i1),y
-;;;         lda #>plainbox
-;;;         iny
-;;;         sta (i1),y
-;;;         lda #<plainbox
-;;;         iny		;ur
-;;;         sta (i1),y
-;;;         lda #>plainbox
-;;;         iny
-;;;         sta (i1),y
-;;;         jsr inctiles
-;;;         dex
-;;;         bne l5
 ;;5$:      mov r2,ul(r0)
 ;;         mov r2,up(r0)
 ;;         mov r2,ur(r0)
 ;;         add #tilesize,r0
 ;;         sob r1,5$
-;;         
-;;;         lda #<tiles+((vermax-1)*hormax*tilesize)  ;bottom border
-;;;         sta i1
-;;;         lda #>tiles+((vermax-1)*hormax*tilesize)
-;;;         sta i1+1
-;;;         ldx #hormax
+.c5:     mov [si+ul],ax
+         mov [si+up],ax
+         mov [si+ur],ax
+         add si,tilesize
+         loop .c5
+         
 ;;         mov #tiles+<<vermax-1>*hormax*tilesize>,r0
 ;;         mov #hormax,r1
+         mov si,tiles+(vermax-1)*hormax*tilesize
+         mov cx,hormax
 
-;;;l4       ldy #dr
-;;;         lda #<plainbox
-;;;         sta (i1),y
-;;;         lda #>plainbox
-;;;         iny
-;;;         sta (i1),y
-;;;         lda #<plainbox
-;;;         iny		;down
-;;;         sta (i1),y
-;;;         lda #>plainbox
-;;;         iny
-;;;         sta (i1),y    
-;;;         lda #<plainbox
-;;;         iny		;dl
-;;;         sta (i1),y
-;;;         lda #>plainbox
-;;;         iny
-;;;         sta (i1),y
-;;;         jsr inctiles
-;;;         dex
-;;;         bne l4
 ;;4$:      mov r2,dr(r0)
 ;;         mov r2,down(r0)
 ;;         mov r2,dl(r0)
 ;;         add #tilesize,r0
 ;;         sob r1,4$
+.c4:     mov [si+dr],ax
+         mov [si+down],ax
+         mov [si+dle],ax
+         add si,tilesize
+         loop .c4
 
-;;;         jsr totiles    ;left border
-;;;         ldx #vermax
 ;;         mov #tiles,r0
 ;;         mov #vermax,r1
+         mov si,tiles
+         mov cx,vermax
 
-;;;l3       ldy #left
-;;;         lda #<plainbox
-;;;         sta (i1),y
-;;;         lda #>plainbox
-;;;         iny
-;;;         sta (i1),y
-;;;         lda #<plainbox
-;;;         iny		;ul
-;;;         sta (i1),y
-;;;         lda #>plainbox
-;;;         iny
-;;;         sta (i1),y
-;;;         lda #<plainbox
-;;;         ldy #dl
-;;;         sta (i1),y
-;;;         lda #>plainbox
-;;;         iny
-;;;         sta (i1),y
-;;;         lda i1
-;;;         adc #<tilesize*hormax
-;;;         sta i1
-;;;         lda i1+1
-;;;         adc #>tilesize*hormax
-;;;         sta i1+1
-;;;         dex
-;;;         bne l3
 ;;3$:      mov r2,left(r0)
 ;;         mov r2,ul(r0)
 ;;         mov r2,dl(r0)
 ;;         add #tilesize*hormax,r0
 ;;         sob r1,3$
+.c3:     mov [si+left],ax
+         mov [si+ul],ax
+         mov [si+dle],ax
+         add si,tilesize*hormax
+         loop .c3
 
-;;;         lda #<tiles+((hormax-1)*tilesize)  ;right border
-;;;         sta i1
-;;;         lda #>tiles+((hormax-1)*tilesize)
-;;;         sta i1+1
-;;;         ldx #vermax
 ;;         mov #tiles+<<hormax-1>*tilesize>,r0
 ;;         mov #vermax,r1
+         mov si,tiles+(hormax-1)*tilesize
+         mov cx,vermax
 
-;;;l2       ldy #ur
-;;;         lda #<plainbox
-;;;         sta (i1),y
-;;;         lda #>plainbox
-;;;         iny
-;;;         sta (i1),y
-;;;         lda #<plainbox
-;;;         iny		;right
-;;;         sta (i1),y
-;;;         lda #>plainbox
-;;;         iny
-;;;         sta (i1),y
-;;;         lda #<plainbox
-;;;         iny		;dr
-;;;         sta (i1),y
-;;;         lda #>plainbox
-;;;         iny
-;;;         sta (i1),y
-;;;         lda i1
-;;;         adc #<tilesize*hormax
-;;;         sta i1
-;;;         lda i1+1
-;;;         adc #>tilesize*hormax
-;;;         sta i1+1
-;;;         dex
-;;;         bne l2
 ;;2$:      mov r2,ur(r0)
 ;;         mov r2,right(r0)
 ;;         mov r2,dr(r0)
 ;;         add #tilesize*hormax,r0
 ;;         sob r1,2$
-
-;;;         rts
 ;;         return
+.c2:     mov [si+ur],ax
+         mov [si+right],ax
+         mov [si+dr],ax
+         add si,tilesize*hormax
+         loop .c2
+         retn
 
 random:
 ;;;uses: adjcell:2 - r2, i1:2 - r3/r5, i2 - r4, t1 - r1

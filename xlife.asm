@@ -23,9 +23,9 @@ start:   push cs   ;??
      mov [startp],si
      mov word [si+next],1
      mov byte [si+sum],1
-     mov byte [si+0],80h
-     mov byte [si+1],060h
-     mov byte [si+2],0c0h
+     mov byte [si+0],60h
+     mov byte [si+1],0c0h
+     mov byte [si+2],40h
      ;mov byte [si+3],40h
      ;mov byte [si+0],0e7h
      ;mov byte [si+7],0e7h
@@ -55,11 +55,10 @@ mainloop:
 
          mov [mode],0
          call incgen
-         ;call initxt
-         ;call showtopology
+         call initxt
+         call showtopology
          ;call xyout
          call showscn
-         ;call showmode
          jmp crsrflash2
 
 .c4:     cmp al,2
@@ -830,60 +829,6 @@ gentab:
 
          include 'vistab.s'
 
-         align 2
-startp    dw 1
-tilecnt   dw 0
-viewport  dw 0
-crsrtile  dw 0
-timercnt  dw 0, 0
-temp      dw 0
-temp2     dw 0
-;kbuf:     dw 0
-saved     dw 0
-tobin     dw 1,10,100,1000,10000
-live      dw 12
-born      dw 8
-
-x0        db 0   ;word aligned
-y0        db 0
-crsrbyte  db 0      ;y%8  word aligned
-crsrbit   db 128    ;x bit position
-i1        db 0,0
-cellcnt   db 0,0,0,0,0
-gencnt    db 0,0,0,0,0,0,0
-crsrx     db 0      ;[x/8]*8, word aligned!
-crsry     db 0      ;[y/8]*8
-vptilecx  db 0      ;word aligned!
-vptilecy  db 0
-xcrsr     db 0,0,0
-ycrsr     db 0,0,0
-tinfo     db 0,0,0  ;even alignment for BK!
-xchgdir   db 0
-xdir      db 0      ;linear transformation, word aligned
-ydir      db 0
-clncnt    db 0
-;palette  db 0      ;not word aligned???
-pseudoc   db 0
-mode      db 0      ;0-stop, 1-run, 2-hide, 3-exit
-zoom      db 0
-fn        db 0,0,0,0,0,0,0,0,0,0,0,0
-density   db 3         ;must follow fn
-;;dirname  .TEXT "0:"      ;filename used to access directory
-topology  db 0      ;0 - torus
-;crsrticks:  db 0
-;copyleft: .ascii "CR.TXT"
-;errst:     db 0   ;0 - do not print i/o-errors message, 1 - print
-ppmode    db 1    ;putpixel mode: 0 - tentative, 1 - active
-crsrpgmk  db 1   ;0 - do not draw cursor during showscnz, 1 - draw
-svfn      db 0,0,0,0,0,0,0,0,0,0,0,0
-;msghide:  .asciz "HIDE"  ;must follow svfn
-;msgtore:  .asciz "TORUS"
-;msgplan:  .asciz "PLAIN"
-;msgrun:   .asciz "RUN "
-;msgstop:  .asciz "STOP"
-nofnchar db '?%(),./:;<=>[\]|'   ;? - must be the first
-stringbuf rb 19
-
 tab3      db 0, 1, 1, 2, 1, 2, 2, 3, 1, 2, 2, 3, 2, 3, 3, 4
           db 1, 2, 2, 3, 2, 3, 3, 4, 2, 3, 3, 4, 3, 4, 4, 5
           db 1, 2, 2, 3, 2, 3, 3, 4, 2, 3, 3, 4, 3, 4, 4, 5
@@ -915,19 +860,67 @@ ttab      db 0,1,2,3,3,4,5,6,7,8,8,9,16,17,18,19,19,20
 bittab    db 1,2,4,8,16,32,64,128
 
         align 2
-digifont:   ;8th columns are free
-         dw 0a00ah,2828h,0a828h,282ah,2828h,2828h,0a00ah,0
-         dw 8002h,8002h,800ah,8002h,8002h,8002h,0a82ah,0
-         dw 0a00ah,2828h,2800h,0a000h,0ah,28h,0a82ah,0
-         dw 0a00ah,2828h,2800h,0a000h,2800h,2828h,0a00ah,0
-         dw 2800h,0a000h,0a802h,280ah,0aa2ah,2800h,2800h,0
-         dw 0a82ah,28h,0a02ah,2800h,2800h,2828h,0a00ah,0    ;5
-         dw 0a00ah,2828h,28h,0a02ah,2828h,2828h,0a00ah,0
-         dw 0a82ah,2828h,0a000h,8002h,8002h,8002h,8002h,0
-         dw 0a00ah,2828h,2828h,0a00ah,2828h,2828h,0a00ah,0
-         dw 0a00ah,2828h,2828h,0a80ah,2800h,2828h,0a00ah,0
-         dw 0,0,0,0,0,0,0                ;space
-
 tiles:
          include 'initiles.s'
+
+digifont:   ;8th columns are free
+          dw 0a00ah,2828h,0a828h,282ah,2828h,2828h,0a00ah,0
+          dw 8002h,8002h,800ah,8002h,8002h,8002h,0a82ah,0
+          dw 0a00ah,2828h,2800h,0a000h,0ah,28h,0a82ah,0
+          dw 0a00ah,2828h,2800h,0a000h,2800h,2828h,0a00ah,0
+          dw 2800h,0a000h,0a802h,280ah,0aa2ah,2800h,2800h,0
+          dw 0a82ah,28h,0a02ah,2800h,2800h,2828h,0a00ah,0    ;5
+          dw 0a00ah,2828h,28h,0a02ah,2828h,2828h,0a00ah,0
+          dw 0a82ah,2828h,0a000h,8002h,8002h,8002h,8002h,0
+          dw 0a00ah,2828h,2828h,0a00ah,2828h,2828h,0a00ah,0
+          dw 0a00ah,2828h,2828h,0a80ah,2800h,2828h,0a00ah,0
+          dw 0,0,0,0,0,0,0                ;space
+startp    dw 1
+tilecnt   dw 0
+viewport  dw 0
+crsrtile  dw 0
+timercnt  dw 0, 0
+temp      dw 0
+temp2     dw 0
+;kbuf:     dw 0
+saved     dw 0
+tobin     dw 1,10,100,1000,10000
+live      dw 12
+born      dw 8
+x0        db 0   ;word aligned for the speed
+y0        db 0
+crsrbyte  db 0      ;y%8  word aligned
+crsrbit   db 128    ;x bit position
+i1        db 0,0
+cellcnt   db 0,0,0,0,0
+gencnt    db 0,0,0,0,0,0,0
+crsrx     db 0      ;[x/8]*8, word aligned!
+crsry     db 0      ;[y/8]*8
+vptilecx  db 0      ;word aligned!
+vptilecy  db 0
+xcrsr     db 0,0,0
+ycrsr     db 0,0,0
+tinfo     db 0,0,0
+xchgdir   db 0
+xdir      db 0      ;linear transformation, word aligned
+ydir      db 0
+clncnt    db 0
+;palette  db 0      ;not word aligned???
+pseudoc   db 0
+mode      db 0      ;0-stop, 1-run, 2-hide, 3-exit
+zoom      db 0
+fn        db 0,0,0,0,0,0,0,0,0,0,0,0
+density   db 3         ;must follow fn
+;;dirname  .TEXT "0:"      ;filename used to access directory
+topology  db 0      ;0 - torus
+;crsrticks:  db 0
+;copyleft: .ascii "CR.TXT"
+;errst:     db 0   ;0 - do not print i/o-errors message, 1 - print
+ppmode    db 1    ;putpixel mode: 0 - tentative, 1 - active
+crsrpgmk  db 1   ;0 - do not draw cursor during showscnz, 1 - draw
+svfn      db 0,0,0,0,0,0,0,0,0,0,0,0
+msgtore   db 'TORUS$'
+msgplain  db 'PLAIN$'
+nofnchar db '?%(),./:;<=>[\]|'   ;? - must be the first
+stringbuf rb 19
 

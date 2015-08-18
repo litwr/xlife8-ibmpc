@@ -2430,22 +2430,18 @@ showtopology:
 ;;         mov #msgtore,r3
 ;;         tstb @#topology
 ;;         beq showptxt
+         call printstr
+         db 27, '[12;33H$'
+         mov dx,msgtore
+         cmp [topology],0
+         jz .l1
+
+         mov dx,msgplain
+.l1:     mov ah,9
+         int 21h
+         retn
 
 ;;         mov #msgplan,r3
-;;         br showptxt
-
-showmode:
-;;         clr r1
-;;         mov #2,r2
-;;         mov #msgstop,r3
-;;         movb @#mode,r0
-;;         beq showptxt
-
-;;         mov #msgrun,r3
-;;         dec r0
-;;         beq showptxt
-         
-;;         mov #msghide,r3
 
 showptxt:     ;IN: R1 - X, R2 - Y, R3 - msg
 ;;         mov #toandos,@#pageport

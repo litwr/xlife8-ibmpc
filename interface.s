@@ -25,7 +25,7 @@ dispatcher: call getkey2
          jz .c40
 
          call initxt
-;;         call @#showtopology
+         call showtopology
 ;;         call @#xyout
          mov bx,0ah
          jmp .c40
@@ -60,14 +60,19 @@ dispatcher: call getkey2
 
 ;;         tstb @#topology
 ;;         beq 84$
+         cmp [topology],0
+         jz .c84
 
 ;;         call @#torus
 ;;         clrb @#topology
 ;;         br 86$
+         call torus
+         mov [topology],0
+         jmp .c86
 
-;;84$:     call @#plain
-;;         incb @#topology
-;;86$:     jmp @#showtopology
+.c84:    call plain
+         inc [topology]
+.c86:    jmp showtopology
 
 .c6:     cmp al,'o'
          jnz .c7
