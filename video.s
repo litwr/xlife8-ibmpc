@@ -724,11 +724,10 @@ showscn2: ;;mov @#startp,r0
           cmp si,1
           jz .lz
           jmp .l1
-          ;jnz .l1  ;optimize 8088?
+          ;jnz .l1  ;optimize 8088? it was short at K1801BM1!
 
-;;          jmp @#crsrset
-.lz:      ;jmp crsrset
-         retn
+.lz:      jmp crsrset
+
 
 showscnp: ;;mov @#startp,r0
 ;;1$:       call @#showscnp1
@@ -1688,6 +1687,15 @@ crsrset1:
 ;;         add video(r0),r1
 ;;         movb @#crsrbit,r0
 ;;         return
+         mov si,[crsrtile]
+         xor bx,bx
+         mov bl,[crsrbyte]
+         shl bx,1
+         mov di,[crsrtab+bx]
+         add di,[si+video]
+         xor bx,bx
+         mov bl,[crsrbit]
+         retn
 
 setdirmsk: ;;jsr r3,@#printstr
 ;;         .byte 12,146
@@ -1947,19 +1955,24 @@ setviewport:
 ;;        add r1,@r0
 ;;        return
 
-crsrset: ;;call @#crsrset1
-;;         tstb @#zoom
-;;         bne gexit2
+crsrset: call crsrset1
+         cmp [zoom],0
+         jnz gexit2
 
-pixel11: ;;mov #tovideo,@#pageport   ;it should be after crsrset, IN: r0 - crsrbit, r1 - addr of video tile line
+pixel11: 
 ;;         asl r0
 ;;         mov vistab(r0),r2
 ;;         mov r2,r0
 ;;         asl r2
 ;;         bis r0,r2
 ;;         bis r2,@r1
-gexit3:  ;;mov #todata,@#pageport
-gexit2:  ;;return
+         shl bx,1    ;it should be after crsrset, IN: bx - crsrbit, di - addr of video tile line
+         mov si,[bx+vistab]
+         mov ax,si
+         shl ax,1
+         or ax,si
+         or [es:di],ax
+gexit2:  retn         ;this is also gexit3
 
 pixel11p: ;;push r0
 ;;         call @#pixel11
@@ -1968,31 +1981,64 @@ pixel11p: ;;push r0
 
 crsrclr: ;;tstb @#zoom
 ;;         bne 1$
+         cmp [zoom],0
+         jnz .c1
 
 ;;         mov @#crsrtile,r0
 ;;         movb @#crsrbyte,r1
+         mov si,[crsrtile]
+         xor bx,bx
+         mov bl,[crsrbyte]
+
 ;;         mov r1,r2
-;;        add r0,r2
+;;         add r0,r2
 ;;         movb @r2,r2
+         mov al,[si+bx]
+
 ;;         swab r1
 ;;         asr r1
 ;;         asr r1
 ;;         add video(r0),r1
+         shl bx,1
+         mov di,[crsrtab+bx]
+         add di,[si+video]
+
 ;;         tstb @#pseudoc
 ;;         bne 2$
+         cmp [pseudoc],0
+         jnz .c2
 
 ;;         mov #tovideo,@#pageport
 ;;         asl r2
 ;;         mov vistab(r2),r2
+         xor bx,bx
+         mov bl,al
+         shl bx,1
+         mov ax,[bx+vistab]
+         stosw
+         retn
+
 ;;5$:      movb @#crsrbit,r3
 ;;         asl r3
 ;;         mov vistab(r3),r3
+.c5:     ;xor bx,bx
+         ;mov bl,[crsrbit]
+         ;shl bx,1
+         ;mov bx,[bx+vistab]
+
 ;;         mov r3,r4
 ;;         asl r4
 ;;         bis r4,r3
+        ;mov dx,bx
+        ;shl dx,1
+        ;or bx,dx
+
 ;;         mov @r1,r4
+        ;mov dx,[es:di]
+
 ;;         bic r3,r4
 ;;         com r3
+
 ;;         bic r3,r2
 ;;         bis r2,r4
 ;;         mov r4,@r1
@@ -2004,6 +2050,7 @@ crsrclr: ;;tstb @#zoom
 ;;         add r0,r3
 ;;         bitb #15,@#crsrbit
 ;;         bne 3$
+.c2:
 
 ;;         mov count0(r3),r3
 ;;         bic #^B1110011100111111,r3
@@ -2038,6 +2085,8 @@ crsrclr: ;;tstb @#zoom
 ;;         incb @#crsrpgmk
 ;;         ;mov @#crsrtile,r0   ;do not remove! ???
 ;;         return
+.c1:
+         retn
 
 ;;8$:      bisb r4,r2
 ;;         bic #^B1111111100000000,r2
@@ -2045,7 +2094,7 @@ crsrclr: ;;tstb @#zoom
 ;;         movb vistabpc(r2),r2
 ;;         return
 
-;;crsrcalc:
+crsrcalc:
 ;;        mov @#crsrtile,r0
 ;;        mov video(r0),r0     ;start of coorditates calculation
 ;;        sub #videostart,r0
@@ -2103,7 +2152,7 @@ crsrclr: ;;tstb @#zoom
 ;;        tstb @#zoom
 ;;        bne 18$
 
-;;        return
+        retn
 
 ;;18$:    mov #up,r1
 ;;        movb @#vptilecy,r3

@@ -207,16 +207,15 @@ dispatcher: call getkey2
 ;;;*         jmp crsrcalc
 ;;         return
 
-;;16$:     cmpb #25,r0    ;cursor right
-;;         bne 160$
 .c16:    cmp ax,4d00h   ;cursor right
          jnz .c160
 
-;;;*         jsr crsrclr
-;;;*         ldy #right
 ;;         call @#crsrclr
 ;;         mov #crsrbit,r4
 ;;         mov #right,r1
+         call crsrclr
+         mov bx,crsrbit
+         mov di,right
 
 ;;;*         jsr shift
 ;;;*         bcc cright
@@ -240,14 +239,22 @@ dispatcher: call getkey2
 ;;         movb @r4,r0
 ;;         cmpb r0,#1
 ;;         beq 71$
+.cright:
+         mov cl,[bx]
+         cmp cl,1
+         jz .c71
 
 ;;         rorb @#crsrbit    ;CY=0 by CMPB
 ;;         br 273$
+         shr [crsrbit],1
+         jmp .c270
 
 ;;;*cxright  lda #$80
 ;;;*         bne cm6
 ;;71$:    mov #128,r0
 ;;        br 72$
+.c71:   mov cl,80h
+        jmp .c72
 
 ;;160$:    cmpb #8,r0   ;cursor left
 ;;         bne 161$
@@ -308,6 +315,8 @@ dispatcher: call getkey2
 ;;         add r1,r2
 ;;         cmp @r2,#plainbox
 ;;         bne 73$
+.c72:    mov si,[crsrtile]
+         add si,di
 
 ;;;*         ldx i2
 ;;;*         lda crsrbit,x
@@ -315,7 +324,8 @@ dispatcher: call getkey2
 ;;;*         bcs cm5
 ;;         movb @r4,r0
 ;;         br 74$
-;;         
+
+         
 ;;;*cm4      sta crsrtile+1
 ;;;*         stx crsrtile
 ;;;*cm5      lda t1
@@ -325,6 +335,10 @@ dispatcher: call getkey2
 ;;73$:     mov @r2,@#crsrtile
 ;;74$:     movb r0,@r4
 ;;         br 270$
+.c73:     lodsw
+          mov [crsrtile],ax
+.c74:     mov [bx],cl
+          jmp .c270
 
 ;;161$:    cmpb #26,r0   ;cursor up
 ;;         bne 162$
@@ -494,6 +508,8 @@ dispatcher: call getkey2
 ;;;*         jmp crsrcalc
 ;;270$:    call @#crsrset
 ;;         jmp @#crsrcalc
+.c270:   call crsrset
+         jmp crsrcalc
 
 ;;171$:    cmpb #12,r0      ;home
 ;;         bne 172$

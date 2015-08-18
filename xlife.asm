@@ -18,7 +18,6 @@ start:   push cs   ;??
          ;;mov #3,r2
          ;;call @#setpalette         ;inits also timer interrupt, sets active video page
          ;;incb @#errst
-         mov [crsrtile],tiles
      mov si,tiles
      mov [startp],si
      mov word [si+next],1
@@ -863,8 +862,8 @@ bittab    db 1,2,4,8,16,32,64,128
 tiles:
          include 'initiles.s'
 
-digifont:   ;8th columns are free
-          dw 0a00ah,2828h,0a828h,282ah,2828h,2828h,0a00ah,0
+crsrtab   dw 0,2000h,1,2001h,2,2002h,3,2003h
+digifont  dw 0a00ah,2828h,0a828h,282ah,2828h,2828h,0a00ah,0  ;8th columns are free
           dw 8002h,8002h,800ah,8002h,8002h,8002h,0a82ah,0
           dw 0a00ah,2828h,2800h,0a000h,0ah,28h,0a82ah,0
           dw 0a00ah,2828h,2800h,0a000h,2800h,2828h,0a00ah,0
@@ -878,7 +877,7 @@ digifont:   ;8th columns are free
 startp    dw 1
 tilecnt   dw 0
 viewport  dw 0
-crsrtile  dw 0
+crsrtile  dw tiles
 timercnt  dw 0, 0
 temp      dw 0
 temp2     dw 0
