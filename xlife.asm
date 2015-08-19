@@ -862,7 +862,7 @@ bittab    db 1,2,4,8,16,32,64,128
 tiles:
          include 'initiles.s'
 
-crsrtab   dw 0,2000h,1,2001h,2,2002h,3,2003h
+crsrtab   dw 0,2000h,80,2050h,160,20a0h,240,20f0h
 digifont  dw 0a00ah,2828h,0a828h,282ah,2828h,2828h,0a00ah,0  ;8th columns are free
           dw 8002h,8002h,800ah,8002h,8002h,8002h,0a82ah,0
           dw 0a00ah,2828h,2800h,0a000h,0ah,28h,0a82ah,0

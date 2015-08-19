@@ -256,16 +256,15 @@ dispatcher: call getkey2
 .c71:   mov cl,80h
         jmp .c72
 
-;;160$:    cmpb #8,r0   ;cursor left
-;;         bne 161$
-.c160:   cmp ax,4b00h ;cursor left
-         jnz .c161
+.c160:  cmp ax,4b00h ;cursor left
+        jnz .c161
 
-;;;*         jsr crsrclr
-;;;*         ldy #left
 ;;         call @#crsrclr
 ;;         mov #crsrbit,r4
 ;;         mov #left,r1
+        call crsrclr
+        mov bx,crsrbit
+        mov di,left
 
 ;;;*         jsr shift
 ;;;*         bcc cleft
@@ -285,19 +284,25 @@ dispatcher: call getkey2
 ;;;*         lda crsrbit
 ;;;*         cmp #$80
 ;;;*         beq cxleft
-
 ;;;*         asl crsrbit
 ;;;*         jmp cont17u
 ;;81$:     decb @#vptilecx
 ;;         movb @r4,r0
 ;;         cmpb #128,r0
 ;;         beq 76$
+.cleft:   
+         mov cl,[bx]
+         cmp cl,80h
+         jz .c76
 
 ;;         aslb @#crsrbit
 ;;         br 270$
+         shl [crsrbit],1
+         jmp .c270
 
 ;;;*cxleft   lda #1
 ;;76$:     mov #1,r0
+.c76:    mov cl,1
 
 ;;;*cm6      ldx #0
 ;;;*cm1      sta t1
@@ -340,16 +345,15 @@ dispatcher: call getkey2
 .c74:     mov [bx],cl
           jmp .c270
 
-;;161$:    cmpb #26,r0   ;cursor up
-;;         bne 162$
 .c161:   cmp ax,4800h  ;cursor up
          jnz .c162
 
-;;;*         jsr crsrclr
-;;;*         ldy #up
 ;;         call @#crsrclr
 ;;         mov #crsrbyte,r4
 ;;         mov #up,r1
+        call crsrclr
+        mov bx,crsrbyte
+        mov di,up
 
 ;;;*         jsr shift
 ;;;*         bcc cup
@@ -369,28 +373,34 @@ dispatcher: call getkey2
 ;;82$:     decb @#vptilecy
 ;;         tstb @r4
 ;;         beq 77$
+.cup:
+         cmp byte [bx],0
+         jz .c77
 
 ;;;*         dec crsrbyte
 ;;;*         jmp cont17u
 ;;         decb @r4
 ;;         br 270$
+         dec byte [bx]
+         jmp .c270
 
 ;;;*cxup     lda #7
 ;;;*cm3      ldx #1
 ;;;*         bpl cm1
 ;;77$:     mov #7,r0
 ;;         br 72$
+.c77:    mov cl,7
+         jmp .c72
 
-;;162$:    cmpb #27,r0   ;cursor down
-;;         bne 17$
 .c162:   cmp ax,5000h  ;cursor down
          jnz .c17
 
-;;;*         jsr crsrclr
-;;;*         ldy #down
 ;;         call @#crsrclr
 ;;         mov #crsrbyte,r4
 ;;         mov #down,r1
+        call crsrclr
+        mov bx,crsrbyte
+        mov di,down
 
 ;;;*         jsr shift
 ;;;*         bcc cdown
@@ -410,16 +420,21 @@ dispatcher: call getkey2
 ;;83$:     incb @#vptilecy
 ;;         cmpb #7,@r4
 ;;         beq 78$
+.cdown:
+         cmp byte [bx],7
+         jz .c78
 
-;;;*         inc crsrbyte
-;;;*         bne cont17u
 ;;         incb @r4
 ;;         br 270$
+         inc byte [bx]
+         jmp .c270
 
 ;;;*cxdown   lda #0
 ;;;*         beq cm3
 ;;78$:     clr r0
 ;;         br 72$
+.c78:    xor cx,cx
+         jmp .c72
 
 ;;17$:     cmpb #32,r0   ;space
 ;;         bne 170$
