@@ -3,7 +3,6 @@ hormax   = 20     ;160
 total    = hormax*vermax+1
 tilesize = 62
 plainbox = hormax*vermax*tilesize+tiles
-;statusline = 197
 ;videostart = 16384+12+128
 
 left     = 8      ;all directions

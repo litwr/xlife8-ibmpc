@@ -278,18 +278,14 @@ help:    call totext
          call getkey
          jmp tograph
 
-xyout:   ;mov #tovideo,@#pageport
-;         mov #xcrsr,r0
-;         mov #3,r1
-;         mov #<statusline*64+16384+50>,r2
-;         call @#digiout
-
-;         mov #ycrsr,r0
-;         mov #3,r1
-;         mov #<statusline*64+16384+58>,r2
-;         call @#digiout
-;         mov #todata,@#pageport
-;         return
+xyout:   mov dx,3
+         mov di,192*40+66
+         mov bx,xcrsr
+         call digiout
+         mov dl,3
+         mov di,192*40+74
+         mov bx,ycrsr
+         jmp digiout
 
 infoout: ;must be before showtinfo
          mov bx,gencnt
@@ -2097,10 +2093,21 @@ crsrclr: ;;tstb @#zoom
 crsrcalc:
 ;;        mov @#crsrtile,r0
 ;;        mov video(r0),r0     ;start of coorditates calculation
+        mov bx,[crsrtile]
+        mov bx,[bx+video]
+        mov ax,bx
+
 ;;        sub #videostart,r0
+        and bl,3fh
+        sub bl,14h
+
 ;;        asl r0
 ;;        asl r0
 ;;        mov r0,@#crsrx
+        shl bx,1
+        shl bx,1
+        mov [crsrx],bl
+
 ;;        clr r1
 ;;        movb @#crsrbit,r2
 ;;10$:    aslb r2
@@ -2108,28 +2115,60 @@ crsrcalc:
 
 ;;        inc r1
 ;;        br 10$
+        xor bh,bh
+        xchg bl,bh
+        mov cl,[crsrbit]
+.c10:   shl cl,1
+        jc .c8
+
+        inc bl
+        jmp .c10
 
 ;;8$:     add r1,r0
 ;;        clr r1
 ;;        cmpb r0,#100
 ;;        bcs 1$
-
+.c8:    add bh,bl
+        xor bl,bl
+        cmp bh,100
+        jc .c1
+        
 ;;        inc r1
 ;;        sub #100,r0
+        inc bl
+        sub bh,100
+
 ;;1$:     movb r1,@#xcrsr
 ;;        clr r1
+.c1:    mov [xcrsr],bl
+        xor bl,bl
+
 ;;3$:     cmpb r0,#10
 ;;        bcs 2$
+.c3:    cmp bh,10
+        jc .c2
 
 ;;        inc r1
 ;;        sub #10,r0
 ;;        br 3$
+        inc bl
+        sub bh,10
+        jmp .c3
 
 ;;2$:     movb r1,@#xcrsr+1
 ;;        movb r0,@#xcrsr+2
+.c2:    mov word [xcrsr+1],bx
+
 ;;        swab r0
+        mov cl,80
+        div cl
+        shl al,1
+
 ;;        movb @#crsrbyte,r2
 ;;        add r2,r0
+        add al,[crsrbyte]
+        xor ah,ah
+
 ;;        clr r1
 ;;        cmpb r0,#100
 ;;        bcs 5$
@@ -2144,13 +2183,24 @@ crsrcalc:
 ;;        inc r1
 ;;        sub #10,r0
 ;;        br 7$
+        mov cl,100
+        div cl
+        mov [ycrsr],al
+        mov al,ah
+        xor ah,ah 
+        mov cl,10
+        div cl
 
 ;;6$:     movb r1,@#ycrsr+1
 ;;        movb r0,@#ycrsr+2
 ;;        call @#xyout
+        mov word [ycrsr+1],ax
+        call xyout
 
 ;;        tstb @#zoom
 ;;        bne 18$
+        cmp [zoom],0
+        jnz .c18
 
         retn
 
@@ -2159,6 +2209,7 @@ crsrcalc:
 ;;        add #8,r3
 ;;        movb @#vptilecy,r2
 ;;        bmi 33$
+.c18:
 
 ;;        mov #down,r1
 ;;        sub #16,r3

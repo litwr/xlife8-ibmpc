@@ -56,7 +56,7 @@ mainloop:
          call incgen
          call initxt
          call showtopology
-         ;call xyout
+         call xyout
          call showscn
          jmp crsrflash2
 
@@ -893,7 +893,7 @@ crsrbit   db 128    ;x bit position
 i1        db 0,0
 cellcnt   db 0,0,0,0,0
 gencnt    db 0,0,0,0,0,0,0
-crsrx     db 0      ;[x/8]*8, word aligned!
+crsrx     db 0      ;[x/8]*8, word aligned
 crsry     db 0      ;[y/8]*8
 vptilecx  db 0      ;word aligned!
 vptilecy  db 0

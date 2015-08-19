@@ -60,8 +60,7 @@ tograph0:  call initxt
            call showscn
            call showtopology
            ;;call @#showrules2
-           ;call xyout
-           retn
+           jmp xyout
 
 printstr:  pop dx
            mov si,dx

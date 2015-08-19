@@ -26,7 +26,7 @@ dispatcher: call getkey2
 
          call initxt
          call showtopology
-;;         call @#xyout
+         call xyout
          mov bx,0ah
          jmp .c40
 
