@@ -221,12 +221,15 @@ dispatcher: call getkey2
 ;;;*         bcc cright
 ;;         call @#shift
 ;;         beq 80$
+         call shift
+         jz .cright
 
 ;;;*         lda vptilecx
 ;;;*         adc #7
 ;;;*         jmp qleft
 ;;         add #8,@#vptilecx
 ;;         br 273$
+         jmp .c270
 
 ;;;*cright   inc vptilecx
 ;;;*         lda crsrbit
@@ -268,8 +271,8 @@ dispatcher: call getkey2
 
 ;;;*         jsr shift
 ;;;*         bcc cleft
-;;         call @#shift
-;;         beq 81$
+         call shift
+         jz .cleft
 
 ;;;*         lda vptilecx
 ;;;*         sbc #8
@@ -279,6 +282,7 @@ dispatcher: call getkey2
 ;;         sub #8,r0
 ;;         movb r0,@#vptilecx
 ;;273$:    br 270$
+         jmp .c270
 
 ;;;*cleft    dec vptilecx
 ;;;*         lda crsrbit
@@ -357,8 +361,8 @@ dispatcher: call getkey2
 
 ;;;*         jsr shift
 ;;;*         bcc cup
-;;         call @#shift
-;;         beq 82$
+         call shift
+         jz .cup
 
 ;;;*         lda vptilecy
 ;;;*         sbc #8
@@ -366,6 +370,7 @@ dispatcher: call getkey2
 ;;;*         jmp cont17u
 ;;         sub #8*256,@#vptilecx
 ;;         br 270$
+         jmp .c270
 
 ;;;*cup      dec vptilecy
 ;;;*         lda crsrbyte
@@ -406,12 +411,15 @@ dispatcher: call getkey2
 ;;;*         bcc cdown
 ;;         call @#shift
 ;;         beq 83$
+         call shift
+         jz .cdown
 
 ;;;*         lda vptilecy
 ;;;*         adc #7
 ;;;*         bcc qup
 ;;         add #8*256,@#vptilecx
 ;;         br 270$
+         jmp .c270
 
 ;;;*cdown    inc vptilecy
 ;;;*         lda crsrbyte
@@ -486,33 +494,38 @@ dispatcher: call getkey2
 ;;79$:     call @#calccells
 ;;         br 270$
 
-;;170$:    cmpb #'.,r0
-;;         bne 171$
 .c170:   cmp al,'.'
          jnz .c171
 
-;;;*         jsr crsrclr
-;;         call @#crsrclr
+         call crsrclr
 
 ;;;*         lda #<tiles+(tilesize*249)
 ;;;*         sta crsrtile
 ;;;*         lda #>tiles+(tilesize*249)
 ;;;*         sta crsrtile+1
 ;;         mov #tiles+<tilesize*249>,@#crsrtile
+           mov [crsrtile],tiles+tilesize*249
 
 ;;;*         lda #1
 ;;;*         sta crsrbyte
 ;;         mov #1,r1
 ;;         movb r1,@#crsrbyte
+           mov al,1
+           mov [crsrbyte],al
+
 ;;;*cont17t  sta crsrbit
 ;;;*         jsr cont17u
 ;;272$:    movb r1,@#crsrbit
 ;;         call @#270$
+.c272:   mov [crsrbit],al
+         call .c270
 
 ;;;*         lda zoom
 ;;;*         beq exit0
 ;;         tstb @#zoom
 ;;         beq 100$
+         cmp [zoom],0
+         jz .c100
 
 ;;;*         jsr setviewport
 ;;;*         jsr showscnz
@@ -526,28 +539,29 @@ dispatcher: call getkey2
 .c270:   call crsrset
          jmp crsrcalc
 
-;;171$:    cmpb #12,r0      ;home
-;;         bne 172$
 .c171:   cmp ax,4700h    ;home
          jnz .c172
 
-;;;*         jsr crsrclr
-;;         call @#crsrclr
+         call crsrclr
 
 ;;;*         lda #<tiles
 ;;;*         sta crsrtile
 ;;;*         lda #>tiles
 ;;;*         sta crsrtile+1
 ;;         mov #tiles,@#crsrtile
+         mov [crsrtile],tiles
 
 ;;;*         lda #0
 ;;;*         sta crsrbyte
 ;;         clrb @#crsrbyte
+         mov [crsrbyte],0
 
 ;;;*         lda #$80
 ;;;*         bne cont17t
 ;;         mov #128,r1
 ;;         br 272$
+         mov al,80h
+         jmp .c272
 
 ;;172$:    cmpb #'l,r0
 ;;         bne 173$
@@ -596,6 +610,7 @@ dispatcher: call getkey2
 
 ;;;*         rts
 ;;100$:    return
+.c100:   retn
 
 ;;;*cont17v  lda zoom
 ;;;*         pha
@@ -709,6 +724,22 @@ dispatcher: call getkey2
 
 ;;         mov @r0,@#crsrtile
 ;;20$:     return
+shift:   push ds
+         xor ax,ax
+         mov ds,ax
+         mov al,[417h]
+         pop ds
+         test al,43h
+         jz .l1
+
+         mov bp,[crsrtile]
+         mov ax,[ds:bp+di]
+         cmp ax,plainbox
+         jz .l1
+         
+         mov [crsrtile],ax
+         inc ax   ;sets NZ
+.l1:     retn
 
 benchcalc: call stop_timer
          mov ax,20480    ;=4096*5=TIMERV*5

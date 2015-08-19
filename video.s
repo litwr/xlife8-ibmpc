@@ -2155,53 +2155,25 @@ crsrcalc:
         sub bh,10
         jmp .c3
 
-;;2$:     movb r1,@#xcrsr+1
-;;        movb r0,@#xcrsr+2
 .c2:    mov word [xcrsr+1],bx
-
-;;        swab r0
         mov cl,80
         div cl
         shl al,1
-
-;;        movb @#crsrbyte,r2
-;;        add r2,r0
         add al,[crsrbyte]
-        xor ah,ah
 
-;;        clr r1
-;;        cmpb r0,#100
-;;        bcs 5$
+        mov [ycrsr],1
+        sub al,100
+        jnc .l1
 
-;;        inc r1
-;;        sub #100,r0
-;;5$:     movb r1,@#ycrsr
-;;        clr r1
-;;7$:     cmpb r0,#10
-;;        bcs 6$
-
-;;        inc r1
-;;        sub #10,r0
-;;        br 7$
-        mov cl,100
-        div cl
-        mov [ycrsr],al
-        mov al,ah
-        xor ah,ah 
+        dec [ycrsr]
+        add al,100
+.l1:    xor ah,ah 
         mov cl,10
         div cl
-
-;;6$:     movb r1,@#ycrsr+1
-;;        movb r0,@#ycrsr+2
-;;        call @#xyout
         mov word [ycrsr+1],ax
         call xyout
-
-;;        tstb @#zoom
-;;        bne 18$
         cmp [zoom],0
         jnz .c18
-
         retn
 
 ;;18$:    mov #up,r1
