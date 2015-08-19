@@ -444,23 +444,27 @@ dispatcher: call getkey2
 .c78:    xor cx,cx
          jmp .c72
 
-;;17$:     cmpb #32,r0   ;space
-;;         bne 170$
 .c17:    cmp al,' '    ;space
          jnz .c170
 
 ;;;*         #assign16 adjcell,crsrtile
 ;;         mov @#crsrtile,r2
 ;;         movb r0,sum(r2)        ;always writes no-zero value
+         mov di,[crsrtile]
+         mov [di+sum],al        ;always writes no-zero value
 
 ;;;*         jsr chkadd
 ;;         call @#chkadd
+         call chkadd
 
 ;;;*         ldy crsrbyte
 ;;         movb @#crsrbyte,r0
+         xor bx,bx
+         mov bl,[crsrbyte]
 
 ;;;*         lda (crsrtile),y
 ;;         add r2,r0
+           add bx,di
 
 ;;;*         eor crsrbit
 ;;;*         sta (crsrtile),y
@@ -468,17 +472,25 @@ dispatcher: call getkey2
 ;;         movb @r0,r2
 ;;         xor r1,r2
 ;;         movb r2,@r0
+         mov al,[crsrbit]
+         mov ah,al
+         xor al,[bx]
+         mov [bx],al
 
 ;;;*         ldy #sum
 ;;;*         and crsrbit
 ;;;*         beq lsp1
 ;;         bitb r1,r2
 ;;         beq 79$
-;;         
+         test al,ah
+         jz .c79
+
 ;;;*         jsr inctsum
 ;;;*lsp2     sta (crsrtile),y  ;always writes no-zero value, so must be AC != 0
 ;;         mov #1,r2
 ;;         call @#inctsum
+          mov al,1
+          call inctsum
 
 ;;;*         lda zoom
 ;;;*         beq lsp3
@@ -488,11 +500,15 @@ dispatcher: call getkey2
 ;;;*         jmp cont17u
 ;;         call @#infoout
 ;;         br 270$
+         call infoout
+         jmp .c270
 
 ;;;*lsp1     jsr dectsum
 ;;;*         bne lsp2
 ;;79$:     call @#calccells
 ;;         br 270$
+.c79:    call calccells
+         jmp .c270
 
 .c170:   cmp al,'.'
          jnz .c171

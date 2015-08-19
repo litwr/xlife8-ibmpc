@@ -38,7 +38,7 @@ chkaddt: ;;tst r3
 
 chkadd:  ;;tst next(r2)
 ;;         bne exit2
-         cmp word [di+next],0
+         cmp word [di+next],0    ;in: di
          jnz exit2
 
 addnode:
