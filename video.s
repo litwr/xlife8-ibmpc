@@ -587,8 +587,7 @@ showscnz:
 ;;         clrb -1(r1)
 ;;         br 16$
 
-gexit:    ;;jmp @#crsrset
-       retn
+gexit:    jmp crsrset
 
 showscn:  call infoout
 

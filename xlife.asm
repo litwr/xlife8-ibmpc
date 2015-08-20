@@ -10,28 +10,14 @@
          org 100h
          use16
 
-start:   push cs   ;??
-         pop ds
+start:   ;push cs   ;??
+         ;pop ds
          mov ax,0b800h
          mov es,ax
          ;;call @#copyr
          ;;mov #3,r2
          ;;call @#setpalette         ;inits also timer interrupt, sets active video page
          ;;incb @#errst
-     mov si,tiles
-     mov [startp],si
-     mov word [si+next],1
-     mov byte [si+sum],1
-     mov byte [si+0],60h
-     mov byte [si+1],0c0h
-     mov byte [si+2],40h
-     ;mov byte [si+3],40h
-     ;mov byte [si+0],0e7h
-     ;mov byte [si+7],0e7h
-     ;mov byte [si],7
-     mov [tilecnt],1
-         ;call calccells
-         ;call infoout
          call help
 
 crsrflash2: 
