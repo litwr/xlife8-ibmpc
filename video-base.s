@@ -8,7 +8,18 @@ curoff: mov ah,1
         int 10h
         retn
 
-initxt: mov ah,2
+initxt: mov ax,0c003h    ;draw frame vertical borders
+        mov di,19
+        mov si,19+2000h
+        mov cx,96
+.c1:    mov [es:di],al
+        mov [es:di+2000h],al
+        mov [es:di+41],ah
+        mov [es:di+41+2000h],ah
+        add di,80
+        loop .c1
+
+initxt2: mov ah,2     ;must follow initxt
         mov bx,1   ;color
         mov dx,24*256
         int 10h
@@ -37,17 +48,6 @@ initxt: mov ah,2
 
         mov ax,9*256+'Y'
         int 10h
-
-        mov ax,0c003h    ;draw frame vertical borders
-        mov di,19
-        mov si,19+2000h
-        mov cx,96
-.c1:    mov [es:di],al
-        mov [es:di+2000h],al
-        mov [es:di+41],ah
-        mov [es:di+41+2000h],ah
-        add di,80
-        loop .c1
         retn
 
 totext:    mov ax,1    ;set video mode #4 = 40x25x16
@@ -113,3 +113,9 @@ digiout:        ;;in: r1 - length, r2 - scrpos, r0 - data
          jnz .c1
          retn
 
+digiout2:        ;in: cx - length, si - srcpos, bx - data
+.c1:     lodsb
+         or al,'0'
+         stosb
+         loop .c1
+         retn

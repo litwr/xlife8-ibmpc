@@ -1,7 +1,7 @@
 insteps: call totext
 .c38:    call printstr
          db ansiclrscn,green,"NUMBER OF GENERATIONS: "
-         db black,'$'         
+         db black,'$'
 
 .c3:     mov si,stringbuf
          xor bx,bx
@@ -284,7 +284,7 @@ xyout:   mov dx,3
          call digiout
          mov dl,3
          mov di,192*40+74
-         mov bx,ycrsr
+         ;mov bx,ycrsr
          jmp digiout
 
 infoout: ;must be before showtinfo
@@ -352,14 +352,67 @@ showtinfo:  ;;mov #tinfo,r0  ;must be after infoout
            mov di,192*40+30
            jmp digiout
 
-calcx:   ;movb @#crsrbit,r1  ;$80 -> 0, $40 -> 1, ...
-;         bis #65280,r1      ;$ff00, IN: R1, OUT: R1
-;1$:      add #256,r1
-;         aslb r1
-;         bcc 1$
 
-;         swab r1
-;         return
+xyout2:  mov cx,3
+         mov di,24*80+66
+         mov si,xcrsr
+         call digiout2
+         mov dl,3
+         mov di,24*80+74
+         jmp digiout2
+
+infoout2: ;must be before showtinfo2
+         mov si,gencnt
+         mov cx,7
+         mov di,24*80+2
+         call digiout2
+         mov bx,cellcnt
+         mov dx,5
+         mov di,24*80+18
+         call digiout2
+
+showtinfo2:  ;must be after infoout2
+           mov bx,tinfo      ;it is too similar to showtinfo
+           mov si,[tilecnt]
+           shr si,1
+           shr si,1
+           cmp si,120
+           jnz .c1
+
+           mov word [bx],1
+           mov byte [bx+2],0
+           jmp .c2
+
+.c1:       mov word [bx],0a0ah
+           mov al,[si+ttab]
+           mov ah,al
+           and al,0fh
+           mov [bx+2],al
+           mov al,ah
+           mov cl,4
+           shr al,cl
+           jz .c2
+
+           mov [bx+1],al
+.c2:       mov cx,3
+           mov si,bx
+           mov di,24*80+30
+           jmp digiout2
+
+calcx:   ;;movb @#crsrbit,r1  ;$80 -> 0, $40 -> 1, ...
+;;         bis #65280,r1      ;$ff00, IN: R1, OUT: R1
+;;1$:      add #256,r1
+;;         aslb r1
+;;         bcc 1$
+
+;;         swab r1
+;;         return
+         mov ah,[crsrbit]
+         mov al,0ffh
+.c1:     inc al
+         shl ah,1
+         jnc .c1
+         retn
 
 crsrpg:  ;clrb @#i1
 ;         tstb @#crsrpgmk
@@ -435,12 +488,12 @@ showscnzp:
 ;         bpl 11$
 
 ;         mov #84,r4
-;         tst r3         ;pseudocolor  
+;         tst r3         ;pseudocolor
 ;         bmi 112$
-         
+
 ;         mov #68,r4
 ;112$:    movb r4,64(r1)   ;new cell char
-;         movb r4,128(r1)  
+;         movb r4,128(r1)
 ;         movb r4,192(r1)
 ;         movb r4,256(r1)
 ;         movb #16,320(r1)
@@ -526,7 +579,7 @@ showscnz:
 ;         cp ixh
 ;         jr nz,cont4
 
-;;4$:      
+;;4$:
 ;cont4    ld d,8
 ;;          mov #8,r3    ;D -> R3
 
@@ -594,7 +647,7 @@ showscn:  call infoout
 ;;          tstb @#zoom
 ;;          bne showscnz
           or [zoom],0
-          jnz showscnz          
+          jnz showscnz
 
 ;;          tst @#tilecnt
 ;;          beq gexit
@@ -628,7 +681,7 @@ showscn2: ;;mov @#startp,r0
           mov bx,cx
           mov cl,ah
           shl bx,1
-          
+
 ;;          mov vistab(r4),@r5
           mov ax,[vistab+bx]
           stosw
@@ -1791,12 +1844,18 @@ setviewport:
 ;;        mov @#crsrtile,@r3
 ;;        mov #vptilecx,r0
 ;;        movb @#crsry,r1
+        mov di,viewport
+        mov ax,[crsrtile]
+        mov [di],ax
+        mov si,vptilecx
+        mov al,[crsry]
 
 ;         ld a,2
 ;         ld (vptilecx),a
 ;         dec a
 ;         ld (vptilecy),a
 ;;        mov #258,@r0      ;$102
+       mov word [si],102h
 
 ;         ld hl,(ycrsr)
 ;         ld a,l
@@ -1808,10 +1867,15 @@ setviewport:
 ;         jr nc,cont1
 ;;        cmpb r1,#8
 ;;        bcc 1$
+        cmp al,8
+        jnc .c1
 
 ;;        decb @#vptilecy
 ;;        add #tilesize*hormax,@r3  ;up
 ;;        br 2$
+        dec [vptilecy]
+        add word [di],tilesize*hormax
+        jmp .c2
 
 ;cont1    ld a,(ycrsr)
 ;         dec a
@@ -1830,6 +1894,11 @@ setviewport:
 
 ;;        incb @#vptilecy     ;down
 ;;        sub #tilesize*hormax,@r3
+.c1:    cmp al,184
+        jc .c2
+
+        inc [vptilecy]
+        sub word [di],tilesize*hormax
 
 ;cont2    ld hl,(xcrsr)
 ;         ld a,l
@@ -1842,6 +1911,9 @@ setviewport:
 ;;2$:     movb @#crsrx,r1
 ;;        cmpb r1,#8
 ;;        bcc 3$
+.c2:    mov al,[crsrx]
+        cmp al,8
+        jnc .c3
 
 ;         dec (ix)
 ;         dec (ix)
@@ -1854,6 +1926,9 @@ setviewport:
 ;;        decb @r0
 ;;        add #tilesize*2,@r3
 ;;        br 5$
+        sub byte [si],2
+        add word [di],tilesize*2
+        jmp .c5
 
 ;cont3    ld a,(xcrsr)
 ;         or a
@@ -1869,6 +1944,8 @@ setviewport:
 ;         jr nc,cont6
 ;;3$:     cmpb r1,#16
 ;;        bcc 6$
+.c3:    cmp al,16
+        jnc .c6
 
 ;cont7    dec (ix)
 ;         ld hl,(viewport)      ;left1
@@ -1879,6 +1956,9 @@ setviewport:
 ;;        decb @r0
 ;;        add #tilesize,@r3
 ;;        br 5$
+        dec byte [si]
+        add word [di],tilesize
+        jmp .c5
 
 ;cont6    ld a,(xcrsr)
 ;         dec a
@@ -1893,6 +1973,8 @@ setviewport:
 ;         jr c,cont8
 ;;6$:     cmpb r1,#152
 ;;        bcs 8$
+.c6:    cmp al,152
+        jc .c8
 
 ;         inc (ix)
 ;         inc (ix)
@@ -1905,7 +1987,10 @@ setviewport:
 ;;        incb @r0
 ;;        sub #tilesize*2,@r3
 ;;        br 5$
-
+        add byte [si],2
+        sub word [di],tilesize*2
+        jmp .c5
+        
 ;cont8    ld a,(xcrsr)
 ;         dec a
 ;         jr nz,cont5
@@ -1920,6 +2005,8 @@ setviewport:
 ;         jr c,cont5
 ;;8$:     cmpb r1,#144
 ;;        bcs 5$
+.c8:    cmp al,144
+        jc .c5
 
 ;cont10   inc (ix)
 ;         ld hl,(viewport)      ;right1
@@ -1928,6 +2015,8 @@ setviewport:
 ;         ld (viewport),hl
 ;;        incb @r0
 ;;        sub #tilesize,@r3
+        inc byte [si]
+        sub word [di],tilesize
 
 ;cont5    ld iy,(viewport)
 ;         ld hl,fixvp
@@ -1936,6 +2025,10 @@ setviewport:
 ;;5$:     mov @r3,r4
 ;;        mov ul(r4),r4
 ;;        mov left(r4),@r3
+.c5:    mov bx,[di]
+        mov bx,[bx+ul]
+        mov ax,[bx+left]
+        mov [di],ax
 
 ;         ld b,3
 ;loop12   sla (ix)
@@ -1944,6 +2037,8 @@ setviewport:
 ;;        asl @r0
 ;;        asl @r0
 ;;        asl @r0
+        mov cl,3
+        shl word [si],cl
 
 ;         ld a,(crsrbyte)
 ;         add a,(ix+1)
@@ -1954,6 +2049,10 @@ setviewport:
 ;;        call @#calcx
 ;;        add r1,@r0
 ;;        return
+        call calcx
+        mov ah,[crsrbyte]
+        add [si],ax
+        retn
 
 crsrset: call crsrset1
          cmp [zoom],0

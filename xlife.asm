@@ -884,7 +884,7 @@ crsry     db 0      ;[y/8]*8
 vptilecx  db 0      ;word aligned!
 vptilecy  db 0
 xcrsr     db 0,0,0
-ycrsr     db 0,0,0
+ycrsr     db 0,0,0  ;must follow xcrsr
 tinfo     db 0,0,0
 xchgdir   db 0
 xdir      db 0      ;linear transformation, word aligned
