@@ -111,17 +111,17 @@ dispatcher: call getkey2
 .c10:    cmp al,'E'
          jnz .c11
 
-;;         decb @#pseudoc
-;;         beq 111$
+         dec [pseudoc]
+         jz .c111
 
-;;         movb #1,@#pseudoc
-;;111$:    jmp @#showscn
+         mov [pseudoc],1
+.c111:   jmp showscn
 
 .c11:    cmp al,'!'
          jnz .c12
 
-;;         call @#random
-;;         jmp @#showscn
+         call random
+         jmp showscn
 
 .c12:    cmp al,'%'
          jnz .c14

@@ -731,85 +731,90 @@ showscnp: ;;mov @#startp,r0
 ;;          cmp #1,r0
 ;;          bne 1$
 ;;          jmp @#crsrset
+          mov si,[startp]
+.c1:      call showscnp1
+          mov si,[si+next-8]
+          cmp si,1
+          jnz .c1
+          jmp crsrset
 
 showscnp1: ;;mov video(r0),r5
 ;;          mov @r0,r1
 ;;          bne 3$
+          mov di,[si+video]
+          lodsb
+          or al,al
+          jnz .c3
 
 ;;          mov #tovideo,@#pageport
 ;;          clr @r5
 ;;          clr 64(r5)
 ;;          mov #todata,@#pageport
 ;;          br 4$
+          mov word [es:di],0
+          jmp .c4
 
 ;;3$:       vidmacp count0,0
 ;;          swab r1
 ;;          bne 5$
+.c3:      vidmacp count0-1,0
+.c4:      lodsb
+          or al,al
+          jnz .c5
 
-;;          mov #tovideo,@#pageport
-;;          clr 64(r5)
-;;          mov #todata,@#pageport
-;;          br 4$
+          mov word [es:di+2000h],0
+          jmp .c6
 
-;;5$:       vidmacp count1,64
-;;4$:       mov 2(r0),r1
-;;          bne 7$
+.c5:      vidmacp count1-2,2000h
+.c6:      lodsb
+          or al,al
+          jnz .c7
 
-;;          mov #tovideo,@#pageport
-;;          clr 128(r5)
-;;          clr 192(r5)
-;;          mov #todata,@#pageport
-;;          br 6$
+          mov word [es:di+80],0
+          jmp .c8
 
-;;7$:       vidmacp count2,128
-;;          swab r1
-;;          bne 8$
+.c7:      vidmacp count2-3,80
+.c8:      lodsb
+          or al,al
+          jnz .c9
 
-;;          mov #tovideo,@#pageport
-;;          clr 192(r5)
-;;          mov #todata,@#pageport
-;;          br 6$
+          mov word [es:di+2050h],0
+          jmp .c10
 
-;;8$:       vidmacp count3,192
-;;6$:       mov 4(r0),r1
-;;          bne 10$
+.c9:      vidmacp count3-4,2050h
+.c10:     lodsb
+          or al,al
+          jnz .c12
 
-;;          mov #tovideo,@#pageport
-;;          clr 256(r5)
-;;          clr 320(r5)
-;;          mov #todata,@#pageport
-;;          br 11$
+          mov word [es:di+160],0
+          jmp .c14
 
-;;10$:      vidmacp count4,256
-;;          swab r1
-;;          bne 12$
+.c12:     vidmacp count4-5,160
+.c14:     lodsb
+          or al,al
+          jnz .c15
 
-;;          mov #tovideo,@#pageport
-;;          clr 320(r5)
-;;          mov #todata,@#pageport
-;;          br 11$
+          mov word [es:di+20a0h],0
+          jmp .c16
 
-;;12$:      vidmacp count5,320
-;;11$:      mov 6(r0),r1
-;;          bne 14$
+.c15:     vidmacp count5-6,20a0h
+.c16:     lodsb
+          or al,al
+          jnz .c17
 
-;;          mov #tovideo,@#pageport
-;;          clr 384(r5)
-;;          clr 448(r5)
-;;          mov #todata,@#pageport
-;;          return
+          mov word [es:di+240],0
+          jmp .c18
 
-;;14$:      vidmacp count6,384
-;;          swab r1
-;;          bne 16$
+.c17:     vidmacp count6-7,240
+.c18:     lodsb
+          or al,al
+          jnz .c19
 
-;;          mov #tovideo,@#pageport
-;;          clr 448(r5)
-;;          mov #todata,@#pageport
-;;          return
+          mov word [es:di+20f0h],0
+          retn
 
-;;16$:      vidmacp count7,448
-;;          return
+.c19:     vidmacp count7-8,20f0h
+          retn
 
 ;;clrscn:   ;;mov #toandos,@#pageport
 ;;          mov #16384,r0
@@ -1996,6 +2001,7 @@ crsrclr: ;;tstb @#zoom
 ;;         asr r1
 ;;         add video(r0),r1
          shl bx,1
+         mov bp,bx
          mov di,[crsrtab+bx]
          add di,[si+video]
 
@@ -2014,39 +2020,17 @@ crsrclr: ;;tstb @#zoom
          stosw
          retn
 
-;;5$:      movb @#crsrbit,r3
-;;         asl r3
-;;         mov vistab(r3),r3
-.c5:     ;xor bx,bx
-         ;mov bl,[crsrbit]
-         ;shl bx,1
-         ;mov bx,[bx+vistab]
-
-;;         mov r3,r4
-;;         asl r4
-;;         bis r4,r3
-        ;mov dx,bx
-        ;shl dx,1
-        ;or bx,dx
-
-;;         mov @r1,r4
-        ;mov dx,[es:di]
-
-;;         bic r3,r4
-;;         com r3
-
-;;         bic r3,r2
-;;         bis r2,r4
-;;         mov r4,@r1
-;;         br gexit3
-
 ;;2$:      movb @#crsrbyte,r3
 ;;         asl r3
 ;;         asl r3
 ;;         add r0,r3
 ;;         bitb #15,@#crsrbit
 ;;         bne 3$
-.c2:
+.c2:     shl bp,1
+         add bp,si
+         mov cl,4
+         test [crsrbit],0fh
+         jnz .c3
 
 ;;         mov count0(r3),r3
 ;;         bic #^B1110011100111111,r3
@@ -2060,6 +2044,16 @@ crsrclr: ;;tstb @#zoom
 ;;         asrb r2
 ;;         call @#8$
 ;;         br 5$
+         mov dx,[ds:bp+count0]
+         and dx,1100011000000b
+         shl dh,1
+         or dh,dl
+         shr al,cl
+.c4:     or al,dh
+         mov bx,vistabpc
+         xlatb
+         stosb
+         retn
 
 ;;3$:      inc r1
 ;;         mov count0+2(r3),r3
@@ -2075,6 +2069,14 @@ crsrclr: ;;tstb @#zoom
 ;;         call @#8$
 ;;         swab r2
 ;;         br 5$
+.c3:     mov dx,[ds:bp+count0+2]
+         and dx,1100011000b
+         shr dl,1
+         or dh,dl
+         shl dh,4
+         and al,0fh
+         inc di
+         jmp .c4
 
 ;;1$:      clrb @#crsrpgmk
 ;;         call @#showscnz
