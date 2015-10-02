@@ -113,9 +113,10 @@ digiout:        ;;in: r1 - length, r2 - scrpos, r0 - data
          jnz .c1
          retn
 
-digiout2:        ;in: cx - length, si - srcpos, bx - data
+digiout2:        ;in: cx - length, di - srcpos, si - data
+         mov ah,5   ;color
 .c1:     lodsb
-         or al,'0'
-         stosb
+         add al,'0'
+         stosw
          loop .c1
          retn

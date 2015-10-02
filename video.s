@@ -278,7 +278,10 @@ help:    call totext
          call getkey
          jmp tograph
 
-xyout:   mov dx,3
+xyout:   cmp [zoom],0
+         jnz xyout2
+         
+         mov dx,3
          mov di,192*40+66
          mov bx,xcrsr
          call digiout
@@ -288,6 +291,10 @@ xyout:   mov dx,3
          jmp digiout
 
 infoout: ;must be before showtinfo
+
+         cmp [zoom],0
+         jnz infoout2
+
          mov bx,gencnt
          mov dx,7
 
@@ -307,6 +314,9 @@ showtinfo:  ;;mov #tinfo,r0  ;must be after infoout
 ;;            asr r3
 ;;            cmp #120,r3   ;sets CY=0
 ;;            bne 1$
+         ;cmp [zoom],0
+         ;jnz showtinfo2
+         
             mov bx,tinfo
             mov si,[tilecnt]
             shr si,1
@@ -352,12 +362,11 @@ showtinfo:  ;;mov #tinfo,r0  ;must be after infoout
            mov di,192*40+30
            jmp digiout
 
-
 xyout2:  mov cx,3
          mov di,24*80+66
          mov si,xcrsr
          call digiout2
-         mov dl,3
+         mov cl,3
          mov di,24*80+74
          jmp digiout2
 
@@ -366,8 +375,8 @@ infoout2: ;must be before showtinfo2
          mov cx,7
          mov di,24*80+2
          call digiout2
-         mov bx,cellcnt
-         mov dx,5
+         mov si,cellcnt
+         mov cl,5
          mov di,24*80+18
          call digiout2
 
@@ -383,12 +392,12 @@ showtinfo2:  ;must be after infoout2
            mov byte [bx+2],0
            jmp .c2
 
-.c1:       mov word [bx],0a0ah
+.c1:       mov word [bx],0f0f0h
            mov al,[si+ttab]
-           mov ah,al
+           mov cl,al
            and al,0fh
            mov [bx+2],al
-           mov al,ah
+           mov al,cl
            mov cl,4
            shr al,cl
            jz .c2
@@ -414,231 +423,210 @@ calcx:   ;;movb @#crsrbit,r1  ;$80 -> 0, $40 -> 1, ...
          jnc .c1
          retn
 
-crsrpg:  ;clrb @#i1
-;         tstb @#crsrpgmk
-;         beq 1$
+showscnz:
+;;xlimit   = $14
+;;ylimit   = $15
+;;         #assign16 i1,viewport
+         mov si,[viewport]
 
-;         push r0
-;         push r1
-;         mov #85,r0
-;         movb r0,383(r1)
-;         movb r0,-65(r1)
-;         bit #1,r1
-;         bne 2$
+;;         lda #5
+;;         sta xlimit
+         mov bl,5
 
-;         dec r1
-;         swab r0
-;2$:      xor r0,63(r1)
-;         xor r0,127(r1)
-;         xor r0,191(r1)
-;         xor r0,255(r1)
-;         xor r0,319(r1)
-;         xor r0,-1(r1)
-;         pop r1
-;         pop r0
-;         return
+;;         lda pseudoc
+;;         bne showscnzp
+         cmp [pseudoc],0
+         jnz showscnzp
 
-;1$:      clrb 383(r1)
-;         clrb -65(r1)
-;         return
+;;         lda #$c
+;;         sta cont2+2
+;;         lda #0
+;;         sta cont2+1
+         xor di,di
+
+;;loop3    lda #3
+;;         sta ylimit
+.loop3:  mov bh,3
+
+;;loop4    ldy #0              ;check sum?
+;;loop2    lda (i1),y
+;;         ldx #0
+;;loop1    asl
+;;         sta 7
+;;         lda #32
+;;         bcc cont2
+.loop4:  mov cx,8
+.loop2:  lodsb
+         mov dl,8
+         mov dh,al
+.loop1:  shl dh,1
+         mov ax,220h   ;space char
+         jnc .cont2
+
+;;         lda #81         ;live cell char
+;;cont2    sta $c00,x
+;;         lda 7
+;;         inx
+;;         cpx #8
+;;         bne loop1
+         mov ax,209h   ;live cell char and attribute
+.cont2:  stosw
+         dec dl
+         jnz .loop1
+
+;;         lda #39    ;CY=1
+;;         adc cont2+1
+;;         sta cont2+1
+;;         bcc nocy1
+         add di,80-16
+
+;;         inc cont2+2
+;;nocy1    iny
+;;         cpy #8
+;;         bne loop2
+         loop .loop2
+
+;;         dec ylimit
+;;         beq cont3
+         dec bh
+         jz .cont3
+
+;;         lda #<tilesize*20-1 ;CY=1
+;;         adc i1
+;;         sta i1
+;;         lda i1+1
+;;         adc #>tilesize*20
+;;         sta i1+1
+;;         bcc loop4
+         add si,tilesize*20-8
+         jmp .loop4
+
+;;cont3    dec xlimit
+;;         bne cont11
+;;         rts
+.cont3:  dec bl         ;xlimit
+         jnz .cont11
+         retn
+
+;;cont11   lda cont2+1    ;CY=1
+;;         sbc #<952
+;;         sta cont2+1
+;;         lda cont2+2
+;;         sbc #>952
+;;         sta cont2+2
+;;         lda i1   ;CY=1
+;;         sbc #<tilesize*39
+;;         sta i1
+;;         lda i1+1
+;;         sbc #>tilesize*39
+;;         sta i1+1
+;;         bne loop3
+.cont11: sub di,24*80-16
+         sub si,tilesize*39+8
+         jmp .loop3
 
 showscnzp:
-;loop3    ld iyl,5
+;;xlimit   = $14
+;;ylimit   = $15
+;;         jsr updatepc
+;;         lda #$c
+;;         sta cont2+2
+;;         lda #0
+;;         sta cont2+1
+;;loop3    lda #3
+;;         sta ylimit
+;;loop4    ldy #0
+;;loop2    sty 7
+;;         tya
+;;         asl
+;;         asl
+;;         tay
+;;         lda (adjcell),y    ;pseudocolor
+;;         and #$c0
+;;         sta t1
+;;         iny
+;;         lda (adjcell),y
+;;         and #$18
+;;         asl
+;;         ora t1
+;;         sta t1
+;;         iny
+;;         lda (adjcell),y
+;;         and #$18
+;;         lsr
+;;         ora t1
+;;         sta t1
+;;         iny
+;;         lda (adjcell),y
+;;         and #3
+;;         ora t1
+;;         sta t1
+;;         ldy 7
 
-;3$:      add #5*256,r2   ;IY -> R2
+;;         lda (i1),y
+;;         ldx #0
+;;loop1    asl t1             ;pseudocolor
+;;         ror adjcell2       ;pseudocolor, save a bit
+;;         asl
+;;         bcc cont1
 
-;loop4    ld a,(crsrtile)
-;         cp ixl
-;         jp nz,cont4
+;;         sta 7
+;;         lda adjcell2
+;;         bmi cont12
 
-;4$:      clr @#200$+2
-;         movb #8,@#temp+1
+;;         lda #87         ;new cell char
+;;         bne cont2
 
-;         cmp r0,@#crsrtile
-;         bne 2$
+;;cont12   lda #81         ;live cell char
+;;cont2    sta $c00,x
+;;         lda 7
+;;         inx
+;;         cpx #8
+;;         bne loop1
 
-;         incb @#i1
-;2$:      mov @#200$+2,r4
-;         asl r4
-;         asl r4
-;         add #count0,r4
-;         add r0,r4
-;         mov (r4)+,r5
-;         bic #^B1110011100111111,r5
-;         mov r5,r3
-;         swab r3
-;         aslb r3
-;         bis r3,r5
-;         mov @r4,r3
-;         bic #^B1111110011100111,r3
-;         mov r3,r4
-;         asrb r3
-;         swab r4
-;         bis r5,r4
-;         movb r3,r3
-;         bisb r4,r3
-;         swab r3
-;200$:    movb 8(r0),r4
-;         bisb r4,r3
-;         inc @#200$+2
-;         mov #8,r5     ;B -> R5 low
-;         mov #tovideo,@#pageport
+;;         lda #39    ;CY=1
+;;         adc cont2+1
+;;         sta cont2+1
+;;         bcc nocy1
 
-;1$:      tstb r3
-;         bpl 11$
+;;         inc cont2+2
+;;nocy1    iny
+;;         cpy #8
+;;         bne loop2
 
-;         mov #84,r4
-;         tst r3         ;pseudocolor
-;         bmi 112$
+;;         dec ylimit
+;;         beq cont3
 
-;         mov #68,r4
-;112$:    movb r4,64(r1)   ;new cell char
-;         movb r4,128(r1)
-;         movb r4,192(r1)
-;         movb r4,256(r1)
-;         movb #16,320(r1)
-;         movb #16,(r1)+
-;16$:     asl  r3
-;         tstb @#i1
-;         beq 15$
+;;         lda #<tilesize*20-1 ;CY=1
+;;         adc i1
+;;         sta i1
+;;         lda i1+1
+;;         adc #>tilesize*20
+;;         sta i1+1
+;;         jsr updatepc
+;;         bcc loop4
 
-;         cmpb @#temp+1,@#i1+1
-;         bne 15$
+;;cont1    sta 7
+;;         lda #32
+;;         bne cont2
 
-;         cmpb @#temp,r5
-;         bne 15$
+;;cont3    dec xlimit
+;;         beq gexit3
 
-;         call @#crsrpg
-;15$:     sob r5,1$
-
-;         mov #todata,@#pageport
-;         add #8*64-8,r1
-;         decb @#temp+1
-;         bne 2$
-
-;         sub #64*64-8,r1
-;         add #tilesize,r0
-;         sub #256,r2
-;         bpl 4$
-
-;         decb r2
-;         bne 30$
-
-;         return
-
-;30$:     add #tilesize*15,r0
-;         add #64*64-40,r1
-;         br 3$
-
-;11$:     tstb (r1)+     ;is it an empty cell?
-;         beq 16$
-
-;         clrb 63(r1)
-;         clrb 127(r1)
-;         clrb 191(r1)
-;         clrb 255(r1)
-;         clrb 319(r1)
-;         clrb -1(r1)
-;         br 16$
-
-showscnz:
-;         mov @#viewport,r0
-;         clrb @#i1
-
-;         ld a,(crsrbyte)
-;         ld b,a
-;         ld a,8
-;         sub b
-;         ld (i1+1),a
-
-;         mov #8,r1
-;         movb @#crsrbyte,r2
-;         sub r2,r1
-;         movb r1,@#i1+1
-;         call @#calcx
-;         mov #8,r2
-;         sub r1,r2
-;         movb r2,@#temp
-
-;         ld hl,$c800
-;         ld iyh,3
-
-;         mov #videostart+64,r1
-;         mov #65280+3,r2    ;65280=$ff03
-;         tstb @#pseudoc
-;         beq 3$
-;         jmp @#showscnzp
-
-;;loop3    ld iyl,5
-;;3$:       add #5*256,r2   ;IY -> R2
-
-;loop4    ld a,(crsrtile)
-;         cp ixl
-;         jp nz,cont4
-;         ld a,(crsrtile+1)
-;         cp ixh
-;         jr nz,cont4
-
-;;4$:
-;cont4    ld d,8
-;;          mov #8,r3    ;D -> R3
-
-;;         cmp r0,@#crsrtile
-;;         bne 2$
-
-;;         incb @#i1
-;;2$:      movb (r0)+,r4
-;;         mov #8,r5     ;B -> R5
-;;         mov #tovideo,@#pageport
-;;1$:      aslb r4
-;;         bcc 11$
-
-;;         movb #84,64(r1)
-;;         movb #84,128(r1)  ;live cell char
-;;         movb #84,192(r1)
-;;         movb #84,256(r1)
-;;         movb #16,320(r1)
-;;         movb #16,(r1)+
-;;16$:     tstb @#i1
-;;         beq 15$
-
-;;         cmpb r3,@#i1+1
-;;         bne 15$
-
-;;         cmpb @#temp,r5
-;;         bne 15$
-
-;;         call @#crsrpg
-;;15$:     sob r5,1$
-
-;;         mov #todata,@#pageport
-;;         add #8*64-8,r1
-;;         sob r3,2$
-
-;;         sub #64*64-8,r1
-;;         add #tilesize-8,r0
-;;         sub #256,r2
-;;         bpl 4$
-
-;;         decb r2
-;;         bne 30$
-
-;;         return
-
-;;30$:     add #tilesize*15,r0
-;;         add #64*64-40,r1
-;;         br 3$
-
-;;11$:     tstb (r1)+     ;is it an empty cell?
-;;         beq 16$
-
-;;         clrb 63(r1)
-;;         clrb 127(r1)
-;;         clrb 191(r1)
-;;         clrb 255(r1)
-;;         clrb 319(r1)
-;;         clrb -1(r1)
-;;         br 16$
+;;         lda cont2+1    ;CY=1
+;;         sbc #<952
+;;         sta cont2+1
+;;         lda cont2+2
+;;         sbc #>952
+;;         sta cont2+2
+;;         lda i1   ;CY=1
+;;         sbc #<tilesize*39
+;;         sta i1
+;;         lda i1+1
+;;         sbc #>tilesize*39
+;;         sta i1+1
+;;         jsr updatepc
+;;         jmp loop3
 
 gexit:    jmp crsrset
 

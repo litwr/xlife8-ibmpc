@@ -20,9 +20,9 @@ start:   ;push cs   ;??
          ;;incb @#errst
          call help
 
-crsrflash2: 
+crsrflash2:
          ;;call @#crsrflash
-mainloop: 
+mainloop:
          call dispatcher
          mov al,[mode]
          or al,al
@@ -862,7 +862,7 @@ digifont  dw 0a00ah,2828h,0a828h,282ah,2828h,2828h,0a00ah,0  ;8th columns are fr
           dw 0,0,0,0,0,0,0                ;space
 startp    dw 1
 tilecnt   dw 0
-viewport  dw 0
+viewport  dw tiles
 crsrtile  dw tiles
 timercnt  dw 0, 0
 temp      dw 0

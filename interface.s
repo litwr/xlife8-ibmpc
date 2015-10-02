@@ -8,7 +8,7 @@ getkey2: mov ah,1
 
          xor ax,ax
          retn
-         
+
 
 dispatcher: call getkey2
 ;;dispat0: cmpb #'g,r0
@@ -656,20 +656,34 @@ dispatcher: call getkey2
 ;;;*         jmp finish
 ;;         tstb @#zoom
 ;;         bne 100$
+         cmp [zoom],0
+         jnz .c100
 
 ;;         call @#clrscn
 ;;         incb @#zoom
 ;;         call @#setviewport
 ;;271$:    jmp @#tograph0
+         inc [zoom]
+         call totext
+         call initxt2
+         ;call setviewport
+         call showscn
+         ;call showtopology
+         ;;call @#showrules2
+         jmp xyout2
 
 .c175:   cmp al,'-'
          jnz .c176
 
 ;;         tstb @#zoom
 ;;         beq 100$
+         cmp [zoom],0
+         jz .c100
 
 ;;319$:    clrb @#zoom
 ;;         br 271$
+         mov [zoom],0
+         jmp tograph
 
 .c176:   cmp al,'V'
          jnz .c177
