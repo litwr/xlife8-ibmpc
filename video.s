@@ -469,7 +469,7 @@ showscnz:
 ;;         inx
 ;;         cpx #8
 ;;         bne loop1
-         mov ax,209h   ;live cell char and attribute
+         mov al,9   ;live cell char and attribute
 .cont2:  stosw
          dec dl
          jnz .loop1
@@ -526,120 +526,72 @@ showscnz:
          jmp .loop3
 
 showscnzp:
-;;xlimit   = $14
-;;ylimit   = $15
-;;         jsr updatepc
-;;         lda #$c
-;;         sta cont2+2
-;;         lda #0
-;;         sta cont2+1
-;;loop3    lda #3
-;;         sta ylimit
-;;loop4    ldy #0
-;;loop2    sty 7
-;;         tya
-;;         asl
-;;         asl
-;;         tay
-;;         lda (adjcell),y    ;pseudocolor
-;;         and #$c0
-;;         sta t1
-;;         iny
-;;         lda (adjcell),y
-;;         and #$18
-;;         asl
-;;         ora t1
-;;         sta t1
-;;         iny
-;;         lda (adjcell),y
-;;         and #$18
-;;         lsr
-;;         ora t1
-;;         sta t1
-;;         iny
-;;         lda (adjcell),y
-;;         and #3
-;;         ora t1
-;;         sta t1
-;;         ldy 7
+         mov si,[viewport]
+         mov dl,5  ;xlimit
+         xor di,di
+.loop3:  mov dh,3   ;ylimit
+.loop4:  mov cl,8
+         lea bp,[si+count0]
+.loop2:  mov ax,[ds:bp]
+         and al,0c0h
+         mov ch,al
+         and ah,18h
+         shl ah,1
+         or ch,ah
+         mov ax,[ds:bp+2]
+         and al,18h
+         shr al,1
+         or ch,al
+         and ah,3
+         or ch,ah
+         lodsb
+         add bp,4
+         mov bl,8
+         mov bh,al
+.loop1:  shl ch,1
+         rcr al,1
+         shl bh,1
+         rcr al,1
+         test al,0c0h
+         mov ax,220h   ;space char and attribute
+         jns .cont2
 
-;;         lda (i1),y
-;;         ldx #0
-;;loop1    asl t1             ;pseudocolor
-;;         ror adjcell2       ;pseudocolor, save a bit
-;;         asl
-;;         bcc cont1
+         mov al,9    ;live cell char
+         jpe .cont2
 
-;;         sta 7
-;;         lda adjcell2
-;;         bmi cont12
+         mov ah,3    ;new cell attr
+.cont2:  stosw
+         dec bl
+         jnz .loop1
 
-;;         lda #87         ;new cell char
-;;         bne cont2
+         add di,80-16
+         dec cl
+         jnz .loop2
 
-;;cont12   lda #81         ;live cell char
-;;cont2    sta $c00,x
-;;         lda 7
-;;         inx
-;;         cpx #8
-;;         bne loop1
+         dec dh
+         jz .cont3
 
-;;         lda #39    ;CY=1
-;;         adc cont2+1
-;;         sta cont2+1
-;;         bcc nocy1
+         add si,tilesize*20-8
+         jmp .loop4
 
-;;         inc cont2+2
-;;nocy1    iny
-;;         cpy #8
-;;         bne loop2
+.cont3:  dec dl         ;xlimit
+         jnz .cont11
+         retn
 
-;;         dec ylimit
-;;         beq cont3
-
-;;         lda #<tilesize*20-1 ;CY=1
-;;         adc i1
-;;         sta i1
-;;         lda i1+1
-;;         adc #>tilesize*20
-;;         sta i1+1
-;;         jsr updatepc
-;;         bcc loop4
-
-;;cont1    sta 7
-;;         lda #32
-;;         bne cont2
-
-;;cont3    dec xlimit
-;;         beq gexit3
-
-;;         lda cont2+1    ;CY=1
-;;         sbc #<952
-;;         sta cont2+1
-;;         lda cont2+2
-;;         sbc #>952
-;;         sta cont2+2
-;;         lda i1   ;CY=1
-;;         sbc #<tilesize*39
-;;         sta i1
-;;         lda i1+1
-;;         sbc #>tilesize*39
-;;         sta i1+1
-;;         jsr updatepc
-;;         jmp loop3
+.cont11: sub di,24*80-16
+         sub si,tilesize*39+8
+         jmp .loop3
 
 gexit:    jmp crsrset
 
 showscn:  call infoout
-
-;;          tstb @#zoom
-;;          bne showscnz
           or [zoom],0
-          jnz showscnz
+          jz .l1    ;optimize for i8088???
+          jmp showscnz
 
 ;;          tst @#tilecnt
 ;;          beq gexit
-          or [tilecnt],0
+.l1:      or [tilecnt],0
           jz gexit
 
 ;;          tstb @#pseudoc
