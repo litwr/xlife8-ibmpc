@@ -8,6 +8,11 @@ curoff: mov ah,1
         int 10h
         retn
 
+curonz: mov ah,1
+        mov cx,7
+        int 10h
+        retn
+        
 initxt: mov ax,0c003h    ;draw frame vertical borders
         mov di,19
         mov si,19+2000h

@@ -229,6 +229,7 @@ dispatcher: call getkey2
 ;;;*         jmp qleft
 ;;         add #8,@#vptilecx
 ;;         br 273$
+         add [vptilecx],8
          jmp .c270
 
 ;;;*cright   inc vptilecx
@@ -243,6 +244,7 @@ dispatcher: call getkey2
 ;;         cmpb r0,#1
 ;;         beq 71$
 .cright:
+         inc [vptilecx]
          mov cl,[bx]
          cmp cl,1
          jz .c71
@@ -282,6 +284,7 @@ dispatcher: call getkey2
 ;;         sub #8,r0
 ;;         movb r0,@#vptilecx
 ;;273$:    br 270$
+         sub [vptilecx],8
          jmp .c270
 
 ;;;*cleft    dec vptilecx
@@ -294,7 +297,8 @@ dispatcher: call getkey2
 ;;         movb @r4,r0
 ;;         cmpb #128,r0
 ;;         beq 76$
-.cleft:   
+.cleft:
+         dec [vptilecx]
          mov cl,[bx]
          cmp cl,80h
          jz .c76
@@ -326,28 +330,14 @@ dispatcher: call getkey2
 ;;         bne 73$
 .c72:    mov si,[crsrtile]
          add si,di
+         cmp word [si],plainbox
+         jnz .c73
+         jmp .c270     ;optimize 8088!
 
-;;;*         ldx i2
-;;;*         lda crsrbit,x
-;;;*         sta t1
-;;;*         bcs cm5
-;;         movb @r4,r0
-;;         br 74$
-
-         
-;;;*cm4      sta crsrtile+1
-;;;*         stx crsrtile
-;;;*cm5      lda t1
-;;;*         ldx i2
-;;;*         sta crsrbit,x
-;;;*         jmp cont17u
-;;73$:     mov @r2,@#crsrtile
-;;74$:     movb r0,@r4
-;;         br 270$
-.c73:     lodsw
-          mov [crsrtile],ax
-.c74:     mov [bx],cl
-          jmp .c270
+.c73:    lodsw
+         mov [crsrtile],ax
+.c74:    mov [bx],cl
+         jmp .c270
 
 .c161:   cmp ax,4800h  ;cursor up
          jnz .c162
@@ -370,6 +360,7 @@ dispatcher: call getkey2
 ;;;*         jmp cont17u
 ;;         sub #8*256,@#vptilecx
 ;;         br 270$
+         sub [vptilecy],8
          jmp .c270
 
 ;;;*cup      dec vptilecy
@@ -378,7 +369,7 @@ dispatcher: call getkey2
 ;;82$:     decb @#vptilecy
 ;;         tstb @r4
 ;;         beq 77$
-.cup:
+.cup:    dec [vptilecy]
          cmp byte [bx],0
          jz .c77
 
@@ -419,6 +410,7 @@ dispatcher: call getkey2
 ;;;*         bcc qup
 ;;         add #8*256,@#vptilecx
 ;;         br 270$
+         add [vptilecy],8
          jmp .c270
 
 ;;;*cdown    inc vptilecy
@@ -429,6 +421,7 @@ dispatcher: call getkey2
 ;;         cmpb #7,@r4
 ;;         beq 78$
 .cdown:
+         inc [vptilecy]
          cmp byte [bx],7
          jz .c78
 
@@ -665,12 +658,14 @@ dispatcher: call getkey2
 ;;271$:    jmp @#tograph0
          inc [zoom]
          call totext
+         call curonz
          call initxt2
-         ;call setviewport
+         call setviewport
          call showscn
          ;call showtopology
          ;;call @#showrules2
-         jmp xyout2
+         call xyout2
+         jmp .c270
 
 .c175:   cmp al,'-'
          jnz .c176
@@ -764,11 +759,10 @@ shift:   push ds
 
          mov bp,[crsrtile]
          mov ax,[ds:bp+di]
-         cmp ax,plainbox
+         cmp ax,plainbox   ;sets NZ
          jz .l1
          
          mov [crsrtile],ax
-         inc ax   ;sets NZ
 .l1:     retn
 
 benchcalc: call stop_timer

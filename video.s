@@ -533,16 +533,14 @@ showscnzp:
 .loop4:  mov cl,8
          lea bp,[si+count0]
 .loop2:  mov ax,[ds:bp]
-         and al,0c0h
+         and ax,18c0h
          mov ch,al
-         and ah,18h
          shl ah,1
          or ch,ah
          mov ax,[ds:bp+2]
-         and al,18h
+         and ax,318h
          shr al,1
          or ch,al
-         and ah,3
          or ch,ah
          lodsb
          add bp,4
@@ -2021,7 +2019,7 @@ pixel11p: ;;push r0
 crsrclr: ;;tstb @#zoom
 ;;         bne 1$
          cmp [zoom],0
-         jnz .c1
+         jnz gexit2
 
 ;;         mov @#crsrtile,r0
 ;;         movb @#crsrbyte,r1
@@ -2121,8 +2119,6 @@ crsrclr: ;;tstb @#zoom
 ;;         incb @#crsrpgmk
 ;;         ;mov @#crsrtile,r0   ;do not remove! ???
 ;;         return
-.c1:
-         retn
 
 ;;8$:      bisb r4,r2
 ;;         bic #^B1111111100000000,r2
@@ -2135,19 +2131,23 @@ crsrcalc:
 ;;        mov video(r0),r0     ;start of coorditates calculation
         mov bx,[crsrtile]
         mov bx,[bx+video]
-        mov ax,bx
+        push bx
 
 ;;        sub #videostart,r0
-        and bl,3fh
-        sub bl,14h
-
+        sub bx,14h  ;20
+        push bx
+        
 ;;        asl r0
 ;;        asl r0
 ;;        mov r0,@#crsrx
         shl bx,1
         shl bx,1
         mov [crsrx],bl
-
+        pop ax
+        mov cl,40
+        div cl
+        mov [crsry],al        
+        pop ax
 ;;        clr r1
 ;;        movb @#crsrbit,r2
 ;;10$:    aslb r2
@@ -2221,28 +2221,51 @@ crsrcalc:
 ;;        add #8,r3
 ;;        movb @#vptilecy,r2
 ;;        bmi 33$
-.c18:
+.c18:   mov di,up
+        mov al,[vptilecy]
+        mov ah,al
+        add al,8
+        or ah,ah
+        js .c33
 
 ;;        mov #down,r1
 ;;        sub #16,r3
 ;;        cmpb r2,#24
 ;;        bcs 34$
+        mov di,down
+        sub al,16
+        cmp ah,24
+        jc .c34
 
 ;;33$:    movb r3,@#vptilecy
 ;;        br 31$
+.c33:   mov [vptilecy],al
+        jmp .c31
 
 ;;34$:    mov #left,r1
 ;;        movb @#vptilecx,r3
 ;;        add #8,r3
 ;;        movb @#vptilecx,r2
 ;;        bmi 35$
+.c34:   mov di,left
+        mov al,[vptilecx]
+        mov ah,al
+        add al,8
+        or ah,ah
+        js .c35
  
 ;;        mov #right,r1
 ;;        sub #16,r3
 ;;        cmpb r2,#40
 ;;        bcs 30$
+        mov di,right
+        sub al,16
+        cmp ah,40
+        jc .c30
 
 ;;35$:    movb r3,@#vptilecx
+.c35:   mov [vptilecx],al
+
 ;;31$:    add @#viewport,r1
 ;;       mov @r1,r3
 ;;        mov r3,@#viewport
@@ -2250,14 +2273,31 @@ crsrcalc:
 ;;        mov dr(r1),r1
 ;;        mov right(r1),r1
 ;;        mov right(r1),r1
+.c31:   add di,[viewport]
+        mov bx,[di]
+        mov [viewport],bx
+        mov di,[bx+dr]
+        mov di,[di+dr]
+        mov di,[di+right]
+        mov di,[di+right]
 
 ;;        add #44*tilesize,r3
 ;;        cmp r1,r3
 ;;        beq 30$
+        add bx,44*tilesize
+        cmp bx,di
+        jz .c30
 
 ;;        call @#setviewport
 ;;30$:    jmp @#showscnz
-
+        call setviewport
+.c30:   call showscnz
+        mov ah,2
+        xor bh,bh
+        mov dx,word [vptilecx]
+        int 10h
+        retn
+        
 outdec:  ;;clr r4            ;in: r3
 ;;         call @#todec
 ;;         mov #stringbuf+7,r1
