@@ -20,13 +20,11 @@ dispatcher: call getkey2
          cmp [mode],0
          jz .c2
 
-.c53:    xor bx,bx
+.c53:    xor bx,bx    ;bg=0=black
          dec [mode]
          jz .c40
 
-         call initxt
-         call showtopology
-         call xyout
+         call tograph
          mov bx,0ah
          jmp .c40
 
@@ -52,7 +50,11 @@ dispatcher: call getkey2
 ;;         jmp @#showmode
          mov [mode],2
          mov ax,4
-         int 10h
+         cmp [zoom],ah
+         jz .l1
+         
+         mov al,1
+.l1:     int 10h
          retn
 
 .c4:     cmp al,'T'
@@ -126,9 +128,9 @@ dispatcher: call getkey2
 .c12:    cmp al,'%'
          jnz .c14
 
-;;         cmpb #2,@#mode
-;;         beq 14$
-;;         jmp @#indens
+         cmp [mode],2
+         jz .c14
+         jmp indens
 
 ;;14$:     cmpb #'B,r0
 ;;         beq 159$
@@ -538,8 +540,9 @@ dispatcher: call getkey2
 
 ;;;*         jsr setviewport
 ;;;*         jsr showscnz
-;;         call @#setviewport
-;;         call @#showscnz
+         call setviewport
+         call showscnz
+         
 
 ;;;*cont17u  jsr crsrset
 ;;;*         jmp crsrcalc
@@ -657,14 +660,7 @@ dispatcher: call getkey2
 ;;         call @#setviewport
 ;;271$:    jmp @#tograph0
          inc [zoom]
-         call totext
-         call curonz
-         call initxt2
-         call setviewport
-         call showscn
-         ;call showtopology
-         ;;call @#showrules2
-         call xyout2
+         call tograph
          jmp .c270
 
 .c175:   cmp al,'-'

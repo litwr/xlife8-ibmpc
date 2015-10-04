@@ -162,48 +162,70 @@ instay:  ;jsr r3,@#printstr
 ;         mov #'0,r5
 ;         jmp @#bornstay
 
-indens:  ;call @#totext
-;         jsr r3,@#printstr
+indens:  call totext
+         call printstr
 ;         .byte 146
 ;         .ascii "SELECT DENSITY OR PRESS "
 ;         .byte 145
 ;         .ascii "KT"
 ;         .byte 146
 ;         .ascii " TO EXIT"
+         db green,'SELECT DENSITY OR PRESS ',red,'ESC',green,' TO EXIT'
 ;         .byte 10,9,145,'0,147
 ;         .ascii " - 12.5%"
+         db 0dh,10,9,red,'0',blue,' - 12.5%'
 ;         .byte 10,9,145,'1,147
 ;         .ascii " - 28%"
+         db 0dh,10,9,red,'1',blue,' - 28%'
 ;         .byte 10,9,145,'2,147
 ;         .ascii " - 42%"
+         db 0dh,10,9,red,'2',blue,' - 42%'
 ;         .byte 10,9,145,'3,147
 ;         .ascii " - 54%"
+         db 0dh,10,9,red,'3',blue,' - 54%'
 ;         .byte 10,9,145,'4,147
 ;         .ascii " - 64%"
+         db 0dh,10,9,red,'4',blue,' - 64%'
 ;         .byte 10,9,145,'5,147
 ;         .ascii " - 73%"
+         db 0dh,10,9,red,'5',blue,' - 73%'
 ;         .byte 10,9,145,'6,147
 ;         .ascii " - 81%"
+         db 0dh,10,9,red,'6',blue,' - 81%'
 ;         .byte 10,9,145,'7,147
 ;         .ascii " - 88.5%"
+         db 0dh,10,9,red,'7',blue,' - 88.5%'
 ;         .byte 10,9,145,'8,147
 ;         .ascii " - 95%"
+         db 0dh,10,9,red,'8',blue,' - 95%'
 ;         .byte 10,9,145,'9,147
 ;         .asciz " - 100%"
 ;         .byte 0
+         db 0dh,10,9,red,'9',blue,' - 100%$',black
 ;1$:      call @#getkey
 ;         cmpb #9,r0
 ;         beq 2$
+         call curoff
+.c1:     call getkey
+         cmp al,27   ;ESC
+         jz .c2
 
 ;         cmpb r0,#'0
 ;         bcs 1$
+         cmp al,'0'
+         jc .c1
 
 ;         cmpb r0,#'0+10
 ;         bcc 1$
+         cmp al,'0'+10
+         jnc .c1
 
 ;         sub #'0-1,r0
 ;         movb r0,@#density
+         sub al,'0'-1
+         
 ;2$:      jmp @#tograph
+.c2:     jmp tograph
 
 inmode:  call printstr
          db 0dh,10,0dh,10,green
