@@ -201,7 +201,7 @@ indens:  call totext
 ;         .byte 10,9,145,'9,147
 ;         .asciz " - 100%"
 ;         .byte 0
-         db 0dh,10,9,red,'9',blue,' - 100%$',black
+         db 0dh,10,9,red,'9',blue,' - 100%',black,'$'
 ;1$:      call @#getkey
 ;         cmpb #9,r0
 ;         beq 2$
