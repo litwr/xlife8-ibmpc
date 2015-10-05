@@ -195,29 +195,37 @@ todec:    mov bx,stringbuf+1    ;convert dx:ax to stringbuf
 ;;         bis r3,r1
 ;;         return
 
-;;rndbyte: push r0   ;IN: R2
-;;         push r1
-;;         push r4
-;;         push r5
-;;         clr r5
-;;         movb @#density,r4
-;;2$:      clr r1
-;;         mov @#timerport2,r0
-;;         xor r0,@#temp
-;;         ror r0    ;uses CY=0 set by clr
-;;         rol r1
-;;         asr r0
-;;         rol r1
-;;         movb 32768(r0),r0
-;;         add @#temp,r0
-;;         asr r0
-;;         rol r1
-;;         bisb bittab(r1),r5
-;;         sob r4,2$
+rndbyte: push cx   ;in: di
+         push dx
+         push bx
 
-;;         bisb r5,(r2)+
-;;         pop r5
-;;         pop r4
-;;         pop r1
-;;         pop r0
-;;         return
+         mov cl,[density]
+         xor dl,dl
+         mov al,80h
+         cli
+         out 43h,al
+         in al,42h
+         mov ah,al
+.l1:     shr ah,1
+         jnz .l1
+
+         mov ah,al
+         xor al,al
+         out 43h,al
+         in al,40h
+         shr al,1        ;mode 3 decrements counter by 2
+         xor al,ah
+         and al,7
+         mov bx,bittab
+         xlatb
+         or dl,al
+         in al,40h
+         sti
+         loop .l1
+
+         or [di],dl
+         inc di
+         pop bx
+         pop dx
+         pop cx
+         retn

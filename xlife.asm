@@ -117,7 +117,7 @@ start_timer:    CLI                 ;SAVE/SET INTR8 VECTOR
                 mov [8*4+2],cs
                 push cs
                 pop ds
-                MOV     AL,36H          ;SET TIMER HARDWARE
+                MOV     AL,36H          ;SET TIMER 0 HARDWARE
                 OUT     43H,AL
                 MOV     AL,TIMERV AND 0FFH
                 OUT     40H,AL
@@ -881,7 +881,7 @@ cellcnt   db 0,0,0,0,0
 gencnt    db 0,0,0,0,0,0,0
 crsrx     db 0      ;[x/8]*8, word aligned
 crsry     db 0      ;[y/8]*8
-vptilecx  db 0      ;word aligned!
+vptilecx  db 0      ;must be word aligned
 vptilecy  db 0
 xcrsr     db 0,0,0
 ycrsr     db 0,0,0  ;must follow xcrsr
@@ -895,7 +895,7 @@ pseudoc   db 0
 mode      db 0      ;0-stop, 1-run, 2-hide, 3-exit
 zoom      db 0
 fn        db 0,0,0,0,0,0,0,0,0,0,0,0
-density   db 3         ;must follow fn
+density   db 3         ;must follow fn?
 ;;dirname  .TEXT "0:"      ;filename used to access directory
 topology  db 0      ;0 - torus
 ;crsrticks:  db 0

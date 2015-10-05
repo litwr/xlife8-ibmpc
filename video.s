@@ -223,6 +223,7 @@ indens:  call totext
 ;         sub #'0-1,r0
 ;         movb r0,@#density
          sub al,'0'-1
+         mov [density],al
          
 ;2$:      jmp @#tograph
 .c2:     jmp tograph

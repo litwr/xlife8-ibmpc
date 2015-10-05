@@ -310,6 +310,19 @@ random:
 ;;         mov #16,r3    ;ver rnd max
 ;;         mov #right,r5
 ;;         mov #14,r4    ;hor rnd max
+         in al,61h
+         or al,1
+         out 61h,al         ;enable timer 2 gate
+         MOV     AL,94H          ;SET TIMER 2 HARDWARE
+         OUT     43H,AL
+         mov     al,251
+         OUT     42H,AL
+        
+         xor bp,bp   ;dir: 0 - left, 1 - right
+         mov di,tiles+(hormax*4+3)*tilesize
+         mov dx,16*256+14    ;dh - ver rnd max, dl - hor rnd max
+         mov bx,right
+
 
 ;;;cont3    ldy #sum
 ;;;         sta (adjcell),y
@@ -317,6 +330,8 @@ random:
 ;;;         sta t3
 ;;23$:     mov #1,sum(r2)
 ;;         mov #8,r0
+.cont3:  mov word [di+sum],1
+         mov cx,8
 
 ;;;loop1    jsr rndbyte
 ;;;         dec t3
@@ -324,6 +339,9 @@ random:
 ;;1$:      call @#rndbyte
 ;;         sob r0,1$
 ;;         sub #8,r2
+.loop1:  call rndbyte
+         loop .loop1
+         sub di,8
 
 ;;;         jsr chkadd
 ;;;         dec i2
@@ -331,6 +349,9 @@ random:
 ;;        call @#chkadd
 ;;        dec r4
 ;;        beq 22$
+         call chkadd
+         dec dl
+         jz .cont2
 
 ;;;         ldy i1+1
 ;;;cont4    lda (adjcell),y
@@ -343,17 +364,26 @@ random:
 ;;         add r5,r2
 ;;24$:     mov @r2,r2
 ;;         br 23$
+.cont4:  mov di,[di+bx]
+         jmp .cont3
+
 
 ;;;cont2    dec i1
 ;;;         beq cont5
 ;;22$:     dec r3
 ;;         beq calccells
+.cont2:  dec dh
+         jz calccells
 
 ;;         mov #14,r4   ;hor rnd max
 ;;         mov #left,r5
 ;;         mov #1,r0
 ;;         xor r0,r1
 ;;         bne 21$
+         mov bl,left
+         mov dl,14       ;hor rnd max
+         xor bp,1
+         jnz .cont1
 
 ;;;         ldy #right
 ;;;cont1    sty i1+1
@@ -362,6 +392,10 @@ random:
 ;;         mov #right,r5
 ;;21$:     add #down,r2
 ;;         br 24$
+        mov bl,right
+.cont1: mov di,[di+down]
+        jmp .cont3
+        
 
 calccells: call zerocc
          cmp [tilecnt],0
