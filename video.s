@@ -40,10 +40,7 @@ insteps: call totext
          dec bx
          js .c3
 
-         push si
-         call printstr
-         db 8,' ',8,'$'
-         pop si
+         call delchr
          jmp .c1
 
 .c11:    cmp bl,0
@@ -118,11 +115,14 @@ bornstay:
          cmp di,si
          js .c3
 
-         push si
+         call delchr
+         jmp .c1
+
+delchr:  push si
          call printstr
          db 8,' ',8,'$'
          pop si
-         jmp .c1
+         retn
 
 inborn:  call printstr
          db green,'THE RULES ARE DEFINED BY ',blue

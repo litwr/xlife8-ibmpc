@@ -197,12 +197,12 @@ dispatcher: call getkey2
          cmp al,27         ;esc
          jz .c200
 
-;;         mov #born,r5
-;;         call @#setrconst
+         mov bx,born
+         call setrconst
          call instay
-;;         mov #live,r5
-;;         call @#setrconst
-;;         call @#fillrt
+         mov bx,live
+         call setrconst
+         call fillrt
 ;;200$:    call @#tograph
 ;;;*         jsr calccells    ;for load sequence
 ;;;*         jsr crsrset      ;showscn also calls crsrset! but crsrset is fast now...

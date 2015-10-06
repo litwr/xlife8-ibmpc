@@ -99,7 +99,7 @@ mainloop:
 ;           mov #crsrclr2,@#crsrflash+2
 ;emptyirq:  rti
 
-;         include 'rules.s'
+         include 'rules.s'
          include 'tile.s'
 
 TIMERV          EQU     4096       ;1193180Hz/TIMERV=FREQ OF INTR8, approx 291.304 Hz
