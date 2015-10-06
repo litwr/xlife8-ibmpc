@@ -80,7 +80,7 @@ tograph0: call initxt
           ;;call @#showrules2
           jmp xyout
 
-printstr:  pop dx
+printstr:  pop dx         ;uses: si,dx,ax
            mov si,dx
 .l1:       lodsb
            cmp al,'$'

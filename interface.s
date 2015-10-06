@@ -192,14 +192,14 @@ dispatcher: call getkey2
 .c15:    cmp al,'R'
          jnz .c16
 
-;;         call @#totext
-;;         call @#inborn
-;;         cmpb #3,r5         ;kt/esc
-;;         beq 200$
+         call totext
+         call inborn
+         cmp al,27         ;esc
+         jz .c200
 
 ;;         mov #born,r5
 ;;         call @#setrconst
-;;         call @#instay
+         call instay
 ;;         mov #live,r5
 ;;         call @#setrconst
 ;;         call @#fillrt
@@ -208,6 +208,7 @@ dispatcher: call getkey2
 ;;;*         jsr crsrset      ;showscn also calls crsrset! but crsrset is fast now...
 ;;;*         jmp crsrcalc
 ;;         return
+.c200:   jmp tograph
 
 .c16:    cmp ax,4d00h   ;cursor right
          jnz .c160

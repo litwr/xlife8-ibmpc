@@ -72,95 +72,80 @@ insteps: call totext
          jmp .c20
 
 bornstay:
-;         mov #stringbuf,r4
-;3$:      mov r4,r3
-;1$:      call @#getkey
-;         cmpb #10,r0
-;         beq 11$
+         mov si,stringbuf
+.c3:     mov di,si
+.c1:     call getkey
+         cmp al,0dh    ;Enter
+         jz .c11
 
-;         cmpb #24,r0    ;backspace=zaboy
-;         beq 12$
+         cmp al,8     ;backspace
+         jz .c12
 
-;         cmp #'0,r5
-;         beq 40$
+         cmp cl,'0'
+         jz .c40
 
-;         cmpb #3,r0    ;kt/esc
-;         beq 11$
+         cmp al,27    ;esc
+         jz .c11
 
-;40$:     cmpb r0,r5
-;         bcs 1$
+.c40:    cmp al,cl
+         jc .c1
 
-;         cmpb r0,#'9
-;         bcc 1$
+         cmp al,'9'
+         jnc .c1
 
-;         mov r4,r2
-;4$:      cmp r2,r3
-;         beq 5$
+         mov bp,si
+.c4:     cmp bp,di
+         jz .c5
 
-;         cmpb (r2)+,r0
-;         beq 1$
-;         br 4$
+;;         cmpb (r2)+,r0
+         cmp al,[ds:bp]
+         lahf
+         inc bp
+         sahf
+         jz .c1
+         jmp .c4
 
-;5$:      movb r0,(r3)+
-;         emt ^O16
-;         br 1$
+.c5:     mov [di],al
+         inc di
+         mov dl,al
+         mov ah,2
+         int 21h
+         jmp .c1
 
-;11$:     mov r0,r5
-;         jsr r3,@#printstr
-;         .byte 154,0
+.c11:    retn
 
-;         return
+.c12:    dec di
+         cmp di,si
+         js .c3
 
-;12$:     dec r3
-;         cmp r3,r4
-;         bmi 3$
+         push si
+         call printstr
+         db 8,' ',8,'$'
+         pop si
+         jmp .c1
 
-;         jsr r3,@#printstr
-;         .byte 24,0
-;         br 1$
+inborn:  call printstr
+         db green,'THE RULES ARE DEFINED BY ',blue
+         db 'BORN',green,' AND ',blue,'STAY',green
+         db ' VALUES.  FOR EXAMPLE, ',purple
+         db 'CONWAYS''S LIFE',green,' HAS BORN=3 AND STAY=23, '
+         db  purple,'SEEDS',green,' - BORN=2 AND EMPTY STAY, '
+         db purple,'HIGHLIFE,',green,' - BORN=36 AND STAY=23, '
+         db purple,'LIFE WITHOUT DEATH',green
+         db ' - BORN=3 AND STAY=012345678, ...',0dh,10,black
+         db 'BORN = $'
 
-inborn:  ;jsr r3,@#printstr
-;         .byte 154
-;         .byte 147
-;         .ascii "THE RULES ARE DEFINED BY "
-;         .byte 156,
-;         .ascii "BORN"
-;         .byte 156
-;         .ascii " AND "
-;         .byte 156
-;         .ascii "STAY"
-;         .byte 156
-;         .ascii " VALUES.  FOR EXAMPLE, "
-;         .byte 159
-;         .ascii "CONWAYS'S LIFE"
-;         .byte 159
-;         .ascii " HAS BORN=3 AND STAY=23, "
-;         .byte 159
-;         .ascii "SEEDS"
-;         .byte 159
-;         .ascii " - BORN=2 AND EMPTY STAY, "
-;         .byte 159
-;         .ascii "HIGHLIFE"
-;         .byte 159
-;         .ascii " - BORN=36 AND STAY=23, "
-;         .byte 159
-;         .ascii "LIFE WITHOUT DEATH"
-;         .byte 159
-;         .ascii " - BORN=3 AND STAY=012345678, ..."
-;         .byte 146,10,10
-;         .ascii "BORN = "
-;         .byte 0,0
+;;         mov #'1,r5
+;;         jmp @#bornstay
+         mov cl,'1'
+         jmp bornstay
 
-;         mov #'1,r5
-;         jmp @#bornstay
 
-instay:  ;jsr r3,@#printstr
-;         .byte 154,10
-;         .ascii "STAY = "
-;         .byte 0
+instay:  call printstr
+         db 0dh,10,'STAY = $'
 
-;         mov #'0,r5
-;         jmp @#bornstay
+         mov cl,'0'
+         jmp bornstay
 
 indens:  call totext
          call printstr
@@ -170,38 +155,38 @@ indens:  call totext
 ;         .ascii "KT"
 ;         .byte 146
 ;         .ascii " TO EXIT"
-         db green,'SELECT DENSITY OR PRESS ',red,'ESC',green,' TO EXIT'
+         db black,'SELECT DENSITY OR PRESS ',red,'ESC',black,' TO EXIT'
 ;         .byte 10,9,145,'0,147
 ;         .ascii " - 12.5%"
-         db 0dh,10,9,red,'0',blue,' - 12.5%'
+         db 0dh,10,9,red,'0',green,' - 12.5%'
 ;         .byte 10,9,145,'1,147
 ;         .ascii " - 28%"
-         db 0dh,10,9,red,'1',blue,' - 28%'
+         db 0dh,10,9,red,'1',green,' - 28%'
 ;         .byte 10,9,145,'2,147
 ;         .ascii " - 42%"
-         db 0dh,10,9,red,'2',blue,' - 42%'
+         db 0dh,10,9,red,'2',green,' - 42%'
 ;         .byte 10,9,145,'3,147
 ;         .ascii " - 54%"
-         db 0dh,10,9,red,'3',blue,' - 54%'
+         db 0dh,10,9,red,'3',green,' - 54%'
 ;         .byte 10,9,145,'4,147
 ;         .ascii " - 64%"
-         db 0dh,10,9,red,'4',blue,' - 64%'
+         db 0dh,10,9,red,'4',green,' - 64%'
 ;         .byte 10,9,145,'5,147
 ;         .ascii " - 73%"
-         db 0dh,10,9,red,'5',blue,' - 73%'
+         db 0dh,10,9,red,'5',green,' - 73%'
 ;         .byte 10,9,145,'6,147
 ;         .ascii " - 81%"
-         db 0dh,10,9,red,'6',blue,' - 81%'
+         db 0dh,10,9,red,'6',green,' - 81%'
 ;         .byte 10,9,145,'7,147
 ;         .ascii " - 88.5%"
-         db 0dh,10,9,red,'7',blue,' - 88.5%'
+         db 0dh,10,9,red,'7',green,' - 88.5%'
 ;         .byte 10,9,145,'8,147
 ;         .ascii " - 95%"
-         db 0dh,10,9,red,'8',blue,' - 95%'
+         db 0dh,10,9,red,'8',green,' - 95%'
 ;         .byte 10,9,145,'9,147
 ;         .asciz " - 100%"
 ;         .byte 0
-         db 0dh,10,9,red,'9',blue,' - 100%',black,'$'
+         db 0dh,10,9,red,'9',green,' - 100%',black,'$'
 ;1$:      call @#getkey
 ;         cmpb #9,r0
 ;         beq 2$
