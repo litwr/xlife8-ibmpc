@@ -68,7 +68,7 @@ tograph: cmp [zoom],0
          call setviewport
          call showscn
          ;call showtopology
-         ;;call @#showrules2
+         call showrules
          call xyout2
          jmp dispatcher.c270
          
@@ -76,8 +76,8 @@ tograph: cmp [zoom],0
           int 10h
 tograph0: call initxt
           call showscn
-          call showtopology
-          ;;call @#showrules2
+          ;call showtopology
+          call showrules
           jmp xyout
 
 printstr:  pop dx         ;uses: si,dx,ax

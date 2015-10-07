@@ -234,7 +234,8 @@ fillrt:  xor bx,bx
          popf
          call fillrt2
          inc bl
-         jnz .c1
+         jz .ep1    ;optimize 8088?
+         jmp .c1
 .ep1:    retn
 
 ;;setrconst:    ;IN: R4 - string, R3 - end of string, R5 - live/born
@@ -267,8 +268,7 @@ setrconst:      ;IN: si - string, di - end of string, bp - live/born
 .c11:     or [bx],dx
           jmp .c2
 
-;;showrules proc
-;;        local loop1,loop2,loop3,loop4,loop5,cont1,cont2,cont4,cont5,showr0,showr1
+showrules:
 ;;        ld hl,$1519
 ;;        call TXT_SET_CURSOR
 ;;        ld a,2
@@ -277,86 +277,108 @@ setrconst:      ;IN: si - string, di - end of string, bp - live/born
 ;;        db "        $"
 ;;        ld a,21
 ;;        call TXT_SET_COLUMN
+        mov ah,2
+        xor bh,bh
+        mov dx,24*256+20
+        int 10h
+        call printstr
+        db "          $"
+        mov ah,2
+        mov dx,24*256+20
+        int 10h
+
 ;;        ld ix,live
 ;;        ld b,0
+        mov di,live
+        mov cl,0
 
-;;;*        lda #1
-;;;*loop1   bit live
-;;;*        bne cont1
 ;;        ld a,1
 ;;loop1   ld c,a
 ;;        and (ix)
 ;;        ld a,c
 ;;        jr nz,cont1
+        mov al,1
+.loop1: test al,[di]
+        jnz .cont1
 
 ;;loop2   sla a
 ;;        jr nz,loop1
+.loop2: shl al,1
+        jnz .loop1
 
 ;;        ld a,(ix+1)
 ;;        or a
 ;;        jr z,cont4
+        mov al,[di+1]
+        or al,al
+        jz .cont4
 
-;;;*        lda #"8"
-;;;*        jsr showr1
-;;;*        beq cont3
 ;;        ld a,8
 ;;        call showr1
 ;;        ret z
+        mov al,'8'
+        call .showr1
+        jnz .cont4
+.e1:    retn
 
-;;;*cont4   lda #"/"
-;;;*        jsr showr1
-;;;*        beq cont3
 ;;cont4   ld a,"/"
 ;;        call showr1
 ;;        ret z
+.cont4: mov al,'/'
+        call .showr1
+        jz .e1
 
-;;;*        lda #1
-;;;*loop4   bit born
-;;;*        bne cont5
 ;;        ld a,1
 ;;loop4   ld c,a
 ;;        and (ix+2)
 ;;        ld a,c
 ;;        jr nz,cont5
+        mov al,1
+.loop4: test al,[di+2]
+        jnz .cont5
 
-;;;*loop5   asl
-;;;*        bne loop4
 ;;loop5   sla a
 ;;        jr nz,loop4
+.loop5: shl al,1
+        jnz .loop4
 
-;;;*        lda born+1
-;;;*        beq cont3
 ;;        ld a,(ix+3)
 ;;        or a
 ;;        ret z
+        mov al,[di+3]
+        or al,al
+        jz .e1
 
-;;;*        lda #"8"
-;;;*        jmp showr1
 ;;        ld a,"8"
 ;;        jr showr1
+        mov al,'8'
+        jmp .showr1
 
-;;;*cont5   jsr showr0
-;;;*        bne loop5
 ;;cont5   call showr0
 ;;        jr nz,loop5
 ;;        ret
+.cont5: call .showr0
+        jnz .loop5
+        retn
 
-;;;*cont1   jsr showr0
-;;;*        bne loop2
 ;;cont1   call showr0
 ;;        jr nz,loop2
 ;;        ret
+.cont1: call .showr0
+        jnz .loop2
+        retn
 
-;;;*showr0  sta t1
-;;;*        ldx #$ff
 ;;showr0  ld c,a
 ;;        ld e,$ff
-;;;*loop3   inx
-;;;*        lsr
-;;;*        bcc loop3
+.showr0: mov dl,al
+         mov ch,0ffh
+
 ;;loop3   inc e
 ;;        rrca
 ;;        jr nc,loop3
+.loop3: inc ch
+        shr al,1
+        jnc .loop3
 
 ;;        ld a,e
 ;;        xor $30
@@ -365,6 +387,10 @@ setrconst:      ;IN: si - string, di - end of string, bp - live/born
 ;;        cp 10
 ;;        ld a,e
 ;;        jr nz,cont2
+        mov al,ch
+        xor al,'0'
+.showr1:cmp cl,10
+        jnz .cont2
 
 ;;        ld a,"*"
 ;;cont2   call TXT_OUTPUT
@@ -373,7 +399,14 @@ setrconst:      ;IN: si - string, di - end of string, bp - live/born
 ;;        cp 11
 ;;        ld a,c
 ;;        ret
-;;        endp
+        mov al,'*'
+.cont2: mov ah,0eh
+        mov bl,2
+        int 10h
+        inc cl
+        cmp cl,11
+        mov al,dl
+        retn
 
 ;;showrules2:
 ;;        mov #stringbuf,r3
