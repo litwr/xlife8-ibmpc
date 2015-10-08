@@ -821,203 +821,116 @@ showscnp1: ;;mov video(r0),r5
 ;;          sob r1,1$          
 ;;          jmp @#gexit3   ;???
 
-;xclrscn  .block
-;         lda tilecnt
-;         bne cont1
-;
-;         lda tilecnt+1
-;         bne cont1
-;
-;         rts
+chgdrv:  mov al,[curdrv]
+         mov bx,drives
+.l2:     inc ax
+         cmp al,26
+         jnz .l1
 
-;cont1    #assign16 currp,startp
-;loop     ldy #sum
-;         lda (currp),y
-;         beq lnext
-;
-;         ldy #video
-;         lda (currp),y
-;         sta i1
-;         iny
-;         lda (currp),y
-;         sta i1+1
-;         lda #0
-;         tay
-;         sta (i1),y
-;         iny
-;         sta (i1),y
-;         iny
-;         sta (i1),y
-;         iny
-;         sta (i1),y
-;         iny
-;         sta (i1),y
-;         iny
-;         sta (i1),y
-;         iny
-;         sta (i1),y
-;         iny
-;         sta (i1),y
-;         lda #8
-;         eor i1
-;         sta i1
-;         ldy #0
-;         tya
-;         sta (i1),y
-;         iny
-;         sta (i1),y
-;         iny
-;         sta (i1),y
-;         iny
-;         sta (i1),y
-;         iny
-;         sta (i1),y
-;         iny
-;         sta (i1),y
-;         iny
-;         sta (i1),y
-;         iny
-;         sta (i1),y
-;lnext    ldy #next
-;         lda (currp),y
-;         tax
-;         iny
-;         lda (currp),y
-;         bne cont
-;
-;         cpx #1
-;         bne cont
-;
-;         rts
-;
-;cont     sta currp+1
-;         stx currp
-;         jmp loop
+         xor ax,ax
+.l1:     mov [curdrv],al
+         xlatb
+         or al,al
+         mov dl,al
+         mov al,[curdrv]
+         jz .l2
+         
+         mov [loadmenu.c80],dl
+         mov [es:240],dl
+         sub dl,'A'
+         mov ah,0eh
+         int 21h
+         retn
 
+loadmenu:call totext
+         call printstr
+         db green,'INPUT FILENAME, AN EMPTY STRING MEANS TO SHOW DIRECTORY. PRESS '
+         db red,'TAB',green,' TO USE RAMDISK, ',red,'*',green
+         db ' TO CHANGE DRIVE, ',red,'ESC',green,' TO EXIT',0dh,10,black
+.c80:    db 'A:$'
 
-chgdrv:  ;;movb @#andos_disk,r0
-;;         bicb #252,r0
-;;         inc r0
-;;         movb r0,@#andos_disk
-;;         movb r0,@#andos_curdsk
-;;         mov r2,r3
-;;         clr r1
-;;         mov r4,r2
-;;         emt ^O24
-;;         add #'A-1,r0
-;;         emt ^O16
-;;         mov r3,r1
-;;         add #2,r1
-;;         emt ^O24
-;;         mov r3,r2
-;;         return
+.c3:     mov di,fn
+         xor cl,cl    ;length
+.c1:     call getkey
+         cmp al,0dh
+         jz .c11
 
-loadmenu: ;;call @#totext 
-;;         movb @#andos_disk,r0
-;;         add #'A-1,r0
-;;         movb r0,@#80$+2
-;;         jsr r3,@#printstr
-;;         .byte 12,146
-;;         .ascii "INPUT FILENAME, AN EMPTY STRING MEANS TO SHOW DIRECTORY. PRESS "
-;;         .byte 145
-;;         .ascii "TAB"
-;;         .byte 146
-;;         .ascii " TO USE RAMDISK, "
-;;         .byte 145,'*,146
-;;         .ascii " TO CHANGE DRIVE, "
-;;         .byte 145
-;;         .ascii "KT"
-;;         .byte 146
-;;         .ascii " TO EXIT"
-;;80$:     .byte 10,147,'A,':,154,0   ;toggles cursor!
+         cmp al,8   ;backspace
+         jz .c12
 
-;;3$:      mov #fn,r5
-;;         clr r2
-;;1$:      call @#getkey
-;;         cmpb r0,#10
-;;         beq 11$
+         cmp al,27   ;esc
+         jnz .c17
 
-;;         cmpb r0,#24   ;zaboy/backspace
-;;         beq 12$
+.c100:   mov ch,al
+.c101:   ;call curoff
+         or ch,ch
+         retn
 
-;;         cmpb r0,#3   ;kt/esc
-;;         bne 17$
+.c17:    cmp al,'*'
+         jnz .c21
 
-;;100$:    movb r0,r4
-;;101$:    jsr r3,@#printstr
-;;         .byte 154,0
-;;         mtps r4
-;;         return
+         mov ch,al
+         call chgdrv
+         jmp .c1
 
-;;17$:     cmpb r0,#'*
-;;         bne 21$
+.c21:    cmp al,9    ;TAB
+         jnz .c18
 
-;;         mov #4,r4
-;;         call @#chgdrv
-;;         br 1$
-
-;;21$:     cmpb #9,r0    ;TAB
-;;         bne 18$
-
-;;         jsr r3,@#printstr
-;;         .byte 154,0
-
+         call curoff
 ;;         call @#ramdisk
-;;         mov #toandos,@#pageport
 ;;         jsr r3,@#printstr
 ;;         .byte 154,0
 
 ;;         mov #1,r0
 ;;         br 100$
 
-;cont8    and $7f
-;         cp 33
-;         jr c,loop1
-;;18$:     cmpb r0,#'!
-;;         bcs 1$
+.c18:    cmp al,'!'
+         jc .c1
 
-;;         cmpb r0,#126
-;;         bcc 1$
+         cmp al,126
+         jnc .c1
 
-;;         mov #nofnchar+1,r3   ;allows ?-char
-;;5$:      cmpb r0,(r3)+
-;;         beq 1$
+         mov si,nofnchar   ;+1? allows ?-char
+         mov dl,al
+.c5:     lodsb
+         cmp dl,al
+         jz .c1
 
-;;         cmpb r0,#'a
-;;         bcs 6$
+         ;cmp al,'a'
+         ;jc .c6
 
-;;         cmpb r0,#'z+1
-;;         bcc 6$
+         ;cmpb al,'z'+1
+         ;jnc .c6
 
-;;         sub #'a-'A,r0
-;;6$:      tstb @r3
-;;         bne 5$
+         ;sub al,'a'-'A'
+;.c6:     
+         cmp byte [si],0
+         jnz .c5
 
-;;         cmp r2,#8
-;;         bcc 1$
+         cmp cl,8
+         jc .c1
 
-;;         movb r0,(r5)+
-;;         inc r2
-;;         emt ^O16 
-;;14$:     br 1$
+         mov [di],dl
+         inc di
+         inc cl
+         mov ah,2
+         int 21h
+;.c14:    
+         jmp .c1
 
-;cont1    call TXT_REMOVE_CURSOR     ;cursor off
-;         ld a,c
-;         or a
-;         jr z,menu2
-;;11$:     tst r2
-;;         beq menu2
+.c11:    or cl,cl
+         jz menu2
 
-;;         movb #'.,(r5)+
-;;         movb #'8,(r5)+
-;;         movb #'L,(r5)+
-;;         movb #'0,(r5)+
-;;         clr r4
-;;42$:     cmp r5,#density
-;;         beq 101$
+         mov word [di],'.'*256+'8'
+         mov word [di+2],'X'*256+'L'
+         add di,4
+         xor ch,ch
+.c42:    cmp di,density
+         jz .c101
 
-;;        clrb (r5)+
-;;         br 42$
+         mov [di],ch
+         inc di
+         jmp .c42
 
 ;cont2    dec de
 ;         dec c
@@ -1027,7 +940,7 @@ loadmenu: ;;call @#totext
 ;         call printn
 ;         db 8,32,8,"$"
 ;         jr cont4
-;;12$:     dec r5
+.c12:     ;;dec r5
 ;;         dec r2
 ;;         bmi 3$
 

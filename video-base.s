@@ -74,7 +74,7 @@ tograph: cmp [zoom],0
          
 .l1:      mov ax,4    ;set video mode #4 = 320x200x4
           int 10h
-tograph0: call initxt
+          call initxt
           call showscn
           ;call showtopology
           call showrules

@@ -12,6 +12,36 @@
 
 start:   ;push cs   ;??
          ;pop ds
+         mov ah,19h   ;get current disk
+         int 21h
+         add al,'A'
+         mov [loadmenu.c80],al
+         
+         xor bx,bx
+.l2:     mov dl,bl
+         mov ah,0eh   ;set current drive
+         int 21h
+         mov ah,19h
+         int 21h
+         mov [drives+bx],bh
+         cmp al,bl
+         jnz .l1
+
+         add al,'A'
+         cmp al,[loadmenu.c80]
+         jnz .l3
+
+         mov [curdrv],bl
+.l3:     mov [drives+bx],al
+.l1:     inc bx
+         cmp bl,26
+         jnz .l2
+
+         mov dl,[loadmenu.c80]
+         sub dl,'A'
+         mov ah,0eh
+         int 21h
+
          mov ax,0b800h
          mov es,ax
          ;;call @#copyr
@@ -895,7 +925,7 @@ pseudoc   db 0
 mode      db 0      ;0-stop, 1-run, 2-hide, 3-exit
 zoom      db 0
 fn        db 0,0,0,0,0,0,0,0,0,0,0,0
-density   db 3         ;must follow fn?
+density   db 3         ;must follow fn!
 ;;dirname  .TEXT "0:"      ;filename used to access directory
 topology  db 0      ;0 - torus
 ;crsrticks:  db 0
@@ -906,6 +936,8 @@ crsrpgmk  db 1   ;0 - do not draw cursor during showscnz, 1 - draw
 svfn      db 0,0,0,0,0,0,0,0,0,0,0,0
 msgtore   db 'TORUS$'
 msgplain  db 'PLAIN$'
+drives    rb 26
+curdrv    db 0
 nofnchar db '?%(),./:;<=>[\]|'   ;? - must be the first
 stringbuf rb 19
 

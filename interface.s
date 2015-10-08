@@ -576,40 +576,24 @@ dispatcher: call getkey2
          mov al,80h
          jmp .c272
 
-;;172$:    cmpb #'l,r0
-;;         bne 173$
 .c172:   cmp al,'l'
          jnz .c173
 
-;;;*         lda zoom
-;;;*         pha
-;;;*         beq nozoom1
 ;;         movb @#zoom,r0
 ;;         push r0
 ;;         beq 301$
 
-;;;*         jsr zoomout
 ;;         clrb @#zoom
-;;         
-;;;*nozoom1  jsr totext
-;;;*         jsr loadmenu
-;;;*         beq exitload
-;;301$:    call @#loadmenu
+.c301:   call loadmenu
 ;;         bcs 302$
 
-;;;*cont17w  jsr loadpat
-;;;*         jsr scrnorm
 ;;303$:    call @#tograph
 ;;         call @#loadpat
 
-;;;*exitload jsr finish
-;;;*         pla
-;;;*         bne zoomin
 ;;302$:    pop r0
 ;;         movb r0,@#zoom
-;;         mov #todata,@#pageport
 ;;         call @#calccells
-;;         jmp @#tograph0
+         jmp tograph
 
 ;;173$:     cmpb #'L,r0
 ;;         bne 174$
