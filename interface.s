@@ -579,29 +579,27 @@ dispatcher: call getkey2
 .c172:   cmp al,'l'
          jnz .c173
 
-;;         movb @#zoom,r0
-;;         push r0
-;;         beq 301$
+         mov al,[zoom]
+         push ax
+         or al,al
+         jz .c301
 
-;;         clrb @#zoom
+         mov [zoom],0
 .c301:   call loadmenu
-;;         bcs 302$
+         jnz .c302
 
-;;303$:    call @#tograph
+;;303$:  
+         call tograph
 ;;         call @#loadpat
 
-;;302$:    pop r0
-;;         movb r0,@#zoom
-;;         call @#calccells
+.c302:   pop ax
+         mov [zoom],al
+         call calccells
          jmp tograph
 
-;;173$:     cmpb #'L,r0
-;;         bne 174$
 .c173:   cmp al,'L'
          jnz .c174
 
-;;;*         lda fnlen
-;;;*         bne cont17v
 ;;         tstb @#fn
 ;;         bne 317$
 

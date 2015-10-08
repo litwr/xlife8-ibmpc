@@ -938,6 +938,6 @@ msgtore   db 'TORUS$'
 msgplain  db 'PLAIN$'
 drives    rb 26
 curdrv    db 0
-nofnchar db '?%(),./:;<=>[\]|'   ;? - must be the first
-stringbuf rb 19
+nofnchar db '?%(),./:;<=>[\]|'
+stringbuf rb 19     ;must be after nofnchar
 

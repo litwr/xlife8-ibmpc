@@ -118,7 +118,7 @@ bornstay:
          call delchr
          jmp .c1
 
-delchr:  push si
+delchr:  push si              ;changes: ax,dx
          call printstr
          db 8,' ',8,'$'
          pop si
@@ -814,13 +814,6 @@ showscnp1: ;;mov video(r0),r5
 .c19:     vidmacp count7-8,20f0h
           retn
 
-;;clrscn:   ;;mov #toandos,@#pageport
-;;          mov #16384,r0
-;;          mov #8192,r1
-;;1$:       clr (r0)+
-;;          sob r1,1$          
-;;          jmp @#gexit3   ;???
-
 chgdrv:  mov al,[curdrv]
          mov bx,drives
 .l2:     inc ax
@@ -876,13 +869,12 @@ loadmenu:call totext
 .c21:    cmp al,9    ;TAB
          jnz .c18
 
-         call curoff
+         ;call curoff
 ;;         call @#ramdisk
-;;         jsr r3,@#printstr
-;;         .byte 154,0
+         ;call curon
 
-;;         mov #1,r0
-;;         br 100$
+         mov ch,1
+         jmp .c101
 
 .c18:    cmp al,'!'
          jc .c1
@@ -896,26 +888,24 @@ loadmenu:call totext
          cmp dl,al
          jz .c1
 
-         ;cmp al,'a'
-         ;jc .c6
+         cmp dl,'a'
+         jc .c6
 
-         ;cmpb al,'z'+1
-         ;jnc .c6
+         cmp dl,'z'+1
+         jnc .c6
 
-         ;sub al,'a'-'A'
-;.c6:     
-         cmp byte [si],0
+         sub dl,'a'-'A'
+.c6:     cmp si,stringbuf
          jnz .c5
 
          cmp cl,8
-         jc .c1
+         jnc .c1
 
          mov [di],dl
          inc di
          inc cl
          mov ah,2
          int 21h
-;.c14:    
          jmp .c1
 
 .c11:    or cl,cl
@@ -923,30 +913,16 @@ loadmenu:call totext
 
          mov word [di],'.'*256+'8'
          mov word [di+2],'X'*256+'L'
-         add di,4
          xor ch,ch
-.c42:    cmp di,density
-         jz .c101
+         mov [di+4],ch
+         jmp .c101
 
-         mov [di],ch
-         inc di
-         jmp .c42
+.c12:    dec di
+         dec cl
+         js .c3
 
-;cont2    dec de
-;         dec c
-;         jp m,loop3
-;
-;         call TXT_REMOVE_CURSOR
-;         call printn
-;         db 8,32,8,"$"
-;         jr cont4
-.c12:     ;;dec r5
-;;         dec r2
-;;         bmi 3$
-
-;;         jsr r3,@#printstr
-;;         .byte 24,0
-;;         br 14$
+         call delchr
+         jmp .c1
 
 menu2:   ;;call @#setdirmsk
 ;;         cmpb #3,r0   ;kt/esc
