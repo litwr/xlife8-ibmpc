@@ -924,9 +924,9 @@ loadmenu:call totext
          call delchr
          jmp .c1
 
-menu2:   ;;call @#setdirmsk
-;;         cmpb #3,r0   ;kt/esc
-;;         beq 100$
+menu2:   call setdirmsk
+         cmp al,27     ;esc
+         jz .c100
 
 ;;*         .text "run/stop"
 ;;*         .byte 30
@@ -937,73 +937,70 @@ menu2:   ;;call @#setdirmsk
 ;;*         .text " as usual"
 ;;*         .byte $d,0
 
-;;         call @#showdir
-;;         swab r5
-;;6$:      clr r1
-;;         clr r2
-;;         emt ^O24
-;;         jsr r3,@#printstr
-;;         .byte 153,146
-;;         .ascii "ENTER FILE# OR "
-;;         .byte 145,'K,'T,146,':,32,147,0,0
+         ;call showdir  ;returns number of directory entries in BP
+.c6:     call printstr
+         db home,erasetoeol,green
+         db 'ENTER FILE# OR ',red,'ESC',green,': ',black,'$'
 
-;;3$:      mov #stringbuf+1,r3
-;;         mov r3,r4
-;;         clr r2
-;;1$:      call @#getkey
-;;         cmpb #3,r0     ;kt/esc
-;;         bne 17$
+.c3:     mov di,stringbuf+1      ;+1?
+         mov si,di
+         xor cx,cx
+.c1:     call getkey
+         cmp al,27     ;esc
+         jnz .c17
 
-;;100$:    mov #154,r0
-;;         emt ^O16
-;;         call @#galign
-;;         jmp @#loadmenu
+.c100:   ;call curon
+         jmp loadmenu
 
-;;17$:     cmpb #10,r0
-;;         beq 11$
+.c17:    cmp al,0dh
+         jz .c11
 
-;;         cmpb #24,r0   ;backspace
-;;         beq 12$
+         cmp al,8   ;backspace
+         jz .c12
 
-;;         cmpb r0,#'0
-;;         bcs 1$
+         cmp al,'0'
+         jc .c1
 
-;;         cmpb #'9,r0
-;;         bcs 1$
+         cmp al,'9'+1
+         jnc .c1
 
-;;         cmp #2,r2
-;;         beq 1$
+         cmp cl,2
+         jz .c1
 
-;;         movb r0,(r3)+
-;;         inc r2
-;;         emt ^O16
-;;         br 1$
+         mov [di],al
+         inc di
+         inc cl
+         mov ah,2
+         mov dl,al
+         int 21h
+         jmp .c1
 
-;;11$:     tst r2
-;;         beq 3$
+.c11:    or cl,cl
+         jz .c3
 
-;;         swab @r4
-;;         dec r2
-;;         bne 21$
+         lodsb
+         sub al,'0'
+         dec cl
+         jnz .c21
 
-;;         movb #'0,@r4
-;;         swab @r4
-;;21$:     cmp @r4,r5
-;;         bcc 6$
+         mov ch,10
+         mul ch
+         add al,[si]
+         sub al,'0'
+.c21:    cmp ax,bp
+         jc .c6
 
-;;         call @#findfn
-;;         mov #154,r0
-;;         emt ^O16
-;;         clc
-;;         return
+         ;call findfn
+         ;call curoff
+         xor ax,ax     ;sets ZF
+         retn
 
-;;12$:     dec r3
-;;         dec r2
-;;         bmi 3$
+.c12:    dec di
+         dec cl
+         js .c3
 
-;;         mov #24,r0
-;;         emt ^O16
-;;         br 1$
+         call delchr
+         jmp .c1
 
 getsvfn: ;;call @#totext
 ;;         movb @#andos_disk,r0
@@ -1585,91 +1582,72 @@ crsrset1:
          mov bl,[crsrbit]
          retn
 
-setdirmsk: ;;jsr r3,@#printstr
-;;         .byte 12,146
-;;         .ascii "SET DIRECTORY MASK ("
-;;         .byte 145
-;;         .ascii "ENTER"
-;;         .byte 146
-;;         .ascii " = *). WILDCARDS USAGE IS THE SAME AS AT IBM PC DOS: "
-;;         .byte 147,0
+setdirmsk:
+         call printstr
+         db ansiclrscn,green,'SET DIRECTORY MASK ('
+         db red,'ENTER',green
+         db ' = *)',black,0dh,10,'$'
 
-;;3$:      mov #stringbuf,r5
-;;         clr r2
-;;1$:      call @#getkey
-;;         cmp #10,r0
-;;         beq 11$
+.c3:     mov di,stringbuf
+         xor cx,cx
+.c1:     call getkey
+         cmp al,0dh
+         jz .c11
 
-;;         cmp #24,r0    ;backspace
-;;         beq 12$
+         cmp al,8    ;backspace
+         jz .c12
 
-;;         cmp #3,r0     ;kt/esc
-;;         beq 13$
+         cmp al,27     ;esc
+         jz .c13
 
-;;         cmpb r0,#'!
-;;         bcs 1$
+         cmp al,'!'
+         jc .c1
 
-;;         cmpb r0,#126
-;;         bcc 1$
+         cmp al,126
+         jnc .c1
 
-;;         mov #nofnchar + 1,r3
-;;50$:     cmpb r0,(r3)+
-;;        beq 1$
+         cmp cl,8    ;fn length limit
+         jnc .c1
 
-;;         cmpb r0,#'a
-;;         bcs 6$
+         mov si,nofnchar+1
+         mov dl,al
+.c50:    lodsb
+         cmp al,dl
+         jz .c1
 
-;;         cmpb r0,#'z+1
-;;         bcc 6$
+         cmp si,stringbuf
+         jnz .c50
 
-;;         sub #'a-'A,r0
-;;6$:      tstb @r3
-;;         bne 50$
+         cmp dl,'a'
+         jc .c6
 
-;;         cmp r2,#8    ;fn length limit
-;;         bcc 1$
+         cmp dl,'z'+1
+         jnc .c6
 
-;;         movb r0,(r5)+
-;;         inc r2
-;;         emt ^O16 
-;;         br 1$
+         sub dl,'a'-'A'
+.c6:     mov [di],dl
+         inc di
+         inc cl
+         mov ah,2
+         int 21h
+         jmp .c1
 
-;;11$:     mov #svfn,r4
-;;         mov r2,r3
-;;         beq 16$
+.c11:    mov si,svfn
+         or cl,cl
+         jnz .c5
 
-;;         mov #stringbuf,r5
-;;2$:      cmpb #'*,@r5
-;;         beq 16$
+         mov byte [si],'*'
+.c5:     mov word [si+1],'.'*256+'8'          
+         mov word [si+3],'X'*256+'L'
+         mov byte [si+4],ch
+.c13:    retn
 
-;;         movb (r5)+,(r4)+
-;;         sob r3,2$
+.c12:    dec di
+         dec cl
+         js .c3
 
-;;         mov #8,r0
-;;         sub r2,r0
-;;         beq 13$
-
-;;         mov r0,r3
-;;         movb #32,r0
-;;         br 5$
-
-;;16$:     mov #8,r0
-;;         sub r2,r0
-;;         add r3,r0
-;;         mov r0,r3
-;;         mov #'?,r0
-;;5$:      movb r0,(r4)+
-;;         sob r3,5$
-
-;;13$:     return
-
-;;12$:     dec r5
-;;         dec r2
-;;         bmi 3$
-
-;;         jsr r3,@#printstr
-;;         .byte 24,0
-;;         br 1$
+         call delchr
+         jmp .c1
 
 setviewport:
 ;         ld hl,(crsrtile)

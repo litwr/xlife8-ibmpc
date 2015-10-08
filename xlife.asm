@@ -925,7 +925,7 @@ pseudoc   db 0
 mode      db 0      ;0-stop, 1-run, 2-hide, 3-exit
 zoom      db 0
 fn        db 0,0,0,0,0,0,0,0,0,0,0,0
-density   db 3         ;must follow fn!
+density   db 3
 ;;dirname  .TEXT "0:"      ;filename used to access directory
 topology  db 0      ;0 - torus
 ;crsrticks:  db 0
@@ -938,6 +938,6 @@ msgtore   db 'TORUS$'
 msgplain  db 'PLAIN$'
 drives    rb 26
 curdrv    db 0
-nofnchar db '?%(),./:;<=>[\]|'
+nofnchar db '?,./:;<=>[\]|'
 stringbuf rb 19     ;must be after nofnchar
 

@@ -67,6 +67,8 @@ purple equ 27,'[35m'
 bold equ 27,'[1m'
 normal equ 27,'[0m'
 ansiclrscn equ 27,'[2J'
+erasetoeol equ 27,'[K'
+home equ 27,'[H'
 
 macro vidmacp one,two {
 ;;          mov one(r0),r2

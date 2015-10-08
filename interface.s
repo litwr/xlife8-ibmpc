@@ -588,9 +588,9 @@ dispatcher: call getkey2
 .c301:   call loadmenu
          jnz .c302
 
-;;303$:  
+;.c303:  
          call tograph
-;;         call @#loadpat
+         ;call loadpat
 
 .c302:   pop ax
          mov [zoom],al
