@@ -902,14 +902,15 @@ crsrtile  dw tiles
 timercnt  dw 0, 0
 temp      dw 0
 temp2     dw 0
-;kbuf:     dw 0
-saved     dw 0
+filehl    dw 0
+filesz    dw 0
+;saved     dw 0
 tobin     dw 1,10,100,1000,10000
-live      dw 12
-born      dw 8
 dta       dw 0,0
 x0        db 0   ;word aligned for the speed
 y0        db 0
+live      dw 12  ;x0,y0,live,born have to go sequently
+born      dw 8
 crsrbyte  db 0      ;y%8  word aligned
 crsrbit   db 128    ;x bit position
 i1        db 0,0

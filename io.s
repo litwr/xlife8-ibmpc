@@ -1,62 +1,65 @@
-;;loadpat: call @#commonin
-;;         mov #fn,r2
-;;         mov #12,r3
-;;1$:      movb (r2)+,(r0)+
-;;         sob r3,1$
+loadpat: mov ax,3d00h
+         mov dx,fn
+         int 21h
+         jc .exit
 
-;;         emt ^O36
-;;         tstb @#io_op+1
-;;         bne ioerrjmp
+         mov [filehl],ax
+         mov bx,ax
+         mov ax,4202h   ;fseek
+         xor cx,cx
+         xor dx,dx
+         int 21h
+         or dx,dx
+         jnz .exit2
 
-;;         mov #16384,r4
-;;         mov (r4)+,r0
-;;         movb r0,@#fcount
-;;         mov (r4)+,@#x0
-;;         mov #toio,@#pageport
-;;         mov (r4)+,r0
-;;         mov @r4,r1
-;;         mov r1,r2
-;;         bis r0,r2
-;;         cmp r2,#512
-;;         bcc exitio
+         sub ax,6
+         jbe .exit2
 
-;;         bit #1,r1
-;;         bne exitio
+         shr ax,1
+         mov [filesz],ax
+         mov ax,4200h
+         int 21h
+         mov si,[live]
+         mov di,[born]
+         mov ah,3fh   ;read file
+         mov cx,6
+         mov dx,x0
+         int 21h
+         mov al,byte [live+1]
+         or al,byte [born+1]
+         cmp al,2
+         jnc .l1
+ 
+         test byte [born],1
+         jz .l2
 
-;;         call @#showrect
-;;         bcs exitio
+.l1:     mov [live],si
+         mov [born],di
+         jmp .exit2
 
-;;         mov #toio,@#pageport
-;;         cmp @#live,@#16384+4
-;;         bne 4$
+.l2:     push si
+         push di
+         ;call readtent   ;should adjust filesz
+         ;call showrect
+         pop di
+         pop si
+         ;jc .l1
 
-;;         cmp @#born,@#16384+6
-;;         beq 5$
+         call fillrt
+         ;call puttent
+.l3:     mov ah,3fh
+         mov bx,[filehl]
+         mov cx,2
+         mov dx,x0
+         int 21h
+         call putpixel
+         dec [filesz]
+         jnz .l3
 
-;;4$:      mov @#16384+4,@#live
-;;         mov @#16384+6,@#born
-;;         mov #todata,@#pageport
-;;         call @#fillrt
-;;5$:      mov #16384+8,r0
-;;9$:      call @#puttent
-;;         decb @#fcount
-;;         bmi exitio
-
-;;         mov #io_fn+14,r1
-;;8$:      tstb -(r1)
-;;         beq 8$
-
-;;         incb @r1
-;;         mov #io_op,r1
-;;         mov #toio,@#pageport
-;;         emt ^O36
-;;         tstb @#io_op+1
-;;         bne ioerrjmp
-
-;;10$:     mov #16384,r0
-;;         br 9$
-
-;;ioerrjmp: jmp @#ioerror
+.exit2:  mov ah,3eh    ;fclose
+         mov bx,[filehl]
+         int 21h
+.exit:   retn
 
 printbp: mov dl,' '
          cmp bp,10

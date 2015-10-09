@@ -1191,11 +1191,13 @@ showrect: ;;mov #toandos,@#pageport
 ;;         call @#dispat0
 ;;         br 10$
 
-xchgxy:  ;;tstb @#xchgdir
-;;         beq exit7
+xchgxy:  or [xchgdir],0
+         jz exit7
 
-;;         swab @#x0
-exit7:   ;;return
+         mov al,[x0]
+         xchg al,[y0]
+         mov [x0],al
+exit7:   retn
 
 
 drawrect: ;;call @#xchgxy

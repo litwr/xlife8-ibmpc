@@ -590,8 +590,7 @@ dispatcher: call getkey2
 
 ;.c303:  
          call tograph
-         ;call loadpat
-
+         call loadpat
 .c302:   pop ax
          mov [zoom],al
          call calccells
@@ -785,6 +784,8 @@ benchcalc: call stop_timer
          call printstr
          db 's',0dh,10,'SPEED: $'
          call printfloat
+         call printstr
+         db black,'$'
 .c143x:  call curoff
          jmp getkey
 

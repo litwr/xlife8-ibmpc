@@ -396,7 +396,6 @@ random:
 .cont1: mov di,[di+down]
         jmp .cont3
         
-
 calccells: call zerocc
          cmp [tilecnt],0
          jnz .c12
@@ -424,198 +423,88 @@ inctsum:            ;in: al
          cellsum .l1
 .l1:     retn
 
-putpixel:     ;IN: x0,y0; USE: R1, R2, R3, R4; DON'T USE: R0,R5
-;;;x8pos    = adjcell2 = R1 low
-;;;y8pos    = t1  = R3 low
-;;;         jsr xchgxy
-;;         call @#xchgxy
-;;         mov @#x0,r4
-;;         call @#calcx
+putpixel:     ;IN: x0,y0; DON'T USE: SI,BP
+         call xchgxy
+         mov dx,word [x0]
+         call calcx
 
-;;;         stx m1+1
-;;;         lda crsrx
-;;;         lsr
-;;;         asl
-;;;         asl
-;;;         asl
-;;;m1       adc #0
-;;;         ldx xdir
-;;;         beq cont4
-;;         movb r4,r2
-;;         bisb @#crsrx,r1
-;;         tstb @#xdir
-;;         beq 4$
+         mov cl,dl
+         or al,[crsrx]
+         cmp [xdir],0
+         jz .c4
 
-;;;         sec
-;;;         sbc x0
-;;;         bcc exit
-;;;         bcs cont2
-;;         cmpb r1,r2
-;;         bcs 100$
+         cmp al,cl
+         jc .c100
 
-;;         sub r2,r1
-;;         br 2$
+         sub al,cl
+         jmp .c2
 
-;;;cont4    adc x0
-;;;         bcs exit
-;;4$:      add r2,r1
-;;         cmpb r1,r2
-;;         bcs 100$
+.c4:     add al,cl
+         cmp al,cl
+         jc .c100
 
-;;;         cmp #160
-;;;         bcs exit
-;;         cmpb r1,#160
-;;         bcc 100$
+         cmp al,160
+         jnc .c100
 
-;;;cont2    sta x8pos
-;;;         lda crsry
-;;;         asl
-;;;         asl
-;;;         asl
-;;;         adc crsrbyte
-;;;         ldx ydir
-;;;         beq cont3
-;;2$:      movb @#crsry,r3
-;;         add @#crsrbyte,r3
-;;         mov r4,r2
-;;         swab r2
-;;         tstb @#ydir
-;;         beq 3$
+.c2:     mov ch,[crsry]
+         add ch,[crsrbyte]
+         mov cl,dh
+         cmp [ydir],0
+         jz .c3
 
-;;;         sec
-;;;         sbc y0
-;;;         bcc exit
-;;;         bcs cont1
-;;         cmpb r3,r2
-;;         bcs 100$
-;;
-;;         sub r2,r3
-;;         br 1$
+         cmp ch,cl
+         jc .c100
 
-;;;cont3    adc y0
-;;;         bcs exit
+         sub ch,cl
+         jmp .c1
 
-;;;         cmp #192
-;;;         bcc cont1
-;;3$:      add r2,r3
-;;         cmpb r3,r2
-;;         bcs 100$
+.c3:     add ch,cl
+         cmp ch,cl
+         jc .c100
 
-;;         cmpb r3,#192
-;;         bcs 1$
+         cmp ch,192
+         jc .c1
 
-;;;exit     rts
-;;100$:    return
+.c100:   retn
 
-;;;cont1    sta y8pos
-;;;         and #7
-;;;         sta y8byte
-;;;         lda y8pos
-;;;         lsr
-;;;         lsr
-;;;         lsr
-;;;         sec
-;;;         sbc crsry
-;;;         sta y8pos
-;;1$:      mov #65280,r2
-;;         movb @#crsry,r4
-;;         bic r2,r3
-;;         bic r2,r4
-;;         sub r4,r3
+.c1:     mov dl,[crsry]
+         sub ch,dl
+         mov dl,[crsrx]
+         sub al,dl
+         mov di,[crsrtile]     ;for chkadd
+.c22:    test ch,0f8h
+         js .cup           ;12$
+         jne .cdown        ;11$
 
-;;;         lda x8pos
-;;;         and #7
-;;;         sta x8bit
-;;;         lda crsrx
-;;;         lsr
-;;;         sta t2
-;;;         lda x8pos
-;;;         lsr
-;;;         lsr
-;;;         lsr
-;;;         sec
-;;;         sbc t2
-;;;         sta x8pos
-;;         movb @#crsrx,r4
-;;         bic r2,r1
-;;         bic r2,r4
-;;         sub r4,r1
+.c23:    test al,0f8h
+         js .cleft         ;13$
+         jne .cright       ;10$
 
-;;;         #assign16 adjcell,crsrtile
-;;         mov @#crsrtile,r2     ;r2 for chkadd
+         mov bx,7
+         sub bl,al
+         mov dl,[bittab+bx]
+         ;and ch,7
+         cmp [ppmode],bh
+         jne putpixel3
+         jmp putpixel2
 
-;;;         sta $ff3f
-;;;         lda y8pos
-;;;loop2    bmi cup
-;;;         bne cdown
-;;22$:     bit #65528,r3
-;;         bmi 12$
-;;         bne 11$
+.cright: mov di,[di+right]   ;y=0, x=/=0
+         sub al,8
+         jmp .c23
 
-;;;         lda x8pos
-;;;loop3    bmi cleft
-;;;         bne cright
-;;23$:     bit #65528,r1
-;;         bmi 13$
-;;         bne 10$
-;;
-;;;         lda #7
-;;;         sec
-;;;         sbc x8bit
-;;;         tay
-;;;         lda bittab,y
-;;;         ldy ppmode
-;;;         bne putpixel3
-;;;         jmp putpixel2
-;;         mov #7,r4
-;;         sub r1,r4
-;;         bic #65528,r4
-;;         movb bittab(r4),r4
-;;         bic #65528,r3
-;;         tstb @#ppmode
-;;         bne putpixel3
-;;         jmp @#putpixel2
+.cdown:  mov di,[di+down]   ;y=/=0
+         sub ch,8
+         jmp .c22
 
-;;;cright   ldy #right     ;y=0, x=/=0
-;;;         jsr nextcell
-;;;         dec x8pos
-;;;         bpl loop3
-;;10$:     mov right(r2),r2
-;;         sub #8,r1
-;;         br 23$
+.cup:    mov di,[di+up]   ;y=/=0
+         add ch,8
+         jmp .c22
 
-;;;cdown    ldy #down      ;y=/=0
-;;;         jsr nextcell
-;;;         dec y8pos
-;;;         bpl loop2
-;;11$:     mov down(r2),r2
-;;         sub #8,r3
-;;         br 22$
+.cleft:  mov di,[di+left]   ;y=0, x=/=0
+         add al,8
+         jmp .c23
 
-;;;cup      ldy #up       ;y=/=0
-;;;         jsr nextcell
-;;;         inc y8pos
-;;;         jmp loop2
-;;12$:     mov up(r2),r2
-;;         add #8,r3
-;;         br 22$
-
-;;;cleft    ldy #left      ;y=0, x=/=0
-;;;         jsr nextcell
-;;;         inc x8pos
-;;;         jmp loop3
-;;13$:     mov left(r2),r2
-;;         add #8,r1
-;;         br 23$
-
-putpixel3:       ;IN: r2,r3,r4
-;;;         ldy y8byte
-;;;         ora (adjcell),y
-;;;         sta (adjcell),y
-;;         add r2,r3
-;;         bisb r4,@r3
-;; 
-;;;         jsr chkadd	;uses adjcell!
-;;;         sta $ff3e
-;;;         rts
-;;         jmp @#chkadd
+putpixel3:
+         mov bl,ch
+         or [di+bx],dl
+         jmp chkadd

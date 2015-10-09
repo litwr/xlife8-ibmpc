@@ -49,15 +49,15 @@ sum      db 0        ;+60
          db 0        ;free
 }
 
-boxsz_xmin = i1
-boxsz_ymin = saved
-boxsz_curx = temp          ;boxsz_sizex
-boxsz_cury = temp2         ;boxsz_sizey
-xcut       = temp2
-ycut       = temp2+1
-x8poscp    = temp
-y8poscp    = temp+1
-y8byte     = saved
+;boxsz_xmin = i1
+;boxsz_ymin = saved
+;boxsz_curx = temp          ;boxsz_sizex
+;boxsz_cury = temp2         ;boxsz_sizey
+;xcut       = temp2
+;ycut       = temp2+1
+;x8poscp    = temp
+;y8poscp    = temp+1
+;y8byte     = saved
 
 black equ 27,'[37m'
 red equ 27,'[31m'
@@ -67,8 +67,9 @@ purple equ 27,'[35m'
 bold equ 27,'[1m'
 normal equ 27,'[0m'
 ansiclrscn equ 27,'[2J'
-clrtoeol equ 27,'[K'
 home equ 27,'[H'
+;clrtoeol equ 27,'[K'  ;doesn't work at Dosbox
+clrtoeol equ '                                        ',home
 
 macro vidmacp one,two {
           mov cx,[si+one]
