@@ -67,57 +67,21 @@ purple equ 27,'[35m'
 bold equ 27,'[1m'
 normal equ 27,'[0m'
 ansiclrscn equ 27,'[2J'
-erasetoeol equ 27,'[K'
+clrtoeol equ 27,'[K'
 home equ 27,'[H'
 
 macro vidmacp one,two {
-;;          mov one(r0),r2
-;;          mov one+2(r0),r4
-;;          bic #^B1110011100111111,r2
           mov cx,[si+one]
           and cx,0001100011000000b
-
-;;          mov r2,r3
-;;          swab r3
-;;          aslb r3   ;sets CY=0
-;;          bis r3,r2
-;;          mov r1,r3
-;;          rorb r3    ;uses CY=0
-;;          asrb r3
-;;          asrb r3
-;;          asrb r3
-;;          movb r3,r3
-;;          bisb r2,r3
-;;          mov #tovideo,@#pageport
           shl ch,1
           or ch,cl
           mov cl,4
           mov ah,al
           shr al,cl
           or al,ch
-                     
-;;if two
-;;          movb vistabpc(r3),@r5
-;;else
-;;          movb vistabpc(r3),two(r5)
-;;endif
           mov bx,vistabpc
           xlatb
           mov [es:di+two],al
-
-;;          bic #^B1111110011100111,r4
-;;          asl r4
-;;          asl r4
-;;          asl r4
-;;          mov r4,r3
-;;          swab r3
-;;          asl r3
-;;          bis r3,r4
-;;          movb r1,r3
-;;          bic #^B1111111111110000,r3
-;;          bisb r4,r3
-;;          movb vistabpc(r3),two+1(r5)
-;;          mov #todata,@#pageport
           mov dx,[si+one+2]
           and dx,0000001100011000b
           shr dl,1

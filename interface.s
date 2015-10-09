@@ -783,7 +783,7 @@ benchcalc: call stop_timer
 .c143a:  mov dx,cx
          call todec
          call printstr
-         db 's',0dh,0ah,'SPEED: $'
+         db 's',0dh,10,'SPEED: $'
          call printfloat
 .c143x:  call curoff
          jmp getkey

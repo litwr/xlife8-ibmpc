@@ -911,8 +911,8 @@ loadmenu:call totext
 .c11:    or cl,cl
          jz menu2
 
-         mov word [di],'.'*256+'8'
-         mov word [di+2],'X'*256+'L'
+         mov word [di],'8'*256+'.'
+         mov word [di+2],'L'*256+'X'
          xor ch,ch
          mov [di+4],ch
          jmp .c101
@@ -937,9 +937,9 @@ menu2:   call setdirmsk
 ;;*         .text " as usual"
 ;;*         .byte $d,0
 
-         ;call showdir  ;returns number of directory entries in BP
+         call showdir  ;returns number of directory entries in BP
 .c6:     call printstr
-         db home,erasetoeol,green
+         db home,clrtoeol,green
          db 'ENTER FILE# OR ',red,'ESC',green,': ',black,'$'
 
 .c3:     mov di,stringbuf+1      ;+1?
@@ -964,7 +964,7 @@ menu2:   call setdirmsk
          cmp al,'9'+1
          jnc .c1
 
-         cmp cl,2
+         cmp cl,3
          jz .c1
 
          mov [di],al
@@ -975,20 +975,25 @@ menu2:   call setdirmsk
          int 21h
          jmp .c1
 
-.c11:    or cl,cl
+.c11:    xor ax,ax
+         or cl,cl
          jz .c3
 
          lodsb
          sub al,'0'
          dec cl
-         jnz .c21
+         jz .c21
 
          mov ch,10
-         mul ch
+.l2:     mul ch
          add al,[si]
+         inc si
          sub al,'0'
+         dec cl
+         jnz .l2
+         
 .c21:    cmp ax,bp
-         jc .c6
+         jnc .c6
 
          ;call findfn
          ;call curoff
@@ -1632,14 +1637,14 @@ setdirmsk:
          int 21h
          jmp .c1
 
-.c11:    mov si,svfn
-         or cl,cl
+.c11:    or cl,cl
          jnz .c5
 
-         mov byte [si],'*'
-.c5:     mov word [si+1],'.'*256+'8'          
-         mov word [si+3],'X'*256+'L'
-         mov byte [si+4],ch
+         mov byte [di],'*'
+         inc di
+.c5:     mov word [di],'8'*256+'.'          
+         mov word [di+2],'L'*256+'X'
+         mov byte [di+4],ch
 .c13:    retn
 
 .c12:    dec di
@@ -2545,4 +2550,3 @@ printfloat: mov si,stringbuf
             int 21h
             loop .l2
             retn
-

@@ -56,7 +56,7 @@
 ;;10$:     mov #16384,r0
 ;;         br 9$
 
-;;showfree: push r5 
+showfree: ;;push r5 
 ;;         mov @#andos_rdfat,r1
 ;;         call @r1
 ;;         mov @#andos_iobuff,r0
@@ -102,13 +102,91 @@
 ;;         .asciz "free"
 
 ;;         pop r5
-;;exitio:  return
+exitio:  retn
 
 ;;ioerrjmp: jmp @#ioerror
 
-;;showdir: jsr r3,@#printstr   ;OUT: R5
-;;         .byte 12,10,0,0
+printbp: mov dl,' '
+         cmp bp,10
+         jnc .l1
 
+         mov ah,2
+         int 21h
+.l1:     cmp bp,100
+         jnc .l2
+
+         mov ah,2
+         int 21h
+.l2:     mov ax,bp
+.ee:     xor dx,dx
+         call todec
+         mov si,stringbuf+1
+.l3:     lodsb
+         mov dl,al
+         mov ah,2
+         int 21h
+         dec bx
+         jnz .l3
+         retn
+         
+showdir: call printstr   ;OUT: BP
+         db ansiclrscn,10,'$'
+
+         xor bp,bp
+         mov dx,stringbuf
+         mov cx,20h
+         mov ah,4eh
+         int 21h
+         push es
+         jc .exit
+
+.l3:     call printstr
+         db red,'$'
+         call printbp
+         call printstr
+         db black,' $'
+         les di,dword [dta]
+         push di
+.l2:     mov dl,[es:di+1eh] ;fn offset in DTA
+         inc di
+         or dl,dl
+         jz .l1
+
+         mov ah,2
+         int 21h
+         jmp .l2
+
+.l1:     call printstr
+         db ' ',blue,'$'
+         pop di
+         mov ax,[es:di+1ah]  ;size offset in DTA
+         call printbp.ee
+         test bp,1
+         jnz .l4
+
+         mov ah,3
+         xor bx,bx
+         int 10h
+         dec ah
+         mov dl,20
+         int 10h
+         jmp .l5
+
+.l4:     call printstr
+         db 0dh,10,'$'
+.l5:     inc bp
+         cmp bp,1000
+         jz .exit
+
+         push ds
+         mov ah,4fh
+         lds dx,dword [dta]
+         int 21h
+         pop ds
+         jnc .l3
+
+.exit:   pop es
+         jmp showfree
 ;;         mov @#andos_init,r1
 ;;         call @r1
 ;;         bcs ioerrjmp
