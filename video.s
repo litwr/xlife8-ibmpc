@@ -1623,7 +1623,7 @@ setdirmsk:
          cmp al,dl
          jz .c1
 
-         cmp si,svfn
+         cmp si,stringbuf
          jnz .c50
 
          cmp dl,'a'
