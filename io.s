@@ -56,21 +56,6 @@
 ;;10$:     mov #16384,r0
 ;;         br 9$
 
-showfree:mov ah,36h
-         xor dx,dx
-         int 21h
-         mul cx
-         mov cx,10    ;1024
-.l1:     shr dx,1
-         rcr ax,1
-         loop .l1
-         mul bx
-         call printbp.ee1
-         call printstr
-         db 'K free$'
-;exitio:
-         retn
-
 ;;ioerrjmp: jmp @#ioerror
 
 printbp: mov dl,' '
@@ -100,7 +85,7 @@ showdir: call printstr   ;OUT: BP
          db ansiclrscn,10,'$'
 
          xor bp,bp
-         mov dx,stringbuf
+         mov dx,svfn
          mov cx,20h
          mov ah,4eh
          int 21h
@@ -116,7 +101,7 @@ showdir: call printstr   ;OUT: BP
          push di
 .l2:     mov dl,[es:di+1eh] ;fn offset in DTA
          inc di
-         or dl,dl
+         cmp dl,'.'
          jz .l1
 
          mov ah,2
@@ -129,7 +114,7 @@ showdir: call printstr   ;OUT: BP
          mov ax,[es:di+1ah]  ;size offset in DTA
          call printbp.ee
          call printstr
-         db black,'$'
+         db green,'$'
          test bp,1
          jnz .l4
 
@@ -155,65 +140,53 @@ showdir: call printstr   ;OUT: BP
          jnc .l3
 
 .exit:   pop es
-         jmp showfree
+         test bp,1
+         jz showfree
 
-;;findfn:  mov @#andos_init,r1
-;;         call @r1
-;;         bcs ioerrjmp
+         call printstr
+         db 0dh,10,'$'
+showfree:mov ah,36h     ;after showdir
+         xor dx,dx
+         int 21h
+         mul cx
+         mov cx,10    ;1024
+.l1:     shr dx,1
+         rcr ax,1
+         loop .l1
+         mul bx
+         call printbp.ee1
+         call printstr
+         db 'K free',black,'$'
+;exitio:
+         retn
 
-;;         mov @#stringbuf+1,r5
-;;         sub #48*256+48,r5
-;;         clr r0
-;;1$:      mov #svfn,r3
-;;         mov @#andos_diren2,r1
-;;         call @r1
-;;         beq exitio
+findfn:  xor bp,bp          ;in: ax
+         mov di,ax
+         mov dx,svfn
+         mov cx,20h
+         mov ah,4eh
+         int 21h
+.l3:     cmp di,bp
+         jz .l7
+         
+         inc bp
+         push ds
+         mov ah,4fh
+         lds dx,dword [dta]
+         int 21h
+         pop ds
+         jmp .l3
 
-;;         cmp #"8L,8(r4)
-;;         bne 1$
-
-;;         cmpb #'0,10(r4)
-;;         bne 1$
-
-;;         mov #8,r2
-;;         mov r4,r1
-;;3$:      cmpb @r3,(r1)+
-;;         beq 2$
-
-;;         cmpb #'?,@r3
-;;         bne 1$
-
-;;2$:      inc r3
-;;         sob r2,3$
-
-;;         tst r5
-;;         beq 5$
-
-;;         decb r5
-;;         bpl 1$
-
-;;         add #65034,r5   ;$ff0a
-;;         br 1$
-
-;;5$:      mov #fn,r5
-;;         mov #8,r2
-;;8$:      movb (r4)+,r1
-;;         cmpb r1,#32
-;;         beq 7$
-
-;;         movb r1,(r5)+
-;;         sob r2,8$
-
-;;7$:      movb #'.,(r5)+
-;;         movb #'8,(r5)+
-;;         movb #'L,(r5)+
-;;         movb #'0,(r5)+
-;;         tst r2
-;;         beq 11$
-
-;;6$:      clrb (r5)+
-;;         sob r2,6$
-;;11$:     return
+.l7:     push es
+         les di,dword [dta]
+         mov si,fn
+.l2:     mov al,[es:di+1eh] ;fn offset in DTA
+         inc di
+         mov [si],al
+         inc si
+         or al,al
+         jnz .l2
+         jmp showdir.exit
 
 ;;savepat: call @#commonin
 ;;         dec @#io_op

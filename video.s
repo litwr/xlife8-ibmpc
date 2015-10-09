@@ -996,8 +996,7 @@ menu2:   call setdirmsk
          jc .l3
          jmp .c6      ;optimize 8088
 
-.l3:
-         ;call findfn
+.l3:     call findfn
          ;call curoff
          xor ax,ax     ;sets ZF
          retn
@@ -1595,7 +1594,7 @@ setdirmsk:
          db red,'ENTER',green
          db ' = *)',black,0dh,10,'$'
 
-.c3:     mov di,stringbuf
+.c3:     mov di,svfn
          xor cx,cx
 .c1:     call getkey
          cmp al,0dh
@@ -1622,7 +1621,7 @@ setdirmsk:
          cmp al,dl
          jz .c1
 
-         cmp si,stringbuf
+         cmp si,svfn
          jnz .c50
 
          cmp dl,'a'
