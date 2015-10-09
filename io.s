@@ -56,53 +56,20 @@
 ;;10$:     mov #16384,r0
 ;;         br 9$
 
-showfree: ;;push r5 
-;;         mov @#andos_rdfat,r1
-;;         call @r1
-;;         mov @#andos_iobuff,r0
-;;         add #3,r0      ;start
-;;         mov #397,r1    ;cluster counter for 80x2x10 = 1600 sectors disk
-;;         clr r3         ;free
-;;3$:      movb (r0)+,r2
-;;         movb @r0,r4
-;;         bic #^B1111,r4
-;;         bis r2,r4
-;;         bne 1$
-
-;;         inc r3
-;;1$:      dec r1
-;;         beq 10$
-
-;;         movb (r0)+,r2
-;;         bic #^B1111111111110000,r2
-;;         bisb (r0)+,r2
-;;         bne 2$
-
-;;         inc r3
-;;2$:      dec r1
-;;         bne 3$
-
-;;10$:     asl r3
-;;         clr r4
-;;         call @#todec
-;;         mov #32,r0
-;;         emt ^O16
-;;         mov #stringbuf,r1
-;;         mov #10,r2
-;;5$:      cmpb @r1,#'0
-;;         bne 4$
-
-;;         inc r1
-;;         dec r2
-;;         br 5$
-
-;;4$:      emt ^O20
-;;         jsr r3,@#printstr
-;;         .byte 'K,32,146
-;;         .asciz "free"
-
-;;         pop r5
-exitio:  retn
+showfree:mov ah,36h
+         xor dx,dx
+         int 21h
+         mul cx
+         mov cx,10    ;1024
+.l1:     shr dx,1
+         rcr ax,1
+         loop .l1
+         mul bx
+         call printbp.ee1
+         call printstr
+         db 'K free$'
+;exitio:
+         retn
 
 ;;ioerrjmp: jmp @#ioerror
 
@@ -119,10 +86,10 @@ printbp: mov dl,' '
          int 21h
 .l2:     mov ax,bp
 .ee:     xor dx,dx
-         call todec
-         mov si,stringbuf+1
-.l3:     lodsb
-         mov dl,al
+.ee1:    call todec
+         lea si,[stringbuf+bx]
+.l3:     mov dl,[si]
+         dec si
          mov ah,2
          int 21h
          dec bx
@@ -161,6 +128,8 @@ showdir: call printstr   ;OUT: BP
          pop di
          mov ax,[es:di+1ah]  ;size offset in DTA
          call printbp.ee
+         call printstr
+         db black,'$'
          test bp,1
          jnz .l4
 
@@ -187,86 +156,6 @@ showdir: call printstr   ;OUT: BP
 
 .exit:   pop es
          jmp showfree
-;;         mov @#andos_init,r1
-;;         call @r1
-;;         bcs ioerrjmp
-
-;;         mov #"00,r5
-;;         clr r0
-;;1$:      mov #svfn,r3
-;;         mov @#andos_diren2,r1
-;;         call @r1
-;;         beq showfree
-
-;;         cmp #"8L,8(r4)
-;;         bne 1$
-
-;;         cmpb #'0,10(r4)
-;;         bne 1$
-
-;;         mov #8,r2
-;;         mov r4,r1
-;;3$:      cmpb @r3,(r1)+
-;;         beq 2$
-
-;;         cmpb #'?,@r3
-;;         bne 1$
-
-;;2$:      inc r3
-;;         sob r2,3$
-
-;;         mov #stringbuf,r3
-;;         movb #145,(r3)+
-;;         mov r5,(r3)+
-;;         mov #32*256+146,(r3)+
-;;         mov #8,r2
-;;         mov r4,r1
-;;4$:      movb (r1)+,(r3)+
-;;         sob r2,4$
-
-;;         mov #147*256+32,r2
-;;         mov r2,(r3)+
-;;         add #256,r5
-;;         cmp r5,#<'9+1>*256
-;;         bcs 15$
-
-;;         add #246*256+1,r5
-;;15$:     mov 28(r4),r1
-;;         cmp #16384,r1
-;;         beq 16$
-
-;;         bit #^B1111111111,r1
-;;         beq 17$
-
-;;         add #^B10000000000,r1
-;;17$:     swab r1
-;;         asrb r1
-;;         asrb r1
-;;         cmpb r1,#10
-;;         bcc 20$
-
-;;         add #'0,r1
-;;         movb r1,(r3)+
-;;         movb r2,(r3)+
-;;         br 23$
-
-;;20$:     add #'0-10,r1
-;;         movb #'1,(r3)+
-;;         movb r1,(r3)+
-;;23$:     movb r2,(r3)+
-;;         br 21$
-
-;;16$:     mov #"16,(r3)+
-;;         movb #'+,(r3)+
-;;21$:     bit #256,r5
-;;         bne 22$
-
-;;         mov #10,r2
-;;22$:     movb r2,(r3)+
-;;         mov #stringbuf,r1
-;;         mov #19,r2
-;;         emt ^O20
-;;         br 1$
 
 ;;findfn:  mov @#andos_init,r1
 ;;         call @r1

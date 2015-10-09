@@ -993,8 +993,10 @@ menu2:   call setdirmsk
          jnz .l2
          
 .c21:    cmp ax,bp
-         jnc .c6
+         jc .l3
+         jmp .c6      ;optimize 8088
 
+.l3:
          ;call findfn
          ;call curoff
          xor ax,ax     ;sets ZF
