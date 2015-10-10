@@ -467,16 +467,20 @@ putpixel:     ;IN: x0,y0; DON'T USE: SI,BP
 
 .c100:   retn
 
-.c1:     mov dl,[crsry]
-         sub ch,dl
+.c1:     xor cl,cl
+         xchg cl,ch
+         xor dh,dh
+         mov dl,[crsry]
+         sub cx,dx
+         xor ah,ah
          mov dl,[crsrx]
-         sub al,dl
+         sub ax,dx
          mov di,[crsrtile]     ;for chkadd
-.c22:    test ch,0f8h
+.c22:    test cx,0fff8h
          js .cup           ;12$
          jne .cdown        ;11$
 
-.c23:    test al,0f8h
+.c23:    test ax,0fff8h
          js .cleft         ;13$
          jne .cright       ;10$
 
@@ -489,22 +493,22 @@ putpixel:     ;IN: x0,y0; DON'T USE: SI,BP
          jmp putpixel2
 
 .cright: mov di,[di+right]   ;y=0, x=/=0
-         sub al,8
+         sub ax,8
          jmp .c23
 
 .cdown:  mov di,[di+down]   ;y=/=0
-         sub ch,8
+         sub cx,8
          jmp .c22
 
 .cup:    mov di,[di+up]   ;y=/=0
-         add ch,8
+         add cx,8
          jmp .c22
 
 .cleft:  mov di,[di+left]   ;y=0, x=/=0
-         add al,8
+         add ax,8
          jmp .c23
 
 putpixel3:
-         mov bl,ch
+         mov bl,cl
          or [di+bx],dl
          jmp chkadd
