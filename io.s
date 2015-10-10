@@ -40,10 +40,10 @@ loadpat: mov ax,3d00h
 .l2:     push si
          push di
          ;call readtent   ;should adjust filesz
-         ;call showrect
+         call showrect
          pop di
          pop si
-         ;jc .l1
+         jc .l1
 
          call fillrt
          ;call puttent

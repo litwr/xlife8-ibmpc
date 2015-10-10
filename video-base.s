@@ -80,22 +80,22 @@ tograph: cmp [zoom],0
           call showrules
           jmp xyout
 
-printstr:  pop dx         ;uses: si,dx,ax
-           mov si,dx
-.l1:       lodsb
-           cmp al,'$'
-           jnz .l1
+printstr:pop dx         ;uses: si,dx,ax
+         mov si,dx
+.l1:     lodsb
+         cmp al,'$'
+         jnz .l1
 
-           mov ah,9
-           int 21h
-           jmp si
+         mov ah,9
+         int 21h
+         jmp si
 
 digiout:        ;;in: r1 - length, r2 - scrpos, r0 - data
                 ;in: dx - length, di - srcpos, bx - data
 ;;1$:      movb (r0)+,r3
-.c1:       xor ax,ax
-           mov al,[bx]
-           inc bx
+.c1:     xor ax,ax
+         mov al,[bx]
+         inc bx
 
 ;;         asl r3
 ;;         asl r3

@@ -13,7 +13,7 @@ getkey2: mov ah,1
 dispatcher: call getkey2
 ;;dispat0: cmpb #'g,r0
 ;;         bne 3$
-         mov bx,0ah    ;for g/h-commands bg=10=lightgreen
+.e0:     mov bx,0ah    ;for g/h-commands bg=10=lightgreen
          cmp al,'g'
          jnz .c3
 
@@ -579,49 +579,28 @@ dispatcher: call getkey2
 .c172:   cmp al,'l'
          jnz .c173
 
-         mov al,[zoom]
+         call loadmenu
+         jnz .c302
+
+.c317:   mov al,[zoom]
          push ax
          or al,al
          jz .c301
 
          mov [zoom],0
-.c301:   call loadmenu
-         jnz .c302
-
-;.c303:  
-         call tograph
+.c301:   call tograph
          call loadpat
-.c302:   pop ax
+         pop ax
          mov [zoom],al
          call calccells
-         jmp tograph
+.c302:   jmp tograph
 
 .c173:   cmp al,'L'
          jnz .c174
 
-;;         tstb @#fn
-;;         bne 317$
-
-;;;*         rts
-;;100$:    return
+         cmp [fn],0
+         jne .c317
 .c100:   retn
-
-;;;*cont17v  lda zoom
-;;;*         pha
-;;;*         beq nozoom3
-;;;*         jsr zoomout
-;;317$:    movb @#zoom,r0
-;;         push r0
-;;         beq 303$
-;;         
-;;         call @#319$
-
-;;;*nozoom3  jsr totext
-;;;*         lda #147
-;;;*         jsr BSOUT
-;;;*         jsr curoff
-;;;*         jmp cont17w
-;;         br 303$
 
 .c174:   cmp al,'+'
          jnz .c175

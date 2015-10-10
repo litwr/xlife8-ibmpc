@@ -53,23 +53,27 @@ sum      db 0        ;+60
 ;boxsz_ymin = saved
 ;boxsz_curx = temp          ;boxsz_sizex
 ;boxsz_cury = temp2         ;boxsz_sizey
-;xcut       = temp2
-;ycut       = temp2+1
-;x8poscp    = temp
-;y8poscp    = temp+1
-;y8byte     = saved
+xcut       = temp2
+ycut       = temp2+1
+x8poscp    = temp
+y8poscp    = temp+1
+y8byte     = saved
 
-black equ 27,'[37m'
 red equ 27,'[31m'
-green equ 27,'[32m'
-blue equ 27,'[34m'
+green equ 27,'[32m'       ;purple in graph
+gpurple equ green
+blue equ 27,'[34m'        ;cyan in graph
+gcyan equ blue
 purple equ 27,'[35m'
+black equ 27,'[37m'       ;white in graph
+gwhite equ black
 bold equ 27,'[1m'
 normal equ 27,'[0m'
 ansiclrscn equ 27,'[2J'
 home equ 27,'[H'
-;clrtoeol equ 27,'[K'  ;doesn't work at Dosbox
-clrtoeol equ '                                        ',home
+;clr2eol equ 27,'[K'      ;doesn't work at Dosbox
+clrtoeol equ '                                       ',0dh
+;home
 
 macro vidmacp one,two {
           mov cx,[si+one]

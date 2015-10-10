@@ -904,7 +904,7 @@ temp      dw 0
 temp2     dw 0
 filehl    dw 0
 filesz    dw 0
-;saved     dw 0
+saved     dw 0
 tobin     dw 1,10,100,1000,10000
 dta       dw 0,0
 x0        db 0   ;word aligned for the speed
