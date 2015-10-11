@@ -1136,7 +1136,7 @@ showrect:
          cmp al,'r'
          jnz .c1
 
-         ;call clrrect
+         call clrrect
          not [xchgdir]
          mov ax,word [xdir]
          xchg al,ah
@@ -1147,7 +1147,7 @@ showrect:
 .c1:     cmp al,'f'
          jne .c2
 
-         ;call clrrect
+         call clrrect
          not [xdir]
          jmp .c10
 
@@ -1160,7 +1160,7 @@ showrect:
          jmp .c11
 
 .c100:   push ax
-         ;call clrrect
+         call clrrect
          pop ax
          call dispatcher.e0
          jmp .c10
@@ -1340,82 +1340,88 @@ drrect1: mov di,[si+video]
          add di,ax
 exitdrawrect: retn
 
+loopup2: call xclrect2
+         je exitdrawrect
+
+         dec byte [y8byte]
+         jns loopup2
+
+         mov si,[si+up]
+         mov byte [y8byte],7
+         jmp loopup2
+
 clrrect:  ;in: x8poscp, y8poscp
-;;         call @#xchgxy
-;;         call @#calcx
-;;         tstb @#xdir
-;;         beq 3$
+         call xchgxy
+         call calcx   ;sets ah=0
+         cmp [xdir],ah
+         je .c3
 
-;;         sub #8,r1
-;;         comb r1
-;;3$:      add @#x8poscp,r1
-;;         clc
-;;         rorb r1
-;;         asrb r1
-;;         asrb r1
-;;         movb r1,r3
-;;         inc r3
-;;         movb r3,@#x8poscp
-;;         movb @#y8poscp,r4
-;;         movb @#crsrbyte,@#y8byte
-;;         tstb @#pseudoc
-;;         bne clrectpc
+         sub al,8
+         not al
+.c3:     add al,[x8poscp]
+         shr al,1
+         shr al,1
+         shr al,1
+         mov dl,al
+         inc dl
+         mov [x8poscp],dl
+         mov dh,[y8poscp]
+         mov cl,[crsrbyte]
+         mov [y8byte],cl
+         cmp [pseudoc],ah
+         jne clrectpc
 
-;;         mov @#crsrtile,r5
-;;        tstb @#ydir
-;         bne loopup2
+         mov si,[crsrtile]
+         cmp [ydir],ah
+         jne loopup2
 
-loopdn2: ;;call @#xclrect2
-         ;;beq exitclrect2
+loopdn2: call xclrect2
+         je exitclrect2
 
-;;         incb @#y8byte
-;;         cmpb #8,@#y8byte
-;;         bne loopdn2
+         inc byte [y8byte]
+         cmp byte [y8byte],8
+         jne loopdn2
 
-;;         mov down(r5),r5
-;;         clrb @#y8byte
-;;         br loopdn2
+         mov si,[si+down]
+         mov byte [y8byte],0
+         jmp loopdn2
 
-loopup2: ;;call @#xclrect2
-;;         beq exitclrect2
+xclrect2:push si
+         cmp [xdir],0
+         jne .c2
 
-;;         decb @#y8byte
-;;         bpl loopup2
+.c1:     call clrect12
+         mov si,[si+right]
+         dec dl
+         jnz .c1
+         jmp .c3
 
-;;         mov up(r5),r5
-;;         movb #7,@#y8byte
-;;         br loopup2
+.c2:     call clrect12
+         mov si,[si+left]
+         dec dl
+         jnz .c2
 
-xclrect2: ;;push r5
-;;         tstb @#xdir
-;;         bne 2$
+.c3:     pop si
+         mov dl,[x8poscp]
+         dec dh
+exitclrect2: retn
 
-;;1$:      call @#clrect12
-;;         mov right(r5),r5
-;;         sob r3,1$
-;;         br 3$
+clrect12:xor bx,bx
+         mov al,[y8byte]
+         mov bl,al
+         mov di,[si+video]
+         shr al,1
+         jnc .l1
 
-;;2$:      call @#clrect12
-;;         mov left(r5),r5
-;;         sob r3,2$
-
-;;3$:      pop r5
-;;         movb @#x8poscp,r3
-;;         decb r4
-exitclrect2: ;;return
-
-clrect12: ;;movb @#y8byte,r1
-;;         mov r1,r2
-;;         swab r1
-;;         asr r1
-;;         asr r1
-;;         add video(r5),r1
-;;         add r5,r2
-;;         movb @r2,r2
-;;         asl r2
-;;         mov #tovideo,@#pageport
-;;         mov vistab(r2),@r1
-;;         jmp @#gexit3
+         add di,2000h
+.l1:     mov cl,80
+         mul cl
+         add di,ax
+         mov bl,[si+bx]
+         shl bx,1
+         mov ax,[bx+vistab]
+         stosw
+         retn
 
 clrectpc: ;;movb @#crsrbyte,r4
 ;;         tstb @#ydir
