@@ -855,7 +855,7 @@ loadmenu:call totext
          jnz .c17
 
 .c100:   mov ch,al
-.c101:   ;call curoff
+.c101:   ;call curoff  ;curoff changes ch?
          or ch,ch
          retn
 
@@ -869,11 +869,11 @@ loadmenu:call totext
 .c21:    cmp al,9    ;TAB
          jnz .c18
 
-         ;call curoff
-;;         call @#ramdisk
+         call curoff
+         call ramdisk
          ;call curon
 
-         mov ch,1
+         xor cx,cx
          jmp .c101
 
 .c18:    cmp al,'!'
@@ -1100,10 +1100,8 @@ getsvfn: ;;call @#totext
 ;;         br 14$
 
 showrect:
-         mov dx,1800h  ;row+column
-         mov ah,2
-         int 10h
          call printstr
+         db 27,'[25H'
          db clrtoeol,gpurple,'MOVE, ',gwhite,'R',gpurple,'OTATE, '
          db gwhite,'F',gpurple,'LIP, ',gwhite,'ENTER',gpurple,', '
          db gwhite,'ESC',gcyan,'  X   Y',black,'$'

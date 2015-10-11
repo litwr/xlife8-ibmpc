@@ -136,10 +136,11 @@ mainloop:
 
          include 'rules.s'
          include 'tile.s'
-
+         include 'ramdata.s'
+         
 TIMERV          EQU     4096       ;1193180Hz/TIMERV=FREQ OF INTR8, approx 291.304 Hz
 
-start_timer:    CLI                 ;SAVE/SET INTR8 VECTOR
+start_timer:    cli                 ;SAVE/SET INTR8 VECTOR
                 xor ax,ax
                 mov [timercnt],ax
                 mov [timercnt+2],ax
@@ -845,8 +846,6 @@ cleanup0:
          include 'tab12.s'
 gentab:
          include 'gentab.s'
-;         include 'ramdata.s'
-
          include 'vistab.s'
 
 tab3      db 0, 1, 1, 2, 1, 2, 2, 3, 1, 2, 2, 3, 2, 3, 3, 4
