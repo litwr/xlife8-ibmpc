@@ -1423,58 +1423,59 @@ clrect12:xor bx,bx
          stosw
          retn
 
-clrectpc: ;;movb @#crsrbyte,r4
-;;         tstb @#ydir
-;;         beq 3$
+clrectpc:mov dh,[crsrbyte]
+         cmp [ydir],0
+         je .c3
 
-;;         sub #8,r4
-;;         comb r4
-;;3$:      movb @#y8poscp,r0
-;;         add r0,r4
-;;         clc
-;;         rorb r4
-;;         asrb r4
-;;         asrb r4
-;;         inc r4
-;;         mov @#crsrtile,r0
-;;         tstb @#ydir
-;;         bne loopuppc
+         sub dh,8
+         not dh
+.c3:     mov dl,[y8poscp]
+         add dh,dl
+         shr dh,1
+         shr dh,1
+         shr dh,1
+         inc dh
+         mov si,[crsrtile]
+         cmp [ydir],0
+         jne loopuppc
 
-loopdnpc: ;;call @#xclrectpc
-;;         beq exitclrectpc
+loopdnpc:call xclrectpc
+         je exitclrectpc
 
-;;         mov down(r0),r0
-;;         br loopdnpc
+         mov si,[si+down]
+         jmp loopdnpc
 
-loopuppc: ;;call @#xclrectpc
-;;       beq exitclrectpc
+loopuppc:call xclrectpc
+         je exitclrectpc
 
-;;         mov up(r0),r0
-;;         br loopuppc
+         mov si,[si+up]
+         jmp loopuppc
 
-xclrectpc: ;;push r0
-;;         tstb @#xdir
-;;         bne 2$
+xclrectpc: push si
+         cmp [xdir],0
+         jne .c2
 
-;;1$:      call @#clrect1pc
-;;         mov right(r0),r0
-;;         sob r3,1$
-;;         br 3$
+.c1:     call clrect1pc
+         mov si,[si+right]
+         dec dl
+         jnz .c1
+         jmp .c3
 
-;;2$:      call @#clrect1pc
-;;         mov left(r0),r0
-;;         sob r3,2$
-;;3$:      pop r0
-;;         movb @#x8poscp,r3
-;;         decb r4
-exitclrectpc: ;;return
+.c2:     call clrect1pc
+         mov si,[si+left]
+         dec dl
+         jnz .c2
+.c3:     pop si
+         mov dl,[x8poscp]
+         dec dh
+exitclrectpc: retn
 
-clrect1pc: ;;push r3
-;;         push r4
-;;         call @#showscnp1
-;;         pop r4
-;;         pop r3
-;;         return
+clrect1pc: push si
+         push dx
+         call showscnp1
+         pop dx
+         pop si
+         retn
          
 crsrset1:
 ;;         mov @#crsrtile,r0     ;sets r0,r1
