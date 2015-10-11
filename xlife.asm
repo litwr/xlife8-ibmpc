@@ -95,7 +95,7 @@ mainloop:
          jmp crsrflash2
 
          include 'io.s'
-;         include 'ramdisk.s'
+         include 'ramdisk.s'
          include 'video-base.s'
          include 'video.s'
          include 'utils.s'
@@ -880,6 +880,7 @@ ttab      db 0,1,2,3,3,4,5,6,7,8,8,9,16,17,18,19,19,20
 bittab    db 1,2,4,8,16,32,64,128
 
         align 2
+iobuf     rb 3072
 tiles:
          include 'initiles.s'
 
@@ -904,6 +905,7 @@ temp      dw 0
 temp2     dw 0
 filehl    dw 0
 filesz    dw 0
+tsz       dw 0
 saved     dw 0
 tobin     dw 1,10,100,1000,10000
 dta       dw 0,0

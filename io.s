@@ -1,7 +1,17 @@
+readtent:mov ah,3fh   ;read file
+         mov bx,[filehl]
+         mov cx,3072
+         mov dx,iobuf
+         int 21h
+         shr ax,1
+         mov [tsz],ax
+         sub [filesz],ax
+.e1:     retn
+
 loadpat: mov ax,3d00h
          mov dx,fn
          int 21h
-         jc .exit
+         jc readtent.e1
 
          mov [filehl],ax
          mov bx,ax
@@ -39,14 +49,17 @@ loadpat: mov ax,3d00h
 
 .l2:     push si
          push di
-         ;call readtent   ;should adjust filesz
+         call readtent   ;should adjust filesz
          call showrect
          pop di
          pop si
          jc .l1
 
          call fillrt
-         ;call puttent
+         call puttent
+         cmp [filesz],0
+         je .exit2
+
 .l3:     mov ah,3fh
          mov bx,[filehl]
          mov cx,2
@@ -59,7 +72,7 @@ loadpat: mov ax,3d00h
 .exit2:  mov ah,3eh    ;fclose
          mov bx,[filehl]
          int 21h
-.exit:   retn
+         retn
 
 printbp: mov dl,' '
          cmp bp,10

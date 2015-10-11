@@ -1112,7 +1112,7 @@ showrect:
          mov word [xdir],bx
          mov [xchgdir],bl
 .c10:    call drawrect
-         ;call showtent
+         call showtent
 .c11:    ;call crsrflash
          call getkey2
          cmp ax,4b00h    ;cursor left
@@ -2262,92 +2262,43 @@ infov:   ;;call @#totext
 ;;         br 24$
 
 putpixel2:
-;;         mov video(r2),r2
-;;         asl r4
-;;         mov vistab(r4),r4
-;;         swab r3
-;;         asr r3
-;;         asr r3
-;;         add r3,r2
-;;22$:     cmp r2,#16384
-;;         bcs 22$
+         mov di,[di+video]
+         mov bl,dl
+         shl bx,1
+         mov bx,[bx+vistab]
+         shr cl,1
+         jnc .l1
 
-;;         cmp r2,#32768
-;;         bcc 22$
+         add di,2000h
+.l1:     mov al,80
+         mul cl
+         add di,ax
 
-;;         mov #tovideo,@#pageport
-;;         bic r4,@r2
-;;         asl r4
-;;         bis r4,@r2
-;;         jmp @#gexit3
+         mov ax,bx
+         not ax
+         and [es:di],ax
+         shl bx,1
+         or [es:di],bx
+         retn
 
-showtent: ;;mov #toio,@#pageport
-;;         mov #16384+8,r0
-;;         mov @#loaded_sz,r5
-;;         sub #8,r5
-;;         cmp r5,#2560
-;;         bcs 2$
+showtent:mov ax,word [x0]
+         push ax
+         mov [ppmode],0
+         mov bp,[tsz]
+         mov si,iobuf
+.loop:   or bp,bp
+         je .fin
 
-;;         mov #2560,r5
-;;2$:      asr r5
+         lodsw
+         dec bp
+         mov word [x0],ax
+         call putpixel
+         jmp .loop
 
-;         lda x0
-;         pha
-;         lda y0
-;         pha
-;         lda #0
-;         sta $14
-;         sta $15
-;         sta ppmode
-;;         push @#x0
-;;         clrb @#ppmode
-
-;loop     lda $15
-;         cmp $b9
-;         bne l1
-
-;         ldx $14
-;         cpx $b8
-;         beq exit
-
-;l1       eor #8
-;         sta $15
-;         ldx #0
-;         lda ($14,x)
-;         sta x0
-;         lda $15
-;         eor #4
-;         sta $15
-;         lda ($14,x)
-;         sta y0
-;         ora x0
-;         beq l3
-;;1$:      mov #toio,@#pageport
-;;         mov (r0)+,@#x0
-
-;         jsr putpixel
-;;         mov #todata,@#pageport
-;;         call @#putpixel
-
-;l3       lda $15
-;         eor #$c
-;         sta $15
-;         inc $14
-;         bne loop
-;
-;         inc $15
-;         bne loop
-;;         sob r5,1$
-
-;exit     pla
-;         sta y0
-;         pla
-;         sta x0
-;         inc ppmode
-;         rts
-;;         pop @#x0
-;;         incb @#ppmode
-;;         return
+.fin:    pop ax
+         mov word [x0],ax
+         inc [ppmode]
+         retn
 
 setpalette:
 ;;         mov #3,r2
