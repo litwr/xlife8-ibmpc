@@ -645,7 +645,7 @@ dispatcher: call getkey2
 .c177:   cmp al,'v'
          jnz .c178
 
-;;         jmp @#infov
+         jmp infov
 
 .c178:   cmp al,'Z'
          jnz .c179

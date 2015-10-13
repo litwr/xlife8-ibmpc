@@ -28,172 +28,111 @@ todec:    mov bx,stringbuf+1    ;convert dx:ax to stringbuf
           mov [stringbuf],bl
           retn
 
-;;boxsz:   mov #192,@#boxsz_ymin
-;;         mov #160,@#boxsz_xmin
-;;         clr r3                ;boxsz_ymax
-;;         clr r5                ;boxsz_xmax
-;;         clr @#boxsz_curx
-;;         clr @#boxsz_cury
-;;         mov #tiles,r4
-;;         clr @#lowbench         ;binary cell count
-;;0$:      push r5
-;;         mov #8,r5
-;;         clr r2
-;;9$:      clr r0
-;;         bisb (r4)+,r0
-;;         movb tab3(r0),r1
-;;         add r1,@#lowbench
-;;         bis r0,r2
-;;         sob r5,9$
-;;         pop r5
-;;         sub #8,r4
-;;         tst r2
-;;         beq 17$
+boxsz:   mov byte [boxsz_ymin],192
+         mov byte [boxsz_xmin],160
+         xor cx,cx               ;cl=boxsz_ymax, ch=boxsz_xmax
+         mov [boxsz_curx],cx
+         mov [boxsz_cury],cx
+         mov si,[tiles]
+         mov [tsz],cx         ;binary cell count
+.c0:     push cx  ;ch
+         mov cl,8
+         xor dx,dx
+         xor bx,bx
+.c9:     mov bl,[si]
+         inc si
+         mov dh,[bx+tab3]
+         add byte [tsz],dh    ;for save
+         adc byte [tsz+1],bh
+         or dl,bl
+         loop .c9
 
-;;         push r2
-;;         clr r1
-;;         dec r1
-;;2$:      inc r1
-;;         aslb r2
-;;         bcc 2$
+         pop cx
+         sub si,8
+         or dl,dl
+         je .c17
 
-;;;         sty t1
-;;;         lda curx
-;;         mov @#boxsz_curx,r2
+         push dx   ;dl
+         mov dh,0ffh
+.c2:     inc dh
+         shl dl,1
+         jnc .c2
 
-;;;         asl
-;;;         asl
-;;;         asl
-;;         asl r2
-;;         asl r2
-;;         asl r2
+         mov dl,[boxsz_curx]
+         shl dl,1
+         shl dl,1
+         shl dl,1
+         mov bl,dl
+         add dh,dl
+         cmp dh,[boxsz_xmin]
+         jnc .c12
 
-;;;         tax
-;;;         adc t1
-;;         mov r2,r0
-;;         add r2,r1
+         mov [boxsz_xmin],dh
+.c12:    pop dx
+         mov dh,8
+.c3:     dec dh
+         shr dl,1
+         jnc .c3
 
-;;;         cmp xmin
-;;;         bcs cont2
-;;         cmp r1,@#boxsz_xmin
-;;         bcc 12$
+         add dh,bl
+         cmp dh,ch
+         jc .c13
 
-;;;         sta xmin
-;;         mov r1,@#boxsz_xmin
+         mov ch,dh
+.c13:    xor dx,dx
+         mov di,si
+.c4:     lodsb
+         or al,al
+         je .c4
 
-;;;cont2    pla
-;;;         ldy #8
-;;;loop3    lsr
-;;;         dey
-;;;         bcc loop3
-;;12$:     pop r2
-;;         mov #8,r1
-;;3$:      dec r1
-;;         asr r2
-;;         bcc 3$
+         sub si,di
+         dec di
+         mov dl,[boxsz_cury]
+         shl dl,1
+         shl dl,1
+         shl dl,1
+         mov bl,dl
+         add dx,si
+         cmp dl,[boxsz_ymin]
+         jnc .c15
 
-;;;         sty t1
-;;;         txa
-;;;         clc
-;;;         adc t1
-;;         add r0,r1
+         mov [boxsz_ymin],dl
+.c15:    mov si,di
+         add di,8
+.c5:     dec di
+         cmp [di],dh
+         je .c5
 
-;;;         cmp xmax
-;;;         bcc cont3
-;;        cmp r1,r5
-;;        bcs 13$
+         sub di,si
+         add di,bx
+         push dx
+         mov dx,di
+         cmp dl,cl
+         jc .c17
 
-;;;         sta xmax
-;;        mov r1,r5
+         mov cl,dl
+.c17:    pop dx
+         add si,tilesize
+         inc byte [boxsz_curx]
+         cmp byte [boxsz_curx],hormax
+         jne .c0
 
-;;;cont3    ldy #0
-;;;loop4    lda (currp),y
-;;;         bne cont4
+         mov [boxsz_curx],bh
+         inc byte [boxsz_cury]
+         cmp byte [boxsz_cury],vermax
+         jne .c0
 
-;;;         iny
-;;;         bpl loop4
-;;13$:     mov r4,r1
-;;4$:      tstb (r1)+
-;;         beq 4$
-
-;;         sub r4,r1
-;;         dec r1
-
-;;;cont4    sty t1
-;;;         lda cury
-;;;         asl
-;;;         asl
-;;;         asl
-;;;         tax
-;;;         adc t1
-;;;         cmp ymin
-;;;         bcs cont5
-;;         mov @#boxsz_cury,r2
-;;         asl r2
-;;         asl r2
-;;         asl r2
-;;         mov r2,r0
-;;         add r1,r2
-;;         cmp r2,@#boxsz_ymin
-;;         bcc 15$
-
-;;;         sta ymin
-;;         mov r2,@#boxsz_ymin
-
-;;;cont5    ldy #7
-;;;loop5    lda (currp),y
-;;;         bne cont6
-
-;;;         dey
-;;;         bpl loop5
-;;15$:     mov r4,r1
-;;         add #8,r1
-;;5$:      tstb -(r1)
-;;         beq 5$
-
-;;         sub r4,r1
-;;         add r0,r1
-;;         cmp r1,r3
-;;         bcs 17$
-
-;;         mov r1,r3
-;;17$:     add #tilesize,r4
-;;         inc @#boxsz_curx
-;;         cmp #hormax,@#boxsz_curx
-;;         bne 0$
-
-;;         clr @#boxsz_curx
-;;         inc @#boxsz_cury
-;;         cmp #vermax,@#boxsz_cury
-;;         bne 0$
-
-;;;         sty cury
-;;;         jmp loop0
-
-;;;cont1    lda ymax
-;;;         sbc ymin
-;;;         adc #0
-;;;         sta cury
-;;;         sec
-;;;         lda xmax
-;;;         sbc xmin
-;;;         adc #0
-;;;         sta curx
-;;;         lda xmax
-;;;         ora ymax
-;;;         ora tiles
-;;;         rts
-;;         mov r3,r0
-;;         sub @#boxsz_ymin,r0
-;;         inc r0
-;;         mov r0,@#boxsz_cury
-;;         mov r5,r4
-;;         sub @#boxsz_xmin,r4
-;;         inc r4       ;returns xsize
-;;         mov r4,@#boxsz_curx
-;;         mov @#tiles,r1
-;;         bis r3,r1
-;;         return
+         mov bl,cl
+         sub bl,[boxsz_ymin]
+         inc bx
+         mov [boxsz_cury],bl
+         mov al,ch
+         sub al,[boxsz_xmin]
+         inc ax       ;returns xsize in al
+         mov [boxsz_curx],al
+         mov [tiles],ah
+         or ah,cl
+         retn
 
 rndbyte: push cx   ;in: di
          push dx

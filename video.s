@@ -2087,77 +2087,77 @@ crsrcalc:
         int 10h
         retn
         
-outdec:  ;;clr r4            ;in: r3
-;;         call @#todec
-;;         mov #stringbuf+7,r1
-;;         mov #3,r2
-;;2$:      cmpb #'0,(r1)+
-;;         bne 1$
-;;         sob r2,2$
+outdec:  xor dx,dx            ;in: ax
+         call todec
+         mov si,stringbuf
+         xor cx,cx
+         mov cl,[si]
+         add si,cx
+         mov ah,2
+.loop:   cmp si,stringbuf
+         jz .exit
 
-;;         inc r2
-;;1$:      dec r1
-;;         emt ^O20
-;;         return
+         mov dl,[si]
+         dec si
+         int 21h
+         jmp .loop
 
-infov:   ;;call @#totext
-;;         mov #146,r0
-;;         emt ^O16
-;;         mov #fn,r3
-;;         tstb @r3
-;;         beq 11$
+.exit:   retn
 
-;;         jsr r3,@#printstr
-;;         .asciz "Last loaded filename: "
-;;         .byte 0
+infov:   call totext
+         cmp [fn],0
+         je .c11
 
-;;1$:      movb (r3)+,r0
-;;         emt ^O16
-;;         cmpb #'.,@r3
-;;         bne 1$
+         call printstr
+         db 'Last loaded filename: $'
 
-;;11$:     mov #todata,@#pageport
-;;         call @#boxsz
-;;         mov #toandos,@#pageport
-;;         bis r5,r1  ;r5 = boxsz_ymax, this instruction is part of boxsz
-;;         beq 12$
+         mov si,fn
+.c1:     lodsb
+         cmp al,'.'
+         jz .c11
 
-;;         jsr r3,@#printstr
-;;         .byte 10
-;;         .asciz "Active pattern size: "
-;;         .byte 0
+         mov dl,al
+         mov ah,2
+         int 21h
+         jmp .c1
+
+.c11:    ;call boxsz
+         ;or ah,ch  ;ch = boxsz_ymax, this instruction is part of boxsz
+         ;je .c12
+
+         call printstr
+         db 0dh,10,'Active pattern size: $'
 
 ;;         push r3
 ;;         push r5
 ;;         mov r4,r3
-;;         call @#outdec
-;;         mov #'x,r0
-;;         emt ^O16
+         call outdec
+         mov dl,'x'
+         int 21h
+
 ;;         mov @#boxsz_cury,r3
-;;         call @#outdec
-;;         jsr r3,@#printstr
-;;         .byte 10
-;;         .ascii "Box life bounds:"
-;;         .byte 10,32,0
+         call outdec
+         call printstr
+         db 0dh,10,'Box life bounds: $'
 
 ;;         mov @#boxsz_xmin,r3
-;;         call @#outdec
-;;         jsr r3,@#printstr
-;;         .asciz "<=x<="
+         call outdec
+         call printstr
+         db '<=x<=$'
 
 ;;         pop r3
-;;         call @#outdec
-
-;;         mov #32,r0
-;;         emt ^O16
+         call outdec
+         mov dl,' '
+         int 21h
 ;;         mov @#boxsz_ymin,r3
-;;         call @#outdec
-;;         jsr r3,@#printstr
-;;         .asciz "<=y<="
+         call outdec
+         call printstr
+         db '<=y<=$'
 ;;         pop r3
-;;         call @#outdec
-;;12$:     call @#getkey
-;;         jmp @#tograph
+         call outdec
+.c12:    call curoff
+         call getkey
+         jmp tograph
 
 ;;chgcolors:
 ;;        movb @#palette,r0

@@ -49,10 +49,10 @@ sum      db 0        ;+60
          db 0        ;free
 }
 
-;boxsz_xmin = i1
-;boxsz_ymin = saved
-;boxsz_curx = temp          ;boxsz_sizex
-;boxsz_cury = temp2         ;boxsz_sizey
+boxsz_xmin = i1
+boxsz_ymin = saved
+boxsz_curx = temp          ;boxsz_sizex
+boxsz_cury = temp2         ;boxsz_sizey
 xcut       = temp2
 ycut       = temp2+1
 x8poscp    = temp
