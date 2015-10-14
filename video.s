@@ -2121,39 +2121,49 @@ infov:   call totext
          int 21h
          jmp .c1
 
-.c11:    ;call boxsz
-         ;or ah,ch  ;ch = boxsz_ymax, this instruction is part of boxsz
-         ;je .c12
+.c11:    call boxsz
+         or ah,ch  ;ch = boxsz_ymax, this instruction is part of boxsz
+         je .c12
 
+         push dx
+         push cx
+         push ax
          call printstr
          db 0dh,10,'Active pattern size: $'
 
-;;         push r3
-;;         push r5
-;;         mov r4,r3
+         pop ax
+         xor ah,ah
          call outdec
          mov dl,'x'
          int 21h
 
-;;         mov @#boxsz_cury,r3
+         xor ax,ax
+         mov al,[boxsz_cury]
          call outdec
          call printstr
          db 0dh,10,'Box life bounds: $'
 
-;;         mov @#boxsz_xmin,r3
+         xor ax,ax
+         mov al,[boxsz_xmin]
          call outdec
          call printstr
          db '<=x<=$'
 
-;;         pop r3
+         pop cx
+         xor ax,ax
+         mov al,ch
          call outdec
          mov dl,' '
          int 21h
-;;         mov @#boxsz_ymin,r3
+
+         xor ax,ax
+         mov al,[boxsz_ymin]
          call outdec
          call printstr
          db '<=y<=$'
-;;         pop r3
+
+         pop ax
+         xor ah,ah
          call outdec
 .c12:    call curoff
          call getkey

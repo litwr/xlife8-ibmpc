@@ -30,48 +30,46 @@ todec:    mov bx,stringbuf+1    ;convert dx:ax to stringbuf
 
 boxsz:   mov byte [boxsz_ymin],192
          mov byte [boxsz_xmin],160
-         xor cx,cx               ;cl=boxsz_ymax, ch=boxsz_xmax
+         xor cx,cx               ;dl=boxsz_ymax, ch=boxsz_xmax
+         xor dx,dx
          mov [boxsz_curx],cx
          mov [boxsz_cury],cx
-         mov si,[tiles]
+         mov si,tiles
          mov [tsz],cx         ;binary cell count
-.c0:     push cx  ;ch
-         mov cl,8
-         xor dx,dx
+.c0:     mov cl,8
          xor bx,bx
+         xor ax,ax
 .c9:     mov bl,[si]
          inc si
-         mov dh,[bx+tab3]
-         add byte [tsz],dh    ;for save
-         adc byte [tsz+1],bh
-         or dl,bl
-         loop .c9
+         or ah,bl
+         mov bl,[bx+tab3]
+         add [tsz],bx    ;for save
+         dec cl
+         jnz .c9
 
-         pop cx
          sub si,8
-         or dl,dl
+         or ah,ah
          je .c17
 
-         push dx   ;dl
+         mov cl,ah
          mov dh,0ffh
 .c2:     inc dh
-         shl dl,1
+         shl cl,1
          jnc .c2
 
-         mov dl,[boxsz_curx]
-         shl dl,1
-         shl dl,1
-         shl dl,1
-         mov bl,dl
-         add dh,dl
+         mov al,[boxsz_curx]
+         shl al,1
+         shl al,1
+         shl al,1
+         mov bl,al
+         add dh,al
          cmp dh,[boxsz_xmin]
          jnc .c12
 
          mov [boxsz_xmin],dh
-.c12:    pop dx
-         mov dh,8
+.c12:    mov dh,8
 .c3:     dec dh
-         shr dl,1
+         shr ah,1
          jnc .c3
 
          add dh,bl
@@ -79,50 +77,49 @@ boxsz:   mov byte [boxsz_ymin],192
          jc .c13
 
          mov ch,dh
-.c13:    xor dx,dx
-         mov di,si
+.c13:    mov di,si
 .c4:     lodsb
          or al,al
          je .c4
 
          sub si,di
-         dec di
-         mov dl,[boxsz_cury]
-         shl dl,1
-         shl dl,1
-         shl dl,1
-         mov bl,dl
-         add dx,si
-         cmp dl,[boxsz_ymin]
+         dec si
+         mov al,[boxsz_cury]
+         shl al,1
+         shl al,1
+         shl al,1
+         mov bl,al
+         add ax,si
+         cmp al,[boxsz_ymin]
          jnc .c15
 
-         mov [boxsz_ymin],dl
+         mov [boxsz_ymin],al
 .c15:    mov si,di
          add di,8
 .c5:     dec di
-         cmp [di],dh
+         cmp [di],bh
          je .c5
 
          sub di,si
          add di,bx
-         push dx
-         mov dx,di
-         cmp dl,cl
+         xor dh,dh
+         cmp di,dx
          jc .c17
 
-         mov cl,dl
-.c17:    pop dx
-         add si,tilesize
+         mov dx,di
+.c17:    add si,tilesize
          inc byte [boxsz_curx]
          cmp byte [boxsz_curx],hormax
-         jne .c0
+         ;jne .c0   ;optimize 8088
+         je .c8
+.c01:    jmp .c0
 
-         mov [boxsz_curx],bh
+.c8:     mov [boxsz_curx],bh
          inc byte [boxsz_cury]
          cmp byte [boxsz_cury],vermax
-         jne .c0
+         jne .c01
 
-         mov bl,cl
+.c7:     mov bl,dl
          sub bl,[boxsz_ymin]
          inc bx
          mov [boxsz_cury],bl
@@ -130,7 +127,7 @@ boxsz:   mov byte [boxsz_ymin],192
          sub al,[boxsz_xmin]
          inc ax       ;returns xsize in al
          mov [boxsz_curx],al
-         mov [tiles],ah
+         mov ah,[tiles]
          or ah,cl
          retn
 
