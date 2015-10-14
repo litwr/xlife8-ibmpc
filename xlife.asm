@@ -46,6 +46,7 @@ start:   ;push cs   ;??
          int 21h
          mov [dta],bx
          mov [dta+2],es
+         call chgdrv.ee1
 
          mov ax,0b800h
          mov es,ax
@@ -65,6 +66,10 @@ mainloop:
 
          cmp al,3
          jnz .c3
+
+         mov ah,3bh
+         mov dx,rootpath
+         int 21h
 
          mov ax,3
          int 10h
@@ -946,6 +951,8 @@ msgtore   db 'TORUS$'
 msgplain  db 'PLAIN$'
 drives    rb 26
 curdrv    db 0
+patpath   db '/patterns',0
+rootpath  db '/',0
 nofnchar db '?,./:;<=>[\]|'
 stringbuf rb 19     ;must be after nofnchar
 

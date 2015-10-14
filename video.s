@@ -833,6 +833,10 @@ chgdrv:  mov al,[curdrv]
          sub dl,'A'
          mov ah,0eh
          int 21h
+
+.ee1:    mov ah,3bh
+         mov dx,patpath
+         int 21h
          retn
 
 loadmenu:call totext
