@@ -640,7 +640,7 @@ dispatcher: call getkey2
 .c176:   cmp al,'V'
          jnz .c177
 
-;;         jmp @#showcomm
+         jmp showcomm
 
 .c177:   cmp al,'v'
          jnz .c178

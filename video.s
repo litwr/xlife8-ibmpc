@@ -2170,7 +2170,7 @@ infov:   call totext
          xor ah,ah
          call outdec
 .c12:    call printstr
-         db 'Rules: $'
+         db 0dh,10,'Rules: $'
 
          call showrules2
          call curoff

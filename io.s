@@ -294,13 +294,7 @@ findfn:  xor bp,bp          ;in: ax
 ;;         mov #16384,r2
 ;;         br 3$
 
-;;commonin:mov #toio,@#pageport
-;;         mov #io_op,r0
-;;         mov r0,r1
-;;         mov #3,(r0)+
-;;         mov #16384,(r0)+
-;;         clr (r0)+
-;;exit20:  return
+;;exit20:  retn
 
 ;;iocf:    mov #io_op,r0    ;IN: R2 - 2/3 - write/read
 ;;         mov r0,r1
@@ -326,30 +320,52 @@ findfn:  xor bp,bp          ;in: ax
 ;;         .asciz "IO ERROR"
 ;;         jmp @#getkey
 
-;;showcomm:tstb @#fn
-;;         beq exit20
+showcomm:cmp byte [fn],0
+         je .exit
 
-;;         call @#totext
-;;         jsr r3,@#printstr
-;;         .byte 155,0
-;;         call @#commonin
-;;         mov #fn,r2
-;;         mov #12,r3
-;;1$:      movb (r2)+,r4
-;;         movb r4,(r0)+
-;;         cmpb #'.,r4
-;;         bne 5$
+         call totext
+         mov si,fn
+         mov di,svfn
+         mov dx,di
+.c1:     lodsb
+         mov [di],al
+         inc di
+         cmp al,'.'
+         jne .c1
 
-;;         movb #'T,(r0)+
-;;         movb #'X,(r0)+
-;;         movb #'T,(r0)+
-;;         sub #3,r3
-;;         add #3,r2
-;;5$:      sob r3,1$
-;;         call @#showtxt0
-;;         jsr r3,@#printstr
-;;         .byte 155,0
-;;         jmp @#tograph
+         mov word [di],'T'+'X'*256
+         mov word [di+2],'T'
+         mov ax,3d00h
+         int 21h
+         jc .error
+
+         mov bx,ax
+         mov ax,3
+         int 10h
+
+.loop:   mov ah,3fh   ;read file
+         mov cx,1
+         mov dx,x0
+         int 21h
+         jc .fin
+
+         or ax,ax
+         jz .fin
+
+         mov dl,[x0]
+         mov ah,2
+         int 21h
+         jmp .loop
+
+.fin:    mov ah,3eh    ;fclose
+         int 21h
+.exit:   call curoff
+         call getkey
+         jmp tograph
+
+.error:  call printstr
+         db 'no comments$'
+         jmp .exit
 
 ;;copyr:   call @#commonin
 ;;         mov #"CR,(r0)+
