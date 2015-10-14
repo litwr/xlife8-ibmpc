@@ -2165,7 +2165,11 @@ infov:   call totext
          pop ax
          xor ah,ah
          call outdec
-.c12:    call curoff
+.c12:    call printstr
+         db 'Rules: $'
+
+         call showrules2
+         call curoff
          call getkey
          jmp tograph
 

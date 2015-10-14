@@ -408,29 +408,49 @@ showrules:
         mov al,dl
         retn
 
-;;showrules2:
+showrules2:
 ;;        mov #stringbuf,r3
 ;;        mov r3,r4
 ;;        mov #1,r1
 ;;        clr r2
 ;;1$:     bit r1,@#live
 ;;        beq 2$
+        mov si,stringbuf
+        mov dx,si
+        mov di,1
+        xor ax,ax
+.c1:    test [live],di
+        jz .c2
 
 ;;        call @#20$
 ;;2$:     inc r2
 ;;        asl r1
 ;;        bpl 1$
+        call .c20
+.c2:    inc ax
+        shl di,1
+        jns .c1
 
 ;;        movb #'/,(r4)+
 ;;        mov #1,r1
 ;;        clr r2
 ;;4$:     bit r1,@#born
 ;;        beq 5$
+        mov byte [si],'/'
+        inc si
+        mov di,1
+        xor ax,ax
+.c4:    test [born],di
+        jz .c5
 
 ;;        call @#20$
 ;;5$:     inc r2
 ;;        asl r1
 ;;        bpl 4$
+        call .c20
+.c5:    inc ax
+        shl di,1
+        jns .c4
 
 ;;        clrb @r4
 ;;        sub r3,r4
@@ -439,8 +459,16 @@ showrules:
 ;;        asr r1
 ;;        mov #19,r2
 ;;        jmp @#showptxt
+         mov byte [si],'$'
+         mov ah,9
+         int 21h
+         retn
 
 ;;20$:    mov r2,r0
 ;;        add #'0,r0
 ;;        movb r0,(r4)+
-;;exit5:  return
+.c20:   mov bl,al
+        add bl,'0'
+        mov [si],bl
+        inc si
+.exit:  retn
