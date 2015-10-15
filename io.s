@@ -1,3 +1,31 @@
+copyr:   call printstr
+         db ansiclrscn,green,'$'
+
+         mov ax,3d00h
+         mov dx,copyleft
+         int 21h
+         jc readtent.e1
+
+         mov bx,ax
+.loop:   mov ah,3fh   ;read file
+         mov cx,1
+         mov dx,x0
+         int 21h
+         jc .exit
+
+         mov dl,[x0]
+         cmp dl,26
+         jz .exit
+
+         mov cx,2000
+.delay:  mov ah,2
+         loop .delay
+         int 21h
+         jmp .loop
+
+.exit:   call getkey
+         jmp setcolors.e1
+
 setcolors:mov ax,3d00h
          mov dx,cf
          int 21h
@@ -8,7 +36,7 @@ setcolors:mov ax,3d00h
          mov cx,7
          mov dx,palette
          int 21h
-         jmp loadpat.e1
+.e1:     jmp loadpat.e1
 
 savecf:  mov ah,3ch   ;create a file
          mov dx,cf
@@ -360,31 +388,3 @@ showcomm:cmp byte [fn],0
 .error:  call printstr
          db 'no comments$'
          jmp .exit
-
-;;copyr:   call @#commonin
-;;         mov #"CR,(r0)+
-;;         mov #".T,(r0)+
-;;         mov #"XT,(r0)+
-;;         mov #5,r2
-;;1$:      clr (r0)+
-;;         sob r2,1$
-
-;;showtxt0:emt ^O36            ;must be after copyr
-;;         tstb @#io_op+1
-;;         bne ioerr1
-
-;;         mov @#loaded_sz,r2
-;;         mov #16384,r1
-;;2$:      mov #toio,@#pageport
-;;         movb (r1)+,r0
-;;         mov #toandos,@#pageport
-;;         emt ^O16
-;;         push r1
-;;1$:      call @#getkey2
-;;         bne 1$
-
-;;         mov #1000,r1
-;;3$:      sob r1,3$
-;;         pop r1
-;;         sob r2,2$
-;;         jmp @#getkey

@@ -50,9 +50,8 @@ start:   ;push cs   ;??
 
          mov ax,0b800h
          mov es,ax
-         ;;call @#copyr
-         ;;mov #3,r2
-         ;;call @#setpalette         ;inits also timer interrupt, sets active video page
+         call copyr
+         call setcolors
          ;;incb @#errst
          call help
 

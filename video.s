@@ -234,7 +234,7 @@ inmode:  call printstr
 
 help:    call totext
          call printstr
-         db 9,bold,'*** XLIFE COMMANDS ***',normal
+         db 9,black,bold,'*** XLIFE COMMANDS ***',normal
          db 0dh,10,red,'!',green
          db ' randomize screen'
          db 0dh,10,red,'%',green
