@@ -24,15 +24,7 @@ initxt: mov ax,0c003h    ;draw frame vertical borders
         add di,80
         loop .c1
 
-initxt2: mov ah,2     ;must follow initxt
-        mov bx,1   ;color
-        mov dx,24*256
-        int 10h
-
-        mov ax,9*256+'G'
-        mov cx,1
-        int 10h
-
+initxt2: call showtopology.l1    ;must follow initxt
         mov ah,2
         mov dl,18
         int 10h
@@ -68,7 +60,7 @@ tograph:cmp [zoom],0
         call setviewport
         call showmode2
         call showscn
-        ;call showtopology
+        call showtopology2
         call showrules
         call xyout2
         jmp dispatcher.c270
@@ -78,7 +70,7 @@ tograph:cmp [zoom],0
         call initxt
         call showmode
         call showscn
-        ;call showtopology
+        call showtopology
         call showrules
         jmp xyout
 
@@ -90,7 +82,6 @@ showmode2: cmp [mode],1
 .modego: mov [czbg],al
         retn
 
-
 showmode: xor bx,bx    ;bg=0=black
         mov bl,[bgr]
         cmp [mode],1
@@ -99,6 +90,41 @@ showmode: xor bx,bx    ;bg=0=black
         mov bl,[bgs]
 .modego: mov ah,0bh
         int 10h
+        retn
+
+showtopology:
+        cmp [topology],0
+        jz .l1
+        
+        mov di,192*40
+        mov cx,4
+.loop:  mov ax,[es:di+2000h]
+        not ax
+        mov [es:di+2000h],ax
+        mov ax,[es:di]
+        not ax
+        stosw
+        add di,78
+        loop .loop
+        retn
+
+.l1:    mov ah,2     ;must follow initxt
+        mov bx,1   ;color
+        mov dx,24*256
+        int 10h
+
+        mov ax,9*256+'G'
+        mov cx,1
+        int 10h
+        retn
+
+showtopology2:
+        mov al,9
+        cmp [topology],0
+        jz .l1
+
+        mov al,69h
+.l1:    mov [es:1921],al
         retn
 
 printstr:pop dx         ;uses: si,dx,ax

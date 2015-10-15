@@ -80,10 +80,7 @@ mainloop:
 
          mov [mode],0
          call incgen
-         call initxt
-         call showtopology
-         call xyout
-         call showscn
+         call tograph
          jmp crsrflash2
 
 .c4:     cmp al,2

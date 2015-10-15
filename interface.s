@@ -61,7 +61,7 @@ dispatcher: call getkey2
 
 .c84:    call plain
          inc [topology]
-.c86:    jmp showtopology
+.c86:    jmp tograph
 
 .c6:     cmp al,'o'
          jnz .c7

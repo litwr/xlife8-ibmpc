@@ -2327,36 +2327,17 @@ crsrclr2: ;;mov #135,@#crsrflash    ;135 = $87 = return
 crsrset2: ;;mov #135,@#crsrflash    ;135 = $87 = return
 ;;          jmp @#crsrset
 
-showtopology:
-;;         mov #27,r1
-;;         mov #2,r2
-;;         mov #msgtore,r3
-;;         tstb @#topology
-;;         beq showptxt
-         call printstr
-         db 27, '[12;33H$'
-         mov dx,msgtore
-         cmp [topology],0
-         jz .l1
+;showtopology:
+;         call printstr
+;         db 27, '[12;33H$'
+;         mov dx,msgtore
+;         cmp [topology],0
+;         jz .l1
 
-         mov dx,msgplain
-.l1:     mov ah,9
-         int 21h
-         retn
-
-;;         mov #msgplan,r3
-
-showptxt:     ;IN: R1 - X, R2 - Y, R3 - msg
-;;         mov #toandos,@#pageport
-;;         emt ^O24
-;;         mov r3,r1
-spt1:    ;;clr r2
-         ;;emt ^O20
-         ;;jmp @#gexit3
-
-showtxt:     ;IN: R1 - msg
-;;         mov #toandos,@#pageport
-;;         br spt1
+;         mov dx,msgplain
+;.l1:     mov ah,9
+;         int 21h
+;         retn
 
 shownum: ;;mov #stringbuf,r0
 ;;         mov r0,r2
