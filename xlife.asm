@@ -939,7 +939,13 @@ mode      db 0      ;0-stop, 1-run, 2-hide, 3-exit
 zoom      db 0
 fn        db 0,0,0,0,0,0,0,0,0,0,0,0
 density   db 3
-;;dirname  .TEXT "0:"      ;filename used to access directory
+czbg      db 0
+bgr       db 0ah
+bgs       db 0
+zbgr      db 50h
+zbgs      db 0
+zfg       db 2
+zfgnc     db 3
 topology  db 0      ;0 - torus
 ;crsrticks:  db 0
 ;copyleft: .ascii "CR.TXT"

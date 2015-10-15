@@ -13,25 +13,17 @@ getkey2: mov ah,1
 dispatcher: call getkey2
 ;;dispat0: cmpb #'g,r0
 ;;         bne 3$
-.e0:     mov bx,0ah    ;for g/h-commands bg=10=lightgreen
-         cmp al,'g'
+.e0:     cmp al,'g'
          jnz .c3
 
          cmp [mode],0
          jz .c2
 
-.c53:    xor bx,bx    ;bg=0=black
-         dec [mode]
-         jz .c40
-
-         call tograph
-         mov bx,0ah
+.c53:    dec [mode]
          jmp .c40
 
 .c2:     inc [mode]
-.c40:    mov ah,0bh
-         int 10h
-         retn
+.c40:    jmp tograph
 
 .c3:     cmp al,'Q'
          jnz .c5

@@ -467,8 +467,9 @@ showscnz:
 .loop2:  lodsb
          mov dl,8
          mov dh,al
-.loop1:  shl dh,1
-         mov ax,220h   ;space char
+.loop1:  mov ax,220h   ;space char
+         or ah,[czbg]
+         shl dh,1
          jnc .cont2
 
 ;;         lda #81         ;live cell char
@@ -558,15 +559,17 @@ showscnzp:
          rcr al,1
          shl bh,1
          rcr al,1
+         mov ah,[zfg]
          test al,0c0h
-         mov ax,220h   ;space char and attribute
+         mov al,20h   ;space char and attribute
          jns .cont2
 
          mov al,9    ;live cell char
          jpe .cont2
 
-         mov ah,3    ;new cell attr
-.cont2:  stosw
+         mov ah,[zfgnc]    ;new cell attr
+.cont2:  or ah,[czbg]
+         stosw
          dec bl
          jnz .loop1
 

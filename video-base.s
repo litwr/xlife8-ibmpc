@@ -55,30 +55,51 @@ initxt2: mov ah,2     ;must follow initxt
         int 10h
         retn
 
-totext:  mov ax,1    ;set video mode #4 = 40x25x16
-         int 10h
-         retn
+totext: mov ax,1    ;set video mode #4 = 40x25x16
+        int 10h
+        retn
 
-tograph: cmp [zoom],0
-         je .l1
+tograph:cmp [zoom],0
+        je .l1
 
-         call totext
-         call curonz
-         call initxt2
-         call setviewport
-         call showscn
-         ;call showtopology
-         call showrules
-         call xyout2
-         jmp dispatcher.c270
+        call totext
+        call curonz
+        call initxt2
+        call setviewport
+        call showmode2
+        call showscn
+        ;call showtopology
+        call showrules
+        call xyout2
+        jmp dispatcher.c270
          
-.l1:      mov ax,4    ;set video mode #4 = 320x200x4
-          int 10h
-          call initxt
-          call showscn
-          ;call showtopology
-          call showrules
-          jmp xyout
+.l1:    mov ax,4    ;set video mode #4 = 320x200x4
+        int 10h
+        call initxt
+        call showmode
+        call showscn
+        ;call showtopology
+        call showrules
+        jmp xyout
+
+showmode2: cmp [mode],1
+        mov al,[zbgr]
+        jz .modego
+
+        mov al,[zbgs]
+.modego: mov [czbg],al
+        retn
+
+
+showmode: xor bx,bx    ;bg=0=black
+        mov bl,[bgr]
+        cmp [mode],1
+        jz .modego
+
+        mov bl,[bgs]
+.modego: mov ah,0bh
+        int 10h
+        retn
 
 printstr:pop dx         ;uses: si,dx,ax
          mov si,dx
