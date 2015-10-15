@@ -65,6 +65,7 @@ gpurple equ green
 blue equ 27,'[34m'        ;cyan in graph
 gcyan equ blue
 purple equ 27,'[35m'
+cyan equ 27,'[36m'
 black equ 27,'[37m'       ;white in graph
 gwhite equ black
 bold equ 27,'[1m'

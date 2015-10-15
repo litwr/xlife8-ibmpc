@@ -2170,105 +2170,151 @@ infov:   call totext
          call getkey
          jmp tograph
 
-;;chgcolors:
-;;        movb @#palette,r0
-;;        movb #'1,r1
-;;        sub #10,r0
-;;        bpl 14$
+outinnum:mov cl,10
+         xor ah,ah
+         div cl
+         mov dx,ax
+         mov ah,2
+         or al,al
+         jz .l1
 
-;;        movb #146,r1
-;;        add #10,r0
-;;14$:    add #'0,r0
-;;        movb r1,@#88$
-;;        movb r0,@#88$+1
-;;        jsr r3,@#printstr
-;;        .byte 154,0
-;;2$:     jsr r3,@#printstr
-;;        .byte 12,146
-;;        .ascii "PRESS "
-;;        .byte 145
-;;        .ascii "ENTER"
-;;        .byte 146
-;;        .ascii " TO USE DEFAULT PALETTE OR INPUT DECIMAL NUMBER OF PALETTE ("
-;;88$:    .ascii "  ): "
-;;        .byte 147,0
+         or dl,'0'
+         int 21h
+.l1:     mov dl,dh
+         or dl,'0'
+         int 21h
+         call printstr
+         db purple,']: ',black,'$'  ;must be followed by inputdec
 
-;;3$:      mov #stringbuf,r2
-;;         clr r1
-;;1$:      call @#getkey
-;;         cmpb #10,r0
-;;         beq 11$
+inputdec:mov si,stringbuf  ;in: ch - limit hi
+         xor cl,cl
+.c1:     call getkey
+         cmp al,0dh
+         je .c11
 
-;;         cmpb #24,r0    ;backspace=zaboy
-;;         beq 12$
+         cmp al,8    ;backspace
+         je .c12
 
-;;         cmpb r0,#'0+10
-;;         bcc 1$
+         cmp al,'0'+10
+         jnc .c1
 
-;;         cmpb r0,#'0
-;;         bcs 1$
+         cmp al,'0'
+         jc .c1
 
-;;         cmpb #2,r1
-;;         beq 1$
+         cmp cl,2
+         je .c1
 
-;;         inc r1
-;;         emt ^O16
-;;         sub #'0,r0
-;;         movb r0,(r2)+
-;;         br 1$
+         inc cx
+         mov dl,al
+         mov ah,2
+         int 21h
 
-;;12$:     dec r2
-;;         dec r1
-;;         bmi 3$
+         sub al,'0'
+         mov [si],al
+         inc si
+         jmp .c1
 
-;;         jsr r3,@#printstr
-;;         .byte 24,0
-;;         br 1$
+.c12:    dec si
+         dec cl
+         js inputdec
 
-;;11$:      tst r1
-;;          beq 20$
+         call delchr
+         jmp .c1
 
-;;          dec r1
-;;          beq 16$
+.c11:    or cl,cl
+         je .exit
 
-;;          movb -(r2),r0
-;;          movb -(r2),r1
-;;          mov #10,r2
-;;          cmpb r1,#1
-;;          beq 4$
-;;          bcc 2$
+         mov di,stringbuf
+         xor ax,ax
+         cmp cl,1
+         je .c16
 
-;;          clr r2
-;;4$:       add r0,r2
-;;          cmp r2,#16
-;;          bcc 2$
+         mov al,[di]
+         inc di
+         mov ah,10
+         mul ah
+.c16:    add al,[di]
+         cmp al,ch
+         jnc .c1
+.exit:   retn          ;should proper set CF
 
-;;24$:     movb r2,@#palette
-;;         swab r2
-;;         asl r2
-;;         mov r2,@#kbddtport
-;;20$:     jsr r3,@#printstr
-;;         .byte 10
-;;         .asciz "TO SAVE THIS CONFIG?"
+chgcolors:
+         mov ax,3
+         int 10h
+         call printstr
+         db green,'PRESS ',red,'ENTER',green
+         db ' TO USE THE DEFAULT VALUE OR INPUT THE DECIMAL NUMBER.',0dh,10,purple
+         db 'PALETTE# FOR ZOOM OUT MODE (0-1)[',cyan,'$'
+         mov al,[palette]
+         mov ch,2
+         call outinnum
+         jnc .l1
 
-;;8$:      call @#getkey
-;;         bis #32,r0
-;;         cmp r0,#'n
-;;         beq 7$
+         mov [palette],al
+.l1:     call printstr
+         db 0dh,10,purple,'THE ZOOM OUT GO BACKGROUND (0-31)[',cyan,'$'
+         mov al,[bgr]
+         mov ch,32
+         call outinnum
+         jnc .l2
 
-;;         cmp r0,#'y
-;;         bne 8$
+         mov [bgr],al
+.l2:     call printstr
+         db 0dh,10,purple,'THE ZOOM OUT EDIT BACKGROUND (0-31)[',cyan,'$'
+         mov al,[bgs]
+         mov ch,32
+         call outinnum
+         jnc .l3
 
-;         jsr savecf
-;;         mov #2,r2
-;;         call @#iocf
-;;7$:      jsr r3,@#printstr
-;;         .byte 154,0
+         mov [bgs],al
+.l3:     call printstr
+         db 0dh,10,purple,'THE ZOOM IN GO BACKGROUND (0-7)[',cyan,'$'
+         mov al,[zbgr]
+         mov cx,804h
+         shr al,cl
+         call outinnum
+         jnc .l4
 
-;;         return
+         mov cl,4
+         shl al,cl
+         mov [zbgr],al
+.l4:     call printstr
+         db 0dh,10,purple,'THE ZOOM IN EDIT BACKGROUND (0-7)[',cyan,'$'
+         mov al,[zbgs]
+         mov cx,804h
+         shr al,cl
+         call outinnum
+         jnc .l5
 
-;;16$:     movb -(r2),r2
-;;         br 24$
+         mov cl,4
+         shl al,cl
+         mov [zbgs],al
+.l5:     call printstr
+         db 0dh,10,purple,'THE ZOOM IN LIVE CELL (0-15)[',cyan,'$'
+         mov al,[zfg]
+         mov ch,16
+         call outinnum
+         jnc .l6
+
+         mov [zfg],al
+.l6:     call printstr
+         db 0dh,10,purple,'THE ZOOM IN NEW CELL (0-15)[',cyan,'$'
+         mov al,[zfgnc]
+         mov ch,16
+         call outinnum
+         jnc .l7
+
+         mov [zfgnc],al
+.l7:     call printstr
+         db 0dh,10,'TO SAVE THIS CONFIG?$'
+.l8:     call getkey
+         or al,32
+         cmp al,'n'
+         je putpixel2.e1
+
+         cmp al,'y'
+         jne .l8
+         jmp savecf
 
 putpixel2:
          mov di,[di+video]
@@ -2288,7 +2334,7 @@ putpixel2:
          and [es:di],ax
          shl bx,1
          or [es:di],bx
-         retn
+.e1:     retn
 
 showtent:mov ax,word [x0]
          push ax
@@ -2309,15 +2355,6 @@ showtent:mov ax,word [x0]
          inc [ppmode]
          retn
 
-setpalette:
-;;         mov #3,r2
-;;         call @#iocf
-;;         movb @#palette,r2
-;;         swab r2
-;;         asl r2
-;;        mov r2,@#kbddtport   ;sets also active video page and enables raster interrupt
-exit55:  ;;return
-
 crsrclr2: ;;mov #135,@#crsrflash    ;135 = $87 = return
 ;;          tstb @#zoom
 ;;          bne exit55
@@ -2327,78 +2364,29 @@ crsrclr2: ;;mov #135,@#crsrflash    ;135 = $87 = return
 crsrset2: ;;mov #135,@#crsrflash    ;135 = $87 = return
 ;;          jmp @#crsrset
 
-;showtopology:
-;         call printstr
-;         db 27, '[12;33H$'
-;         mov dx,msgtore
-;         cmp [topology],0
-;         jz .l1
-
-;         mov dx,msgplain
-;.l1:     mov ah,9
-;         int 21h
-;         retn
-
-shownum: ;;mov #stringbuf,r0
-;;         mov r0,r2
-;;         mov #stringbuf+10,r1
-;;2$:      cmpb #'0,(r0)+
-;;         bne 1$
-
-;;         cmp r2,r0
-;;         bne 2$
-
-;;1$:      dec r0
-;;5$:      cmpb #'0,-(r1)
-;;         bne 4$
-
-;;         cmp r0,r1
-;;         bne 5$
-
-;;4$:      cmp r0,#stringbuf+7
-;;         bcs 3$
-
-;;         mov r0,r5
-;;         sub #stringbuf+7,r5
-;;         sub r5,r0
-;;8$:      movb #'.,(r2)+
-;;7$:      movb (r0)+,(r2)+
-;;         cmp r1,r0
-;;         bcc 7$
-
-;;         mov #stringbuf,r1
-;;         sub r1,r2
-;;         emt ^O20
-;;         return
-
-;;3$:      movb (r0)+,(r2)+
-;;         cmp r0,#stringbuf+7
-;;         beq 8$
-;;         br 3$
-
 printfloat: mov si,stringbuf
-            xor cx,cx
-            mov cl,[stringbuf]
-            mov ah,2
-            cmp cl,1
-            jnz .l3
+        xor cx,cx
+        mov cl,[stringbuf]
+        mov ah,2
+        cmp cl,1
+        jnz .l3
 
-            mov dl,'.'
-            int 21h
-            mov dl,'0'
-            int 21h
-.l3:        add si,cx
-.l2:        std
-            lodsb
-            cld
-            cmp cl,ah
-            jnz .l1
+        mov dl,'.'
+        int 21h
+        mov dl,'0'
+        int 21h
+.l3:    add si,cx
+.l2:    std
+        lodsb
+        cld
+        cmp cl,ah
+        jnz .l1
 
-            mov dl,'.'
-            push ax
-            int 21h
-            pop ax
-.l1:        mov dl,al
-            int 21h
-            loop .l2
-            retn
+        mov dl,'.'
+        push ax
+        int 21h
+        pop ax
+.l1:    mov dl,al
+        int 21h
+        loop .l2
+        retn

@@ -930,13 +930,13 @@ xchgdir   db 0
 xdir      db 0      ;linear transformation, word aligned
 ydir      db 0
 clncnt    db 0
-;palette  db 0      ;not word aligned???
 pseudoc   db 0
 mode      db 0      ;0-stop, 1-run, 2-hide, 3-exit
 zoom      db 0
 fn        db 0,0,0,0,0,0,0,0,0,0,0,0
 density   db 3
 czbg      db 0
+palette   db 0
 bgr       db 0ah
 bgs       db 0
 zbgr      db 20h
@@ -945,17 +945,15 @@ zfg       db 3
 zfgnc     db 5
 topology  db 0      ;0 - torus
 ;crsrticks:  db 0
-;copyleft: .ascii "CR.TXT"
 ;errst:     db 0   ;0 - do not print i/o-errors message, 1 - print
 ppmode    db 1    ;putpixel mode: 0 - tentative, 1 - active
 crsrpgmk  db 1   ;0 - do not draw cursor during showscnz, 1 - draw
 svfn      db 0,0,0,0,0,0,0,0,0,0,0,0
-msgtore   db 'TORUS$'
-msgplain  db 'PLAIN$'
 drives    rb 26
 curdrv    db 0
 patpath   db '/patterns',0
 rootpath  db '/',0
+cf        db '/colors.cfg',0
+copyleft  db '/CR.TXT',0
 nofnchar db '?,./:;<=>[\]|'
 stringbuf rb 19     ;must be after nofnchar
-

@@ -67,6 +67,12 @@ tograph:cmp [zoom],0
          
 .l1:    mov ax,4    ;set video mode #4 = 320x200x4
         int 10h
+
+        mov bl,[palette]
+        mov bh,1
+        mov ah,0bh
+        int 10h
+
         call initxt
         call showmode
         call showscn

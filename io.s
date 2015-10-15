@@ -1,3 +1,28 @@
+setcolors:mov ax,3d00h
+         mov dx,cf
+         int 21h
+         jc readtent.e1
+
+         mov bx,ax
+         mov ah,3fh   ;read file
+         mov cx,7
+         mov dx,palette
+         int 21h
+         jmp loadpat.e1
+
+savecf:  mov ah,3ch   ;create a file
+         mov dx,cf
+         xor cx,cx
+         int 21h
+         jc readtent.e1
+
+         mov bx,ax
+         mov ah,40h   ;write
+         mov cx,7
+         mov dx,palette
+         int 21h
+         jmp loadpat.e1
+
 readtent:mov ah,3fh   ;read file
          mov bx,[filehl]
          mov cx,3072
@@ -69,8 +94,8 @@ loadpat: mov ax,3d00h
          dec [filesz]
          jnz .l3
 
-.exit2:  mov ah,3eh    ;fclose
-         mov bx,[filehl]
+.exit2:  mov bx,[filehl]
+.e1:     mov ah,3eh    ;fclose
          int 21h
          retn
 
@@ -279,21 +304,6 @@ savepat: mov ah,3ch   ;create a file
          pop bx
          pop ax
          jmp .loop3
-
-;;iocf:    mov #io_op,r0    ;IN: R2 - 2/3 - write/read
-;;         mov r0,r1
-;;         mov r2,(r0)+
-;;         mov #palette,(r0)+
-;;         mov #1,(r0)+
-;;         mov #"CO,(r0)+
-;;         mov #"LO,(r0)+
-;;         mov #"RS,(r0)+
-;;         mov #".C,(r0)+
-;;         mov #"FG,(r0)+
-;;         clr @r0
-;;         emt ^O36
-;;         tstb @#io_op+1
-;;         beq exit20
 
 ;;ioerror: tstb @#errst           ;must be after iocf
 ;;         beq exit20

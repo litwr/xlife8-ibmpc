@@ -627,21 +627,20 @@ dispatcher: call getkey2
 
 .c177:   cmp al,'v'
          jnz .c178
-
          jmp infov
 
 .c178:   cmp al,'Z'
          jnz .c179
 
          call totext
-;;         call @#chgcolors
+         call chgcolors
 .c220:   jmp tograph
 
 .c179:   cmp al,'X'
          jnz .c18
 
          call totext
-;;         call @#setpalette
+         call setcolors
          jmp .c220
 
 .c18:    cmp al,'S'
