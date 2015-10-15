@@ -942,10 +942,10 @@ density   db 3
 czbg      db 0
 bgr       db 0ah
 bgs       db 0
-zbgr      db 50h
+zbgr      db 20h
 zbgs      db 0
-zfg       db 2
-zfgnc     db 3
+zfg       db 3
+zfgnc     db 5
 topology  db 0      ;0 - torus
 ;crsrticks:  db 0
 ;copyleft: .ascii "CR.TXT"

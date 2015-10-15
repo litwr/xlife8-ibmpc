@@ -467,8 +467,9 @@ showscnz:
 .loop2:  lodsb
          mov dl,8
          mov dh,al
-.loop1:  mov ax,220h   ;space char
-         or ah,[czbg]
+.loop1:  mov al,20h   ;space char
+         mov ah,[czbg]
+         or ah,[zfg]
          shl dh,1
          jnc .cont2
 

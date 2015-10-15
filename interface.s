@@ -37,9 +37,6 @@ dispatcher: call getkey2
          cmp [mode],2
          jz .c53
 
-;;         movb #2,@#mode
-;;         call @#clrscn
-;;         jmp @#showmode
          mov [mode],2
          mov ax,4
          cmp [zoom],ah
@@ -49,17 +46,15 @@ dispatcher: call getkey2
 .l1:     int 10h
          retn
 
-.c4:     cmp al,'T'
+.c4:     cmp [mode],2
+         je .c101
+
+         cmp al,'T'
          jnz .c6
 
-;;         tstb @#topology
-;;         beq 84$
          cmp [topology],0
          jz .c84
 
-;;         call @#torus
-;;         clrb @#topology
-;;         br 86$
          call torus
          mov [topology],0
          jmp .c86
@@ -88,8 +83,6 @@ dispatcher: call getkey2
 .c7:     cmp al,'?'
          jnz .c8
 
-         cmp [mode],2
-         jz .c8
          jmp help
 
 .c8:     cmp al,'C'
@@ -120,8 +113,6 @@ dispatcher: call getkey2
 .c12:    cmp al,'%'
          jnz .c14
 
-         cmp [mode],2
-         jz .c14
          jmp indens
 
 ;;14$:     cmpb #'B,r0
