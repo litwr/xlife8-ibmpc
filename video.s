@@ -829,7 +829,7 @@ chgdrv:  mov al,[curdrv]
          jz .l2
          
          mov [loadmenu.c80],dl
-         mov [es:240],dl
+         mov [es:si],dl
          sub dl,'A'
          mov ah,0eh
          int 21h
@@ -867,6 +867,7 @@ loadmenu:call totext
          jnz .c21
 
          mov ch,al
+         mov si,240
          call chgdrv
          jmp .c1
 
@@ -912,6 +913,13 @@ loadmenu:call totext
          int 21h
          jmp .c1
 
+.c12:    dec di
+         dec cl
+         js .c3
+
+         call delchr
+         jmp .c1
+
 .c11:    or cl,cl
          jz menu2
 
@@ -920,13 +928,6 @@ loadmenu:call totext
          xor ch,ch
          mov [di+4],ch
          jmp .c101
-
-.c12:    dec di
-         dec cl
-         js .c3
-
-         call delchr
-         jmp .c1
 
 menu2:   call setdirmsk
          cmp al,27     ;esc
@@ -1012,96 +1013,85 @@ menu2:   call setdirmsk
          call delchr
          jmp .c1
 
-getsvfn: ;;call @#totext
-;;         movb @#andos_disk,r0
-;;         add #'A-1,r0
-;;         movb r0,@#80$
-;;         jsr r3,@#printstr
-;;         .byte 12,146
-;;         .ascii "Enter filename ("
-;;         .byte 145
-;;         .ascii "KT"
-;;         .byte 146
-;;         .ascii " - exit, "
-;;         .byte 145, '*, 146
-;;         .ascii " - drive)"
-;;         .byte 147,10
-;;80$:     .byte 'A,':,154,0,0
+getsvfn: call totext
+         mov al,[loadmenu.c80]
+         mov [.c80],al
+         call printstr
+         db green,'Enter filename (',red,'ESC',green,' - exit, '
+         db red,'*',green,' - drive)',black,0dh,10
+.c80:    db 'A:$'
 
-;;3$:      mov #svfn,r5
-;;         clr r2
-;;1$:      call @#getkey
-;;         cmpb r0,#10
-;;         beq 11$
+.c3:     mov di,svfn
+         xor cl,cl
+.c1:     call getkey
+         cmp al,0dh
+         je .c11
 
-;;         cmpb r0,#24  ;backspace
-;;         beq 12$
+         cmp al,8  ;backspace
+         je .c12
 
-;;         cmpb r0,#3   ;kt
-;;         bne 17$
+         cmp al,27   ;esc
+         jne .c17
 
-;;100$:    movb r0,r4
-;;101$:    jsr r3,@#printstr
-;;         .byte 154,0
-;;         mtps r4
-;;         return
+.c100:   mov ch,al
+.c101:   or ch,ch
+         retn
 
-;;17$:     cmpb r0,#'*
-;;         bne 18$
+.c17:    cmp al,'*'
+         jne .c18
 
-;;         mov #2,r4
-;;         call @#chgdrv
-;;         br 1$
+         mov ch,al
+         mov si,80
+         call chgdrv
+         jmp .c1
 
-;;18$:     cmpb r0,#'!
-;;         bcs 1$
+.c18:    cmp al,'!'
+         jc .c1
 
-;;         cmpb r0,#126
-;;         bcc 1$
+         cmp al,126
+         jnc .c1
 
-;;         mov #nofnchar,r3
-;;5$:      cmpb r0,(r3)+
-;;         beq 1$
+         mov si,nofnchar
+         mov dl,al
+.c5:     lodsb
+         cmp al,dl
+         je .c1
 
-;;         cmpb r0,#'a
-;;         bcs 6$
+         cmp dl,'a'
+         jc .c6
 
-;;         cmpb r0,#'z+1
-;;         bcc 6$
+         cmp dl,'z'+1
+         jnc .c6
 
-;;         sub #'a-'A,r0
-;;6$:      tstb @r3
-;;         bne 5$
+         sub dl,'a'-'A'
+.c6:     cmp si,stringbuf
+         jne .c5
 
-;;         cmp r2,#8
-;;         bcc 1$
+         cmp cl,8
+         jnc .c1
 
-;;         movb r0,(r5)+
-;;         inc r2
-;;         emt ^O16 
-;;14$:     br 1$
+         mov [di],dl
+         inc di
+         inc cl
+         mov ah,2
+         int 21h 
+         jmp .c1
 
-;;11$:     tst r2
-;;         beq 100$
+.c11:    or cl,cl
+         je .c100
 
-;;         movb #'.,(r5)+
-;;         movb #'8,(r5)+
-;;         movb #'L,(r5)+
-;;         movb #'0,(r5)+
-;;         clr r4
-;;42$:     cmp r5,#msghide
-;;         beq 101$
+         mov word [di],'.'+'8'*256
+         mov word [di+2],'X'+'L'*256
+         xor ch,ch
+         mov [di+4],ch
+         jmp .c101
 
-;;         clrb (r5)+
-;;         br 42$
+.c12:    dec di
+         dec cl
+         js .c3
 
-;;12$:     dec r5
-;;         dec r2
-;;         bmi 3$
-
-;;         jsr r3,@#printstr
-;;         .byte 24,0
-;;         br 14$
+         call delchr
+         jmp .c1
 
 showrect:
          call printstr
@@ -2126,7 +2116,6 @@ infov:   call totext
          jmp .c1
 
 .c11:    call boxsz
-         or ah,ch  ;ch = boxsz_ymax, this instruction is part of boxsz
          je .c12
 
          push dx

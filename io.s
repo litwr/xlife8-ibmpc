@@ -173,7 +173,7 @@ showfree:mov ah,36h     ;after showdir
          call printbp.ee1
          call printstr
          db 'K free',black,'$'
-;exitio:
+
          retn
 
 findfn:  xor bp,bp          ;in: ax
@@ -204,97 +204,81 @@ findfn:  xor bp,bp          ;in: ax
          jnz .l2
          jmp showdir.exit
 
-;;savepat: call @#commonin
-;;         dec @#io_op
-;;         mov #svfn,r2
-;;         mov #12,r3
-;;1$:      movb (r2)+,(r0)+
-;;         sob r3,1$
+savepat: mov ah,3ch   ;create a file
+         mov dx,svfn
+         xor cx,cx
+         int 21h
+         jc .error
 
-;;         mov #16384,r2
-;;         mov @#lowbench,r0
-;;         asl r0
-;;         add #7,r0
-;;         rol r0
-;;         rol r0
-;;         rol r0
-;;         bic #65532,r0
-;;         mov r0,(r2)+         ;number of blocks
-;;         movb @#boxsz_curx,(r2)+    ;sizex
-;;         movb @#boxsz_cury,(r2)+    ;sizey
-;;         mov @#live,(r2)+
-;;         mov @#born,(r2)+
-;;         mov #tiles,r4
-;;         clr @#boxsz_curx
-;;         clr @#boxsz_cury
-;;         mov #4,@#io_len
-;;0$:      mov #8,r5
-;;2$:      mov #todata,@#pageport
-;;         movb (r4)+,r0
-;;         bne 11$
-;;4$:      sob r5,2$
+         mov bx,ax
+         mov [filehl],ax
+         mov ah,40h   ;write
+         mov cx,6
+         mov dx,x0
+         int 21h
 
-;;         add #tilesize-8,r4
-;;         inc @#boxsz_curx
-;;         cmp #hormax,@#boxsz_curx
-;;         bne 0$
+         mov si,tiles
+         mov dx,[boxsz_xmin]  ;dl - xmin, dh - ymin
+         xor cx,cx  ;cl - currow, ch - curcol
+.loop0:  xor bx,bx
+.loop2:  mov al,[si+bx]
+         or al,al
+         jnz .cont1
 
-;;         clr @#boxsz_curx
-;;         inc @#boxsz_cury
-;;         cmp #vermax,@#boxsz_cury
-;;         bne 0$
-;;         br 20$
+.loop4:  inc bx
+         cmp bl,8
+         jnz .loop2
 
-;;11$:     mov #65535,r1
-;;3$:      inc r1
-;;         aslb r0
-;;         bcs 14$
-;;         beq 4$
-;;         br 3$
+         add si,tilesize
+         inc ch
+         cmp ch,hormax
+         jnz .loop0
 
-;;14$:     mov @#boxsz_curx,r3
-;;         asl r3
-;;         asl r3
-;;         asl r3
-;;         add r1,r3
-;;         sub @#boxsz_xmin,r3
-;;         mov #toio,@#pageport
-;;         movb r3,(r2)+
-;;         mov @#boxsz_cury,r3
-;;         asl r3
-;;         asl r3
-;;         asl r3
-;;         add #8,r3
-;;         sub r5,r3
-;;         sub @#boxsz_ymin,r3
-;;         movb r3,(r2)+
-;;         inc @#io_len
-;;         cmp #8192,@#io_len
-;;         bne 3$
+         xor ch,ch
+         inc cx
+         cmp cl,vermax
+         jnz .loop0
+         jmp loadpat.exit2
 
-;;20$:     asl @#io_len
-;;         beq exit20
+.error:  call printstr
+         db 'can''t save$'
+         jmp getkey
 
-;;21$:     push r1
-;;         mov #io_op,r1
-;;         mov #toio,@#pageport
-;;         emt ^O36
-;;         pop r1
-;;         clr @#io_len
-;;         tstb @#io_op+1
-;;         bne ioerr1   ;????
+.cont1:  mov ah,0ffh
+.loop3:  inc ah
+         shl al,1
+         jc .cont4
+         jz .loop4
+         jmp .loop3
 
-;;         cmp #plainbox,r4
-;;         beq exit20
-
-;;         mov #io_fn+14,r3
-;;25$:     tstb -(r3)
-;;         beq 25$
-;;         incb @r3
-;;         mov #16384,r2
-;;         br 3$
-
-;;exit20:  retn
+.cont4:  push ax
+         mov al,ch
+         shl al,1
+         shl al,1
+         shl al,1
+         add al,ah
+         sub al,dl
+         mov [x0],al
+         mov al,cl
+         shl al,1
+         shl al,1
+         shl al,1
+         add al,bl
+         sub al,dh
+         mov [y0],al
+         push bx
+         push cx
+         push dx
+         mov ah,40h
+         mov bx,[filehl]
+         mov cx,2
+         mov dx,x0
+         int 21h
+         pop dx
+         pop cx
+         pop bx
+         pop ax
+         jmp .loop3
 
 ;;iocf:    mov #io_op,r0    ;IN: R2 - 2/3 - write/read
 ;;         mov r0,r1
@@ -314,7 +298,7 @@ findfn:  xor bp,bp          ;in: ax
 ;;ioerror: tstb @#errst           ;must be after iocf
 ;;         beq exit20
 
-;;ioerr1:  mov #toandos,@#pageport  ;must be after ioerror
+;;ioerr1:  
 ;;         jsr r3,@#printstr
 ;;         .byte 12
 ;;         .asciz "IO ERROR"

@@ -33,17 +33,12 @@ boxsz:   mov byte [boxsz_ymin],192
          xor cx,cx               ;dl=boxsz_ymax, ch=boxsz_xmax
          xor dx,dx
          mov [boxsz_curx],cx
-         mov [boxsz_cury],cx
          mov si,tiles
-         mov [tsz],cx         ;binary cell count
 .c0:     mov cl,8
          xor bx,bx
          xor ax,ax
-.c9:     mov bl,[si]
+.c9:     or ah,[si]
          inc si
-         or ah,bl
-         mov bl,[bx+tab3]
-         add [tsz],bx    ;for save
          dec cl
          jnz .c9
 
@@ -128,7 +123,8 @@ boxsz:   mov byte [boxsz_ymin],192
          inc ax       ;returns xsize in al
          mov [boxsz_curx],al
          mov ah,[tiles]
-         or ah,cl
+         or ah,dl
+         or ah,ch  ;ch = boxsz_xmax, dl = boxsz_ymax
          retn
 
 rndbyte: push cx   ;in: di

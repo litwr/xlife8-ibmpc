@@ -50,9 +50,9 @@ sum      db 0        ;+60
 }
 
 boxsz_xmin = i1
-boxsz_ymin = saved
-boxsz_curx = temp          ;boxsz_sizex
-boxsz_cury = temp2         ;boxsz_sizey
+boxsz_ymin = i1+1
+boxsz_curx = x0          ;boxsz_sizex
+boxsz_cury = y0          ;boxsz_sizey
 xcut       = temp2
 ycut       = temp2+1
 x8poscp    = temp

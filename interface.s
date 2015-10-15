@@ -650,28 +650,28 @@ dispatcher: call getkey2
 .c178:   cmp al,'Z'
          jnz .c179
 
-;;         call @#totext
+         call totext
 ;;         call @#chgcolors
-;;220$:    jmp @#tograph
+.c220:   jmp tograph
 
 .c179:   cmp al,'X'
          jnz .c18
 
-;;         call @#totext
+         call totext
 ;;         call @#setpalette
-;;         br 220$
+         jmp .c220
 
 .c18:    cmp al,'S'
          jnz .c20
 
-;;         call @#boxsz
-;;         beq 20$
+         call boxsz
+         je .c20
 
-;;         call @#getsvfn
-;;         bcs 220$
+         call getsvfn
+         jnz .c220
 
-;;         call @#savepat
-;;         br 220$
+         call savepat
+         jmp .c220
 
 ;;;*cont20   clc
 ;;;*         rts
