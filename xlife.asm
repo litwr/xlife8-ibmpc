@@ -42,12 +42,7 @@ start:   ;push cs   ;??
          mov ah,0eh
          int 21h
 
-         mov ah,2fh     ;get DTA addr
-         int 21h
-         mov [dta],bx
-         mov [dta+2],es
          call chgdrv.ee1
-
          mov ax,0b800h
          mov es,ax
          call copyr
@@ -911,7 +906,6 @@ filesz    dw 0
 tsz       dw 0
 saved     dw 0
 tobin     dw 1,10,100,1000,10000
-dta       dw 0,0
 x0        db 0   ;word aligned for the speed
 y0        db 0
 live      dw 12  ;x0,y0,live,born have to go sequently

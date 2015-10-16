@@ -158,7 +158,6 @@ showdir: call printstr   ;OUT: BP
          mov cx,20h
          mov ah,4eh
          int 21h
-         push es
          jc .exit
 
 .l3:     call printstr
@@ -166,9 +165,9 @@ showdir: call printstr   ;OUT: BP
          call printbp
          call printstr
          db black,' $'
-         les di,dword [dta]
+         mov di,80h ;dta
          push di
-.l2:     mov dl,[es:di+1eh] ;fn offset in DTA
+.l2:     mov dl,[di+1eh] ;fn offset in DTA
          inc di
          cmp dl,'.'
          jz .l1
@@ -180,7 +179,7 @@ showdir: call printstr   ;OUT: BP
 .l1:     call printstr
          db ' ',blue,'$'
          pop di
-         mov ax,[es:di+1ah]  ;size offset in DTA
+         mov ax,[di+1ah]  ;size offset in DTA
          call printbp.ee
          call printstr
          db green,'$'
@@ -201,15 +200,12 @@ showdir: call printstr   ;OUT: BP
          cmp bp,1000
          jz .exit
 
-         push ds
          mov ah,4fh
-         lds dx,dword [dta]
+         mov dx,80h   ;dta
          int 21h
-         pop ds
          jnc .l3
 
-.exit:   pop es
-         test bp,1
+.exit:   test bp,1
          jz showfree
 
          call printstr
@@ -239,17 +235,14 @@ findfn:  xor bp,bp          ;in: ax
          jz .l7
          
          inc bp
-         push ds
          mov ah,4fh
-         lds dx,dword [dta]
+         mov dx,80h
          int 21h
-         pop ds
          jmp .l3
 
-.l7:     push es
-         les di,dword [dta]
+.l7:     mov di,80h ;dta
          mov si,fn
-.l2:     mov al,[es:di+1eh] ;fn offset in DTA
+.l2:     mov al,[di+1eh] ;fn offset in DTA
          inc di
          mov [si],al
          inc si

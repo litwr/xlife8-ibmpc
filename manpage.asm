@@ -1,7 +1,9 @@
          org 100h
          use16
 
-start:   mov si,mandata
+start:   mov ax,3
+         int 10h
+         mov si,mandata
          mov ax,0b800h
          mov es,ax
          xor bp,bp
