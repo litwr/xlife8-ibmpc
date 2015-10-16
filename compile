@@ -1,5 +1,6 @@
 #D=XLIFE3.IMG               #name of the disk image file
 #M=/mnt/loop                #mount point
+awk -f xlife.man.awk xlife.man.txt >manpage.txt
 gcc -DIBMPC genvistab.c && ./a.out >vistab.s && \
 gcc -DIBMPC geninitiles.c && ./a.out >initiles.s #&& \
 gcc -DIBMPC gengentab.c && ./a.out >gentab.s && \
