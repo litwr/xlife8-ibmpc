@@ -1109,7 +1109,7 @@ showrect:
          mov [xchgdir],bl
 .c10:    call drawrect
          call showtent
-.c11:    ;call crsrflash
+.c11:    call crsrflash
          call getkey2
          cmp ax,4b00h    ;cursor left
          jz .c100
@@ -1840,6 +1840,20 @@ crsrclr: ;;tstb @#zoom
          mov bl,al
          shl bx,1
          mov ax,[bx+vistab]
+
+         xor bx,bx        ;for crsrflash
+         mov bl,[crsrbit]
+         shl bx,1
+         mov bx,[bx+vistab]
+         mov bp,bx
+         shl bp,1
+         or bp,bx
+         and ax,bp
+         not bp
+         mov bx,[es:di]
+         and bx,bp
+         or ax,bx
+
          stosw
          retn
 
@@ -1852,7 +1866,8 @@ crsrclr: ;;tstb @#zoom
 .c2:     shl bp,1
          add bp,si
          mov cl,4
-         test [crsrbit],0fh
+         mov ch,[crsrbit]
+         test ch,0fh
          jnz .c3
 
 ;;         mov count0(r3),r3
@@ -1872,9 +1887,21 @@ crsrclr: ;;tstb @#zoom
          shl dh,1
          or dh,dl
          shr al,cl
+         shr ch,cl   ;crsrflash
 .c4:     or al,dh
          mov bx,vistabpc
          xlatb
+
+         xchg al,ch        ;for crsrflash
+         xlatb
+         mov cl,al
+         shr cl,1
+         or al,cl
+         and ch,al
+         not al
+         and al,[es:di]
+         or al,ch
+
          stosb
          retn
 
@@ -2354,15 +2381,6 @@ showtent:mov ax,word [x0]
          mov word [x0],ax
          inc [ppmode]
          retn
-
-crsrclr2: ;;mov #135,@#crsrflash    ;135 = $87 = return
-;;          tstb @#zoom
-;;          bne exit55
-          
-;;          jmp @#crsrclr
-
-crsrset2: ;;mov #135,@#crsrflash    ;135 = $87 = return
-;;          jmp @#crsrset
 
 printfloat: mov si,stringbuf
         xor cx,cx

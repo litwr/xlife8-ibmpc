@@ -442,10 +442,10 @@ putpixel:     ;IN: x0,y0; DON'T USE: SI,BP
 .c4:     add al,cl
          cmp al,cl
          jc .c100
-
-         cmp al,160
+if hormax<>32
+         cmp al,hormax*8
          jnc .c100
-
+end if
 .c2:     mov ch,[crsry]
          add ch,[crsrbyte]
          mov cl,dh
@@ -462,7 +462,7 @@ putpixel:     ;IN: x0,y0; DON'T USE: SI,BP
          cmp ch,cl
          jc .c100
 
-         cmp ch,192
+         cmp ch,vermax*8
          jc .c1
 
 .c100:   retn

@@ -48,8 +48,8 @@ initxt2: call showtopology.l1    ;must follow initxt
         retn
 
 totext: mov ax,1    ;set video mode #4 = 40x25x16
-        int 10h
-        retn
+.e1:    int 10h
+        jmp stop_timer2
 
 tograph:cmp [zoom],0
         je .l1
@@ -76,6 +76,7 @@ tograph:cmp [zoom],0
         call initxt
         call showmode
         call showscn
+        call start_timer2
         call showtopology
         call showrules
         jmp xyout

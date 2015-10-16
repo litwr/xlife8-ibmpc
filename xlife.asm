@@ -55,13 +55,12 @@ start:   ;push cs   ;??
          ;;incb @#errst
          call help
 
-crsrflash2:
-         ;;call @#crsrflash
 mainloop:
+         call crsrflash
          call dispatcher
          mov al,[mode]
          or al,al
-         jz crsrflash2
+         jz mainloop
 
          cmp al,3
          jnz .c3
@@ -71,7 +70,7 @@ mainloop:
          int 21h
 
          mov ax,3
-         int 10h
+         call totext.e1
          int 20h    ;directly to DOS?
 
 .c3:     cmp [tilecnt],0
@@ -80,7 +79,7 @@ mainloop:
          mov [mode],0
          call incgen
          call tograph
-         jmp crsrflash2
+         jmp mainloop
 
 .c4:     cmp al,2
          jnz .c5
@@ -93,7 +92,7 @@ mainloop:
          call generate
          call showscn
          call cleanup
-         jmp crsrflash2
+         jmp mainloop
 
          include 'io.s'
          include 'ramdisk.s'
@@ -101,40 +100,6 @@ mainloop:
          include 'video.s'
          include 'utils.s'
          include 'interface.s'
-
-;benchirq0: mov @#saved,r0
-;           mov @#timerport2,r1
-;           mov r1,@#saved
-;           sub r1,r0
-;           add r0,@#lowbench
-;           adc @#highbench
-;           return
-
-;benchirq:  push r0
-;           push r1
-;           call @#benchirq0
-;           pop r1
-;           pop r0
-;           rti
-
-;crsrflash: return
-;           nop
-
-;crsrirq:   cmp @#plainbox+left,#plainbox   ;test memory bank
-;           bne emptyirq
-
-;           incb @#crsrticks
-;           bitb #15,@#crsrticks
-;           bne emptyirq
-
-;           mov #95,@#crsrflash     ;95 = $5f = jmp@#
-;           mov #crsrset2,@#crsrflash+2
-;           bitb #16,@#crsrticks
-;           beq emptyirq
-
-;           mov #crsrclr2,@#crsrflash+2
-;emptyirq:  rti
-
          include 'rules.s'
          include 'tile.s'
          include 'ramdata.s'
@@ -152,16 +117,12 @@ start_timer:    cli                 ;SAVE/SET INTR8 VECTOR
                 MOV [cs:SAVE8HI],ax
                 mov word [8*4],intr8
                 mov [8*4+2],cs
-                push cs
-                pop ds
                 MOV     AL,36H          ;SET TIMER 0 HARDWARE
                 OUT     43H,AL
                 MOV     AL,TIMERV AND 0FFH
                 OUT     40H,AL
                 MOV     AL,TIMERV SHR 8
-                OUT     40H,AL
-                STI
-                RETN
+                jmp stop_timer.e1
 
 stop_timer:     CLI                 ;SAVE/SET INTR8 VECTOR
                 xor ax,ax
@@ -170,15 +131,42 @@ stop_timer:     CLI                 ;SAVE/SET INTR8 VECTOR
                 mov [8*4],ax
                 MOV ax,[cs:SAVE8HI]
                 mov [8*4+2],ax
-                push cs
-                pop ds
                 MOV     AL,36H          ;RESTORE TIMER HARDWARE
                 OUT     43H,AL
                 XOR     AL,AL
                 OUT     40H,AL
-                OUT     40H,AL
-                STI
-                RETN
+.e1:            OUT     40H,AL
+                jmp stop_timer2.e1
+
+start_timer2:   cli                 ;SAVE/SET INTR8 VECTOR
+                xor ax,ax
+                cmp ax,[cs:SAVE8LO2]
+                jne stop_timer2.exit
+                
+                mov ds,ax
+                mov ax,[8*4]
+                MOV [cs:SAVE8LO2],ax
+                mov ax,[8*4+2]
+                MOV [cs:SAVE8HI2],ax
+                mov word [8*4],intr82
+                mov [8*4+2],cs
+                jmp stop_timer2.e1
+
+
+stop_timer2:    CLI                 ;SAVE/SET INTR8 VECTOR
+                xor ax,ax
+                cmp ax,[cs:SAVE8LO2]
+                je .exit
+
+                mov ds,ax
+                XCHG ax,[cs:SAVE8LO2]
+                mov [8*4],ax
+                MOV ax,[cs:SAVE8HI2]
+                mov [8*4+2],ax
+.e1:            push cs
+                pop ds
+.exit:          STI
+.e2:            RETN
 
 intr8:   inc [cs:timercnt]
          jnz .c1
@@ -196,6 +184,21 @@ intr8:   inc [cs:timercnt]
 .c2:     db  0eah
 SAVE8LO  DW      0
 SAVE8HI  DW      0
+
+intr82:  inc [cs:crsrticks]
+          db  0eah
+SAVE8LO2  DW      0
+SAVE8HI2  DW      0
+
+crsrflash:
+         test [crsrticks],3
+         jne stop_timer2.e2
+
+         test [crsrticks],4
+         je .l1
+
+         jmp crsrset
+.l1:     jmp crsrclr
 
 generate:mov si,[startp]           ;currp=si
          mov cx,0c0c0h
@@ -844,6 +847,20 @@ cleanup0:
          jnz .c1
          retn
 
+ttab      db 0,1,2,3,3,4,5,6,7,8,8,9,16,17,18,19,19,20
+          db 21,22,23,24,24,25,32,33,34,35,35,36
+          db 37,38,39,40,40,41,48,49,50,51,51,52
+          db 53,54,55,56,56,57,64,65,66,67,67,68
+          db 69,70,71,72,72,73,80,81,82,83,83,84
+          db 85,86,87,88,88,89,96,97,98,99,99,100
+          db 101,102,103,104,104,105,112,113,114,115,115,116
+          db 117,118,119,120,120,121,128,129,130,131,131,132
+          db 133,134,135,136,136,137,144,145,146,147,147,148
+          db 149,150,151,152,152,153
+
+bittab    db 1,2,4,8,16,32,64,128
+
+         align 2
          include 'tab12.s'
 gentab:
          include 'gentab.s'
@@ -866,20 +883,6 @@ tab3      db 0, 1, 1, 2, 1, 2, 2, 3, 1, 2, 2, 3, 2, 3, 3, 4
           db 3, 4, 4, 5, 4, 5, 5, 6, 4, 5, 5, 6, 5, 6, 6, 7
           db 4, 5, 5, 6, 5, 6, 6, 7, 5, 6, 6, 7, 6, 7, 7, 8
 
-ttab      db 0,1,2,3,3,4,5,6,7,8,8,9,16,17,18,19,19,20
-          db 21,22,23,24,24,25,32,33,34,35,35,36
-          db 37,38,39,40,40,41,48,49,50,51,51,52
-          db 53,54,55,56,56,57,64,65,66,67,67,68
-          db 69,70,71,72,72,73,80,81,82,83,83,84
-          db 85,86,87,88,88,89,96,97,98,99,99,100
-          db 101,102,103,104,104,105,112,113,114,115,115,116
-          db 117,118,119,120,120,121,128,129,130,131,131,132
-          db 133,134,135,136,136,137,144,145,146,147,147,148
-          db 149,150,151,152,152,153
-
-bittab    db 1,2,4,8,16,32,64,128
-
-        align 2
 iobuf     rb 3072
 tiles:
          include 'initiles.s'
@@ -943,7 +946,7 @@ zbgs      db 0
 zfg       db 3
 zfgnc     db 5
 topology  db 0      ;0 - torus
-;crsrticks:  db 0
+crsrticks db 1
 ;errst:     db 0   ;0 - do not print i/o-errors message, 1 - print
 ppmode    db 1    ;putpixel mode: 0 - tentative, 1 - active
 crsrpgmk  db 1   ;0 - do not draw cursor during showscnz, 1 - draw

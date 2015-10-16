@@ -28,8 +28,8 @@ todec:    mov bx,stringbuf+1    ;convert dx:ax to stringbuf
           mov [stringbuf],bl
           retn
 
-boxsz:   mov byte [boxsz_ymin],192
-         mov byte [boxsz_xmin],160
+boxsz:   mov byte [boxsz_ymin],vermax*8
+         mov byte [boxsz_xmin],hormax*8
          xor cx,cx               ;dl=boxsz_ymax, ch=boxsz_xmax
          xor dx,dx
          mov [boxsz_curx],cx
