@@ -1,14 +1,14 @@
 BEGIN {
-   c = sprintf("%c", 27) ""
-   red = c "[31m"
-   green = c "[32m"
-   yellow = c "[33m"
-   blue = c "[34m"
-   purple = c "[35m"
-   cyan = c "[36m"
-   white = c "[37m"
-   bold = c "[1m"
-   normal = c "[0m"
+   c = sprintf("%c", 27) "["
+#   red = c "[31m"
+   green = c "32m"
+   yellow = c "33m"
+#   blue = c "34m"
+   purple = c "35m"
+#   cyan = c "36m"
+   white = c "37m"
+   bold = c "1m"
+   normal = c "0m"
    r = "\r"
 }
 {
@@ -34,7 +34,11 @@ BEGIN {
          e = substr(e, p + 2)
       }
       else if (m == "r") {
-         b = b c
+         b = b bold
+         e = substr(e, p + 2)
+      }
+      else if (m == "n") {
+         b = b normal
          e = substr(e, p + 2)
       }
    }
@@ -42,4 +46,6 @@ BEGIN {
    gsub("\\\\.","")
    if (length($0) < 80) print r
 }
-
+END {
+   printf "%c", 26
+}

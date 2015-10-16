@@ -1,6 +1,10 @@
 #D=XLIFE3.IMG               #name of the disk image file
 #M=/mnt/loop                #mount point
-awk -f xlife.man.awk xlife.man.txt >manpage.txt
+awk -f xlife.man.awk xlife.man.txt >manpage.txt && \
+fasm manpage.asm -s manpage.fas && \
+fasm-listing manpage.fas manpage.lst && \
+cat manpage.com manpage.txt >m.com && \
+mv m.com manpage.com
 gcc -DIBMPC genvistab.c && ./a.out >vistab.s && \
 gcc -DIBMPC geninitiles.c && ./a.out >initiles.s #&& \
 gcc -DIBMPC gengentab.c && ./a.out >gentab.s && \
@@ -17,5 +21,5 @@ fasm-listing xlife.fas xlife.lst # &&\
 #sudo sync
 #ls -l $M/xlife*.com $M/manpage.com
 #sudo umount $M
-rm initiles.s gentab.s tab12.s vistab.s a.out xlife.fas #manpage.s
+rm initiles.s gentab.s tab12.s vistab.s a.out *.fas manpage.txt
 grep -n ': 0F' *.lst
