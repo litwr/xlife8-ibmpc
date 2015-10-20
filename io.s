@@ -95,7 +95,7 @@ loadpat: mov ax,3d00h
          or al,byte [born+1]
          cmp al,2
          jnc .l1
- 
+
          test byte [born],1
          jz .l2
 
@@ -152,7 +152,7 @@ printbp: mov dl,' '
          dec bx
          jnz .l3
          retn
-         
+
 showdir: call printstr   ;OUT: BP
          db ansiclrscn,10,'$'
 
@@ -236,7 +236,7 @@ findfn:  xor bp,bp          ;in: ax
          int 21h
 .l3:     cmp di,bp
          jz .l7
-         
+
          inc bp
          mov ah,4fh
          mov dx,80h
@@ -332,7 +332,7 @@ savepat: mov ah,3ch   ;create a file
 ;;ioerror: tstb @#errst           ;must be after iocf
 ;;         beq exit20
 
-;;ioerr1:  
+;;ioerr1:
 ;;         jsr r3,@#printstr
 ;;         .byte 12
 ;;         .asciz "IO ERROR"

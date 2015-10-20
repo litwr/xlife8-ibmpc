@@ -41,7 +41,7 @@ dispatcher: call getkey2
          mov ax,4
          cmp [zoom],ah
          jz .l1
-         
+
          mov al,1
 .l1:     int 10h
          retn
@@ -170,7 +170,7 @@ dispatcher: call getkey2
 .c4147:  call showscn
          dec word [x0]
          jnz .c4147
-         jmp .c401 
+         jmp .c401
 
 .c15:    cmp al,'R'
          jnz .c16
@@ -499,7 +499,7 @@ dispatcher: call getkey2
 ;;;*         lda #>tiles+(tilesize*249)
 ;;;*         sta crsrtile+1
 ;;         mov #tiles+<tilesize*249>,@#crsrtile
-           mov [crsrtile],tiles+tilesize*249
+           mov [crsrtile],tiles+tilesize*(hormax*vermax/2+9)
 
 ;;;*         lda #1
 ;;;*         sta crsrbyte
@@ -526,7 +526,7 @@ dispatcher: call getkey2
 ;;;*         jsr showscnz
          call setviewport
          call showscnz
-         
+
 
 ;;;*cont17u  jsr crsrset
 ;;;*         jmp crsrcalc
@@ -700,7 +700,7 @@ shift:   push ds
          mov ax,[ds:bp+di]
          cmp ax,plainbox   ;sets NZ
          jz .l1
-         
+
          mov [crsrtile],ax
 .l1:     retn
 

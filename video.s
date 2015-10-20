@@ -209,7 +209,7 @@ indens:  call totext
 ;         movb r0,@#density
          sub al,'0'-1
          mov [density],al
-         
+
 ;2$:      jmp @#tograph
 .c2:     jmp tograph
 
@@ -288,7 +288,7 @@ help:    call totext
 
 xyout:   cmp [zoom],0
          jnz xyout2
-         
+
          mov dx,3
          mov di,192*40+66
          mov bx,xcrsr
@@ -324,31 +324,18 @@ showtinfo:  ;;mov #tinfo,r0  ;must be after infoout
 ;;            bne 1$
          ;cmp [zoom],0
          ;jnz showtinfo2
-         
+
             mov bx,tinfo
             mov si,[tilecnt]
             shr si,1
             shr si,1
-            cmp si,120
+            cmp si,hormax*vermax/4
             jnz .c1
 
-           ;;mov #1,@r0
-           ;;clrb 2(r0)
-           ;;br 2$
-           mov word [bx],1
-           mov byte [bx+2],0
-           jmp .c2
+            mov word [bx],1
+            mov byte [bx+2],0
+            jmp .c2
 
-;;1$:         mov #2570,@r0      ;$a0a
-;;            movb ttab(r3),r1
-;;            mov r1,r2
-;;            bic #^B11110000,r1
-;;            movb r1,2(r0)
-;;            rorb r2   ;uses CY=0
-;;            asrb r2
-;;            asrb r2
-;;            asrb r2
-;;            beq 2$
 .c1:        mov word [bx],0a0ah
             mov al,[si+ttab]
             mov ah,al
@@ -370,30 +357,30 @@ showtinfo:  ;;mov #tinfo,r0  ;must be after infoout
            mov di,192*40+30
            jmp digiout
 
-xyout2:  mov cx,3
-         mov di,24*80+66
-         mov si,xcrsr
-         call digiout2
-         mov cl,3
-         mov di,24*80+74
-         jmp digiout2
+xyout2:    mov cx,3
+           mov di,24*80+66
+           mov si,xcrsr
+           call digiout2
+           mov cl,3
+           mov di,24*80+74
+           jmp digiout2
 
 infoout2: ;must be before showtinfo2
-         mov si,gencnt
-         mov cx,7
-         mov di,24*80+2
-         call digiout2
-         mov si,cellcnt
-         mov cl,5
-         mov di,24*80+18
-         call digiout2
+           mov si,gencnt
+           mov cx,7
+           mov di,24*80+2
+           call digiout2
+           mov si,cellcnt
+           mov cl,5
+           mov di,24*80+18
+           call digiout2
 
 showtinfo2:  ;must be after infoout2
            mov bx,tinfo      ;it is too similar to showtinfo
            mov si,[tilecnt]
            shr si,1
            shr si,1
-           cmp si,120
+           cmp si,hormax*vermax/4
            jnz .c1
 
            mov word [bx],1
@@ -831,7 +818,7 @@ chgdrv:  mov al,[curdrv]
          mov dl,al
          mov al,[curdrv]
          jz .l2
-         
+
          mov [loadmenu.c80],dl
          mov [es:si],dl
          sub dl,'A'
@@ -1000,7 +987,7 @@ menu2:   call setdirmsk
          sub al,'0'
          dec cl
          jnz .l2
-         
+
 .c21:    cmp ax,bp
          jc .l3
          jmp .c6      ;optimize 8088
@@ -1078,7 +1065,7 @@ getsvfn: call totext
          inc di
          inc cl
          mov ah,2
-         int 21h 
+         int 21h
          jmp .c1
 
 .c11:    or cl,cl
@@ -1184,10 +1171,10 @@ drawrect: call xchgxy
          sub dl,[x0]
          cmp al,dl
          jnc .c2
- 
+
          not dl
          or dl,dl
-         je .c10 
+         je .c10
 
          inc byte [xcut]
 .c10:    mov dl,al
@@ -1217,7 +1204,7 @@ drawrect: call xchgxy
          mov bl,[y0]
          cmp [ydir],bh
          je .c3
-         
+
          mov cl,dh
          sub dh,bl
          cmp cl,dh
@@ -1246,7 +1233,7 @@ drawrect: call xchgxy
          sub dh,al
          cmp bl,dh
          jnc .c8
- 
+
          neg dh
 .c8:     mov [y8poscp],dh
 
@@ -1472,7 +1459,7 @@ clrect1pc: push si
          pop dx
          pop si
          retn
-         
+
 crsrset1:
 ;;         mov @#crsrtile,r0     ;sets r0,r1
 ;;         movb @#crsrbyte,r1
@@ -1547,7 +1534,7 @@ setdirmsk:
 
          mov byte [di],'*'
          inc di
-.c5:     mov word [di],'8'*256+'.'          
+.c5:     mov word [di],'8'*256+'.'
          mov word [di+2],'L'*256+'X'
          mov byte [di+4],ch
 .c13:    retn
@@ -1584,7 +1571,7 @@ setviewport:
 ;         ld a,l
 ;         or h
 ;         jr nz,cont1
- 
+
 ;         ld a,(ycrsr+2)
 ;         cp 8
 ;         jr nc,cont1
@@ -1713,7 +1700,7 @@ setviewport:
         add byte [si],2
         sub word [di],tilesize*2
         jmp .c5
-        
+
 ;cont8    ld a,(xcrsr)
 ;         dec a
 ;         jr nz,cont5
@@ -1948,9 +1935,9 @@ crsrcalc:
         push bx
 
 ;;        sub #videostart,r0
-        sub bx,14h  ;20
+        sub bx,40-hormax
         push bx
-        
+
 ;;        asl r0
 ;;        asl r0
 ;;        mov r0,@#crsrx
@@ -1960,7 +1947,7 @@ crsrcalc:
         pop ax
         mov cl,40
         div cl
-        mov [crsry],al        
+        mov [crsry],al
         pop ax
 ;;        clr r1
 ;;        movb @#crsrbit,r2
@@ -1986,7 +1973,7 @@ crsrcalc:
         xor bl,bl
         cmp bh,100
         jc .c1
-        
+
 ;;        inc r1
 ;;        sub #100,r0
         inc bl
@@ -2021,7 +2008,7 @@ crsrcalc:
 
         dec [ycrsr]
         add al,100
-.l1:    xor ah,ah 
+.l1:    xor ah,ah
         mov cl,10
         div cl
         mov word [ycrsr+1],ax
@@ -2067,7 +2054,7 @@ crsrcalc:
         add al,8
         or ah,ah
         js .c35
- 
+
 ;;        mov #right,r1
 ;;        sub #16,r3
 ;;        cmpb r2,#40
@@ -2111,7 +2098,7 @@ crsrcalc:
         mov dx,word [vptilecx]
         int 10h
         retn
-        
+
 outdec:  xor dx,dx            ;in: ax
          call todec
          mov si,stringbuf

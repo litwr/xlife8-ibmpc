@@ -252,7 +252,7 @@ plain:
          mov [si+ur],ax
          add si,tilesize
          loop .c5
-         
+
 ;;         mov #tiles+<<vermax-1>*hormax*tilesize>,r0
 ;;         mov #hormax,r1
          mov si,tiles+(vermax-1)*hormax*tilesize
@@ -317,7 +317,7 @@ random:
          OUT     43H,AL
          mov     al,251
          OUT     42H,AL
-        
+
          xor bp,bp   ;dir: 0 - left, 1 - right
          mov di,tiles+(hormax*4+3)*tilesize
          mov dx,16*256+14    ;dh - ver rnd max, dl - hor rnd max
@@ -395,7 +395,7 @@ random:
         mov bl,right
 .cont1: mov di,[di+down]
         jmp .cont3
-        
+
 calccells: call zerocc
          cmp [tilecnt],0
          jnz .c12

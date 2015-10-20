@@ -81,7 +81,7 @@ fillrt2: jnc .c1
          jz .c13
 
 ;;12$:     bisb r0,gentab(r1)
-;;         return 
+;;         return
 .c12:    or [bx+gentab],dl
          retn
 

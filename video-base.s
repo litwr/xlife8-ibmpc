@@ -12,16 +12,15 @@ curonz: mov ah,1
         mov cx,7
         int 10h
         retn
-        
+
 initxt: mov ax,0c003h    ;draw frame vertical borders
-        mov di,19
-        mov si,19+2000h
+        mov di,39-hormax
         mov cx,96
-.c1:    mov [es:di],al
-        mov [es:di+2000h],al
-        mov [es:di+41],ah
-        mov [es:di+41+2000h],ah
-        add di,80
+.c1:    mov [es:di+2000h],al
+        mov [es:di+hormax*2+1],ah
+        mov [es:di+hormax*2+1+2000h],ah
+        stosb
+        add di,79
         loop .c1
 
 initxt2: call showtopology.l1    ;must follow initxt
@@ -64,7 +63,7 @@ tograph:cmp [zoom],0
         call showrules
         call xyout2
         jmp dispatcher.c270
-         
+
 .l1:    mov ax,4    ;set video mode #4 = 320x200x4
         int 10h
 
@@ -102,7 +101,7 @@ showmode: xor bx,bx    ;bg=0=black
 showtopology:
         cmp [topology],0
         jz .l1
-        
+
         mov di,192*40
         mov cx,4
 .loop:  mov ax,[es:di+2000h]

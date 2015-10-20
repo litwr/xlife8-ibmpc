@@ -45,7 +45,7 @@ start:   mov ax,3
          mov dh,[es:3997]
          mov [es:3998],dx
          jmp .l1
-         
+
 .eof:    mov ah,1
          mov cx,607h
          int 10h
