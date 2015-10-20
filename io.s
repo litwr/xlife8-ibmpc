@@ -54,8 +54,11 @@ savecf:  mov ah,3ch   ;create a file
 readtent:mov ah,3fh   ;read file
          mov bx,[filehl]
          mov cx,3072
-         mov dx,iobuf
+         xor dx,dx
+         push ds
+         mov ds,[iobseg]
          int 21h
+         pop ds
          shr ax,1
          mov [tsz],ax
          sub [filesz],ax

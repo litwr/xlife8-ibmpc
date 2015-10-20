@@ -4,11 +4,11 @@ maketent:   ;in: si
          shr ax,1
          mov [tsz],ax
          mov cx,ax
-         mov bx,iobuf
-.loop:   lodsw
-         mov [bx],ax
-         add bx,2
-         loop .loop
+         push es
+         mov es,[iobseg]
+         xor di,di
+         rep movsw
+         pop es
          retn
 
 ramdisk: call printstr
@@ -48,11 +48,14 @@ ramdisk: call printstr
          jc puttent.exit
 
 puttent: mov bp,[tsz]
-         mov si,iobuf
+         xor si,si
 .loop:   or bp,bp
          jz .exit
 
-         lodsw
+         push es
+         mov es,[iobseg]
+         lods word [es:si]
+         pop es
          mov word [x0],ax
          dec bp
          call putpixel

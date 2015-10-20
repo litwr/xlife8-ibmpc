@@ -2367,11 +2367,14 @@ showtent:mov ax,word [x0]
          push ax
          mov [ppmode],0
          mov bp,[tsz]
-         mov si,iobuf
+         xor si,si
 .loop:   or bp,bp
          je .fin
 
-         lodsw
+         push es
+         mov es,[iobseg]
+         lods word [es:si]
+         pop es
          dec bp
          mov word [x0],ax
          call putpixel

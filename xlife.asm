@@ -10,8 +10,13 @@
          org 100h
          use16
 
-start:   ;push cs   ;??
-         ;pop ds
+start:   mov ax,ds
+         mov bx,iobuf
+         mov cl,4
+         shr bx,cl
+         add ax,bx
+         mov [iobseg],ax
+
          mov ah,19h   ;get current disk
          int 21h
          add al,'A'
@@ -98,7 +103,7 @@ mainloop:
          include 'rules.s'
          include 'tile.s'
          include 'ramdata.s'
-         
+
 TIMERV          EQU     4096       ;1193180Hz/TIMERV=FREQ OF INTR8, approx 291.304 Hz
 
 start_timer:    cli                 ;SAVE/SET INTR8 VECTOR
@@ -137,7 +142,7 @@ start_timer2:   cli                 ;SAVE/SET INTR8 VECTOR
                 xor ax,ax
                 cmp ax,[cs:SAVE8LO2]
                 jne stop_timer2.exit
-                
+
                 mov ds,ax
                 mov ax,[8*4]
                 MOV [cs:SAVE8LO2],ax
@@ -878,7 +883,6 @@ tab3      db 0, 1, 1, 2, 1, 2, 2, 3, 1, 2, 2, 3, 2, 3, 3, 4
           db 3, 4, 4, 5, 4, 5, 5, 6, 4, 5, 5, 6, 5, 6, 6, 7
           db 4, 5, 5, 6, 5, 6, 6, 7, 5, 6, 6, 7, 6, 7, 7, 8
 
-iobuf     rb 3072
 tiles:
          include 'initiles.s'
 
@@ -901,6 +905,7 @@ crsrtile  dw tiles
 timercnt  dw 0, 0
 temp      dw 0
 temp2     dw 0
+iobseg    dw 0
 filehl    dw 0
 filesz    dw 0
 tsz       dw 0
@@ -951,5 +956,8 @@ patpath   db '/patterns',0
 rootpath  db '/',0
 cf        db '/colors.cfg',0
 copyleft  db '/CR.TXT',0
-nofnchar db '?,./:;<=>[\]|'
+nofnchar  db '?,./:;<=>[\]|'
 stringbuf rb 19     ;must be after nofnchar
+
+          align 16
+iobuf:
