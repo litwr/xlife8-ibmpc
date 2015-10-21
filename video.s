@@ -495,7 +495,7 @@ showscnz:
 ;;         adc #>tilesize*20
 ;;         sta i1+1
 ;;         bcc loop4
-         add si,tilesize*20-8
+         add si,tilesize*hormax-8
          jmp .loop4
 
 ;;cont3    dec xlimit
@@ -519,7 +519,7 @@ showscnz:
 ;;         sta i1+1
 ;;         bne loop3
 .cont11: sub di,24*80-16
-         sub si,tilesize*39+8
+         sub si,tilesize*(hormax*2-1)+8
          jmp .loop3
 
 showscnzp:
@@ -568,7 +568,7 @@ showscnzp:
          dec dh
          jz .cont3
 
-         add si,tilesize*20-8
+         add si,tilesize*hormax-8
          jmp .loop4
 
 .cont3:  dec dl         ;xlimit
@@ -576,7 +576,7 @@ showscnzp:
          retn
 
 .cont11: sub di,24*80-16
-         sub si,tilesize*39+8
+         sub si,tilesize*(hormax*2-1)+8
          jmp .loop3
 
 gexit:    jmp crsrset
@@ -1604,7 +1604,7 @@ setviewport:
 
 ;;        incb @#vptilecy     ;down
 ;;        sub #tilesize*hormax,@r3
-.c1:    cmp al,184
+.c1:    cmp al,vermax*8-8    ;184
         jc .c2
 
         inc [vptilecy]
@@ -1683,7 +1683,7 @@ setviewport:
 ;         jr c,cont8
 ;;6$:     cmpb r1,#152
 ;;        bcs 8$
-.c6:    cmp al,152
+.c6:    cmp al,hormax*8-8  ;152
         jc .c8
 
 ;         inc (ix)
@@ -1715,7 +1715,7 @@ setviewport:
 ;         jr c,cont5
 ;;8$:     cmpb r1,#144
 ;;        bcs 5$
-.c8:    cmp al,144
+.c8:    cmp al,hormax*8-16   ;144
         jc .c5
 
 ;cont10   inc (ix)
@@ -1971,13 +1971,14 @@ crsrcalc:
 ;;        bcs 1$
 .c8:    add bh,bl
         xor bl,bl
-        cmp bh,100
+.c8x:   cmp bh,100
         jc .c1
 
 ;;        inc r1
 ;;        sub #100,r0
         inc bl
         sub bh,100
+        jmp .c8x
 
 ;;1$:     movb r1,@#xcrsr
 ;;        clr r1

@@ -42,9 +42,14 @@ ramdisk: call printstr
          mov si,[ramptrs+si]
          lodsw
          mov word [x0],ax   ;geometry
+         mov al,[zoom]
+         push ax
+         mov [zoom],0
          call maketent
          call tograph
          call showrect
+         pop ax
+         mov [zoom],al
          jc puttent.exit
 
 puttent: mov bp,[tsz]
