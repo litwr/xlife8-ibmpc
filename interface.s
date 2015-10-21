@@ -499,7 +499,7 @@ dispatcher: call getkey2
 ;;;*         lda #>tiles+(tilesize*249)
 ;;;*         sta crsrtile+1
 ;;         mov #tiles+<tilesize*249>,@#crsrtile
-           mov [crsrtile],tiles+tilesize*(hormax*vermax/2+9)
+           mov [crsrtile],tiles+tilesize*(hormax*vermax/2+hormax/2-1)
 
 ;;;*         lda #1
 ;;;*         sta crsrbyte

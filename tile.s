@@ -147,19 +147,22 @@ torus:
 ;;4$:      mov r0,r2
 ;;         sub #<<vermax-1>*hormax-1>*tilesize,r2
 ;;         mov r2,dr(r0)
-.c4:     lea ax,[si-((vermax-1)*hormax-1)*tilesize]
+.c4:     mov ax,si
+         sub ax,((vermax-1)*hormax-1)*tilesize
          mov [si+dr],ax
 
 ;;         mov r0,r2
 ;;         sub #<vermax-1>*hormax*tilesize,r2
 ;;         mov r2,down(r0)
-         lea ax,[si-(vermax-1)*hormax*tilesize]
+         mov ax,si
+         sub ax,(vermax-1)*hormax*tilesize
          mov [si+down],ax
 
 ;;         mov r0,r2
 ;;         sub #<<vermax-1>*hormax+1>*tilesize,r2
 ;;         mov r2,dl(r0)
-         lea ax,[si-((vermax-1)*hormax+1)*tilesize]
+         mov ax,si
+         sub ax,((vermax-1)*hormax+1)*tilesize
          mov [si+dle],ax
 
 ;;         add #tilesize,r0

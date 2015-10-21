@@ -1,5 +1,5 @@
 vermax   = 24     ;192
-hormax   = 22     ;176
+hormax   = 24     ;192
 total    = hormax*vermax+1
 tilesize = 62
 plainbox = hormax*vermax*tilesize+tiles

@@ -1185,10 +1185,10 @@ drawrect: call xchgxy
          cmp dl,al
          jc .c5
 
-         cmp dl,161
+         cmp dl,hormax*8+1
          jc .c2
 
-.c5:     mov dl,160
+.c5:     mov dl,hormax*8
          inc byte [xcut]
 
 .c2:     mov bl,dl
@@ -1223,10 +1223,10 @@ drawrect: call xchgxy
          cmp dh,bl
          jc .c6
 
-         cmp dh,193
+         cmp dh,vermax*8+1
          jc .c1
 
-.c6:     mov dh,192
+.c6:     mov dh,vermax*8
          inc byte [ycut]
 
 .c1:     mov bl,dh
