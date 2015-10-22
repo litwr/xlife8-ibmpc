@@ -562,21 +562,18 @@ dispatcher: call getkey2
 .c172:   cmp al,'l'
          jnz .c173
 
+         mov al,[zoom]
+         push ax
+         mov [zoom],0
          call loadmenu
          jnz .c302
 
-.c317:   mov al,[zoom]
-         push ax
-         or al,al
-         jz .c301
-
-         mov [zoom],0
-.c301:   call tograph
+.c303:   call tograph
          call loadpat
-         pop ax
+.c302:   pop ax
          mov [zoom],al
          call calccells
-.c302:   jmp tograph
+         jmp tograph
 
 .c173:   cmp al,'L'
          jnz .c174
@@ -584,6 +581,11 @@ dispatcher: call getkey2
          cmp [fn],0
          jne .c317
 .c100:   retn
+
+.c317:   mov al,[zoom]
+         push ax
+         mov [zoom],0
+         jmp .c303
 
 .c174:   cmp al,'+'
          jnz .c175

@@ -867,9 +867,7 @@ loadmenu:call totext
 
          call curoff
          call ramdisk
-         ;call curon
-
-         xor cx,cx
+         mov ch,1
          jmp .c101
 
 .c18:    cmp al,'!'

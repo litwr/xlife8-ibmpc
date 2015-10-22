@@ -69,7 +69,7 @@
  shown but loaded later.  This quantity is enough to show the every cell from  a
  pattern file with the size up to 3 KB.
 
- The universe size is 176x192.
+ The universe size is 240x192.
 
  The rules with "born on" condition 0 are not supported.
 
