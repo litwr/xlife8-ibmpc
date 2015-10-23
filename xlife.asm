@@ -11,10 +11,7 @@
          use16
 
 start:   mov [iobseg],ds
-         mov ax,iobuf
-         mov cl,4
-         shr ax,cl
-         add [iobseg],ax
+         add [iobseg],1000h  ;64k/16
 
          mov ah,19h   ;get current disk
          int 21h
@@ -961,6 +958,3 @@ cf        db '/colors.cfg',0
 copyleft  db '/CR.TXT',0
 nofnchar  db '?,./:;<=>[\]|'
 stringbuf rb 19     ;must be after nofnchar
-
-          align 16
-iobuf:
