@@ -53,7 +53,7 @@ start:   mov [iobseg],ds
 
 mainloop:
          call crsrflash
-         call dispatcher
+.e1:     call dispatcher
          mov al,[mode]
          or al,al
          jz mainloop
@@ -82,7 +82,7 @@ mainloop:
 
          call generate     ;hide
          call cleanup
-         jmp mainloop
+         jmp mainloop.e1
 
 .c5:     call zerocc
          call generate
