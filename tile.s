@@ -323,7 +323,7 @@ random:
 
          xor bp,bp   ;dir: 0 - left, 1 - right
          mov di,tiles+(hormax*4+3)*tilesize
-         mov dx,16*256+14    ;dh - ver rnd max, dl - hor rnd max
+         mov dx,(vermax-8)*256+hormax-6    ;dh - ver rnd max, dl - hor rnd max
          mov bx,right
 
 
@@ -384,7 +384,7 @@ random:
 ;;         xor r0,r1
 ;;         bne 21$
          mov bl,left
-         mov dl,14       ;hor rnd max
+         mov dl,hormax-6       ;hor rnd max
          xor bp,1
          jnz .cont1
 

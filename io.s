@@ -75,13 +75,14 @@ loadpat: mov ax,3d00h
          xor cx,cx
          xor dx,dx
          int 21h
+         shr dx,1
+         rcr ax,1
          or dx,dx
          jnz .exit2
 
-         sub ax,6
+         sub ax,3
          jbe .exit2
 
-         shr ax,1
          mov [filesz],ax
          mov ax,4200h
          int 21h

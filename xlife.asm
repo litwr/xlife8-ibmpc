@@ -49,7 +49,7 @@ start:   mov [iobseg],ds
          call chgdrv.ee1
          mov ax,0b800h
          mov es,ax
-         ;call copyr
+         call copyr
          call setcolors
          ;;incb @#errst
          call help
