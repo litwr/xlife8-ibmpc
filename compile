@@ -1,5 +1,6 @@
 #D=XLIFE3.IMG               #name of the disk image file
 #M=/mnt/loop                #mount point
+sed 's/$/\r/' notepad-ibmpc.bas >npi.bas
 awk -f xlife.man.awk xlife.man.txt >manpage.txt && \
 fasm manpage.asm -s manpage.fas && \
 fasm-listing manpage.fas manpage.lst && \
