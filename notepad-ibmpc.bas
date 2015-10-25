@@ -4,10 +4,10 @@
  6 rem *** by litwr, 2014-15, (C) GNU GPL
  7 rem *** the initial banner was made by Text Resizer by MIRKOSOFT
  8 defint a-w:cl=119
-10 mc=80:cc$=chr$(176):cf$=chr$(178):mo$="ins":im=1
+10 mc=80:cc$=chr$(176):cf$=chr$(178):mo$="ins":im=1:dr$="\patterns\"
 11 un$=chr$(u+65)+":"
 12 ml=500:dim a$(ml)
-14 rem clr2eol$=chr$(27)+"[K":invert$=chr$(27)+"[7m"
+14 s80$=space$(80):s79$=space$(79)
 
 20 gosub 100
 30 gosub 9700
@@ -26,14 +26,11 @@
 180 c$=inkey$:if c$<>"" then 180
 190 return
 
-1000 call cs3:efs=peek(&c7d1):l2=peek(&c7d2):c$=space$(l2):if l2=0 then return
-1020 call cs4,@c$:if l2=255 then 3160 else return
-
 2000 cls:print chr$(12)tab(24)"Notepad +4 IBM PC Edition commands list":print
 2005 print tab(30);:color 0,7:print "With the CONTROL key":color 7,0
 2010 print "P - help"tab(20)"N - new"tab(40)"L/S - load/save"tab(60)"B/E - to begin/end"
 2020 print "F - find forward"tab(20)"R - repeat find"tab(40)"C - cat & load"tab(60)"V - change disk"
-2030 print "Q - quit":print
+2030 print "D - change directory"tab(40)"Q - quit":print
 2040 print tab(31);:color 0,7:print"With the TAB prefix":color 7,0
 2050 print "  A/C - toggle insert/overwrite mode"tab(42)"D/I - delete/insert a line"
 2060 print "  J/K - to start/end of line"tab(42)"P/Q - erase begin/end of line"
@@ -48,7 +45,7 @@
 2220 if i<lc and i-ty<24 then gosub 2400:i=i+1:goto 2220
 2230 gosub 2310
 
-2250 locate 25,1:print f$,fre(0);:locate 25,38:print mo$;:locate 25,43:print un$;:return
+2250 locate 25,1:print f$,fre(0);:locate 25,38:print mo$;:locate 25,43:print un$dr$;:return
 
 2270 i=cy
 2280 if i<lc and i-ty<24 then gosub 2510:if right$(a$(i),1)<>cc$ then i=i+1:goto 2280
@@ -65,9 +62,9 @@
 2430 print left$(a$(i),79);:def seg=&HB800:poke 3838,asc(right$(a$(i),1)):def seg:return
 
 2500 rem show line #i
-2510 locate i-ty+1,1:if csrlin=24 then 2520 else print space$(80);
+2510 locate i-ty+1,1:if csrlin=24 then 2520 else print s80$;
 2515 locate i-ty+1,1:print a$(i);:return
-2520 print space$(79);:def seg=&HB800:poke 3838,32:def seg:goto 2515
+2520 print s79$;:def seg=&HB800:poke 3838,32:def seg:goto 2515
 
 2600 locate cy-ty+1,cx+1,1
 2604 c$=inkey$:if c$="" then 2604
@@ -99,20 +96,20 @@
 2890 goto 2600
 
 3000 rem load
-3010 cls:s$="":print"disk "un$:print"enter file name to load":input s$:if s$="" goto 3100
+3010 cls:s$="":print"PATH: "un$dr$:print"enter file name to load":input s$:if s$="" goto 3100
 3014 f$=s$:gosub 5900
-3020 on error goto 3700:openin f$:cls:locate#0,1,16:print "The flashing lines below is just a load indicator":poke &c7d1,1
-3030 gosub 1000:if efs=0 then gosub 7160:goto 3080
-3040 gosub 7000:print chr$(13)lc;:if efs goto 3030
+3020 open "R",#1,un$+dr$+f$,1:field #1,1 as c$:cls
+3030 get#1
+3040 if c$="" goto 3070
+3050 i=asc(c$):ol=lc
+3060 if i=10 then gosub 7010 else if i>31 then gosub 7210
+3065 if ol<lc then locate 1,1:print lc;
+3070 if not eof(1) goto 3030
 3080 a$(lc)=a$(lc)+cf$:gosub 7100
-3090 closein
-3095 on error goto 0
+3090 close#1
 3100 gosub 2205:goto 2310
 
-3140 call cs3:efs=peek(&c7d1):l2=peek(&c7d2):c$=space$(l2):if l2>0 then call cs4,@c$
-3150 return
-
-3160 if len(c$)>mc then gosub 7200:goto 3160
+3160 if len(c$)>mc then gosub 7210:goto 3160
 3165 d$=c$:l=len(d$):if efs then gosub 3140 else return
 3170 if l+l2<255 then c$=d$+c$:return
 3180 if l2>254 then gosub 3190:goto 3160
@@ -120,31 +117,30 @@
 3190 a$(lc)=d$+left$(c$,mc-l):c$=mid$(c$,mc-l+1):goto 7100
 
 3200 rem save
-3210 cls#1:cls:s$="":print"disk "un$,f$
+3210 cls:s$="":print"PATH: "un$dr$f$
 3212 print"Enter filename to save":print"  empty string - use the current one":print"  * - exit"
 3214 input s$:c$=s$:if s$="*" then 3100
 3216 if s$="" then c$=f$ else f$=c$
 3218 if instr(c$,"*") or instr(c$,"?") then 3350
-3220 on error goto 3710:openout c$
+3220 open "O",#1,un$+dr$+c$
 3240 if a$(0)=cf$ goto 3330
 3250 for i=1 to lc
 3260 s$=a$(i-1):l=len(s$)
-3270 if l>1 then print#9,left$(s$,l-1);:s$=right$(s$,1)
+3270 if l>1 then print#1,left$(s$,l-1);:s$=right$(s$,1)
 3280 if s$=cf$ goto 3310
-3290 print chr$(13)i;:if s$=cc$ then print#9:goto 3310
-3300 print#9,s$;
+3290 locate csrlin,1:print i;:if s$=cc$ then print#1,"":goto 3310
+3300 print#1,s$;
 3310 next
-3320 on error goto 0
-3330 closeout
+3330 close#1
 3340 goto 3100
 
 3350 cls:print "cannot open "c$:print ds$
 3360 c$=inkey$:if c$="" then 3360 else goto 3100
 
 3400 rem change drive letter
-3410 cls:cls#1
-3415 u=u+1:if u>1 then u=0
-3420 un$=chr$(u+65)+":":if u=0 then |a else |b
+3410 cls
+3415 u=u+1:if u>4 then u=0
+3420 un$=chr$(u+65)+":"
 3430 goto 2205
 
 3500 rem directory & load
@@ -276,15 +272,16 @@
 6110 if ty>cy then ty=cy
 6120 return
 
-7000 rem input and optionally split line
-7010 if len(c$)<mc then a$(lc)=c$+cc$ else gosub 7200:goto 7010
+7000 rem input line after eol
+7010 if len(a$(lc))<mc then a$(lc)=a$(lc)+cc$ else gosub 7100:a$(lc)=cc$
 
 7100 if lc<ml then lc=lc+1 else color 0,7:print "file too big, a line skipped";:color 7,0:a$(lc-1)=cf$
 7110 a$(lc)="":return
 
-7160 if len(c$)<mc then a$(lc)=c$:return else gosub 7200:goto 7160
-
-7200 a$(lc)=left$(c$,mc):c$=mid$(c$,mc+1):goto 7100
+7200 rem add input char
+7210 if len(a$(lc))=mc then gosub 7100
+7220 a$(lc)=a$(lc)+c$
+7230 return
 
 7300 if right$(a$(cy),1)=cf$ then 7600
 
@@ -437,3 +434,5 @@
 10235 if c$=right$(s$,i) and d$=left$(g$,l3-i) then fi=mc-i+1:return
 10240 next
 10250 return
+
+11000 x$=inkey$:if x$="" goto 11000 else return
