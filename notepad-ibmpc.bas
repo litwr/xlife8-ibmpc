@@ -101,6 +101,7 @@
 3014 f$=s$:gosub 5900
 3016 on error goto 3350
 3020 open "R",#1,un$+dr$+f$,1:field #1,1 as c$:cls
+3025 on error goto 3700
 3030 get#1
 3040 if c$="" goto 3070
 3050 i=asc(c$):ol=lc
@@ -147,13 +148,15 @@
 3430 goto 2205
 
 3500 rem directory & load
-3510 cls#1:cls:dm$="":print"disk "un$:print"enter directory mask (*.* by default)":input dm$:if dm$="" then dm$="*.*"
-3520 |dir,dm$
-3630 print "You may use the second cursor to copy filename from the list"
+3510 cls:dm$="":print"path "un$dr$:print"enter directory mask (*.* by default)":input dm$:if dm$="" then dm$="*.*"
+3515 on error goto 3670
+3520 files un$+dr$+dm$
+3530 on error goto 0
 3640 s$="":input "Filename (empty string = exit)";s$:if s$="" then 3100
 3650 goto 3014
+3670 resume 3530
 
-3700 if err=14 then print " No memory - next lines are ignored" else print" Error";err
+3700 if err=14 then print " No memory - next lines are ignored" else print" Error 14"
 3702 print "Hit a key"
 3705 c$=inkey$:if c$="" then 3705 else resume 3080
 
