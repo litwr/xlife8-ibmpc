@@ -93,11 +93,13 @@
 2830 if i=22 then 3400
 2840 if i=3 then 3500
 2850 if i=211 then 3800
+2860 if i=4 then 3900
 2890 goto 2600
 
 3000 rem load
 3010 cls:s$="":print"PATH: "un$dr$:print"enter file name to load":input s$:if s$="" goto 3100
 3014 f$=s$:gosub 5900
+3016 on error goto 3350
 3020 open "R",#1,un$+dr$+f$,1:field #1,1 as c$:cls
 3030 get#1
 3040 if c$="" goto 3070
@@ -107,6 +109,7 @@
 3070 if not eof(1) goto 3030
 3080 a$(lc)=a$(lc)+cf$:gosub 7100
 3090 close#1
+3095 on error goto 0
 3100 gosub 2205:goto 2310
 
 3160 if len(c$)>mc then gosub 7210:goto 3160
@@ -117,11 +120,11 @@
 3190 a$(lc)=d$+left$(c$,mc-l):c$=mid$(c$,mc-l+1):goto 7100
 
 3200 rem save
-3210 cls:s$="":print"PATH: "un$dr$f$
+3210 cls:s$="":print"PATH: "un$dr$
 3212 print"Enter filename to save":print"  empty string - use the current one":print"  * - exit"
 3214 input s$:c$=s$:if s$="*" then 3100
 3216 if s$="" then c$=f$ else f$=c$
-3218 if instr(c$,"*") or instr(c$,"?") then 3350
+3218 on error goto 3350
 3220 open "O",#1,un$+dr$+c$
 3240 if a$(0)=cf$ goto 3330
 3250 for i=1 to lc
@@ -132,10 +135,10 @@
 3300 print#1,s$;
 3310 next
 3330 close#1
-3340 goto 3100
+3340 goto 3095
 
-3350 cls:print "cannot open "c$:print ds$
-3360 c$=inkey$:if c$="" then 3360 else goto 3100
+3350 cls:print "cannot open "un$dr$f$
+3360 c$=inkey$:if c$="" then 3360 else resume 3095
 
 3400 rem change drive letter
 3410 cls
@@ -165,6 +168,12 @@
 3840 gosub 4150
 3850 if k<>cy then cx=0
 3860 goto 4700
+
+3900 rem set working directory
+3910 cls:print"current directory path: "dr$
+3920 print"enter directory path (* - exit)";:input c$
+3930 if c$<>"*" then dr$=c$
+3940 goto 2205
 
 4000 rem cursor right
 4010 if cx<len(a$(cy))-1 then cx=cx+1 else goto 4050
