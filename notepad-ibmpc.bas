@@ -3,7 +3,7 @@
  4 rem *** converted from Commodore plus/4
  6 rem *** by litwr, 2014-15, (C) GNU GPL
  7 rem *** the initial banner was made by Text Resizer by MIRKOSOFT
- 8 defint a-w:cl=119
+ 8 z=timer:defint a-w:cl=119
 10 mc=80:cc$=chr$(176):cf$=chr$(178):mo$="ins":im=1:dr$="\patterns\"
 11 un$=chr$(u+65)+":"
 12 ml=500:dim a$(ml)
@@ -22,7 +22,7 @@
 118 PRINT "     ﬂﬂ  ﬂﬂ   ﬂﬂﬂﬂ     ﬂﬂﬂ    ﬂﬂﬂﬂﬂ  €€       ﬂﬂﬂﬂﬂ   ﬂﬂﬂﬂﬂ              ﬂﬂ "
 150 locate 11,62:print "IBM PC Edition";
 154 locate 12,46:print "v1, by litwr, (c) 2014-15 gnu gpl"
-170 z=timer:while timer-z<3:wend
+170 for i=1 to 5000:next:if z<>timer then while timer-z<3:wend
 180 c$=inkey$:if c$<>"" then 180
 190 return
 
@@ -148,7 +148,7 @@
 3430 goto 2205
 
 3500 rem directory & load
-3510 cls:dm$="":print"path "un$dr$:print"enter directory mask (*.* by default)":input dm$:if dm$="" then dm$="*.*"
+3510 cls:dm$="":print"path "un$dr$:print"enter directory mask (*.TXT by default)":input dm$:if dm$="" then dm$="*.txt"
 3515 on error goto 3670
 3520 files un$+dr$+dm$
 3530 on error goto 0
