@@ -3,16 +3,20 @@
  4 rem *** converted from Commodore plus/4
  6 rem *** by litwr, 2014-15, (C) GNU GPL
  7 rem *** the initial banner was made by Text Resizer by MIRKOSOFT
- 8 z=timer:defint a-w:cl=119
+ 8 defint a-w:cl=119
 10 mc=80:cc$=chr$(176):cf$=chr$(178):mo$="ins":im=1:dr$="\patterns\"
 11 un$=chr$(u+65)+":"
-12 ml=500:dim a$(ml)
-14 s80$=space$(80):s79$=space$(79)
+12 ml=500:dim a$(ml):dim ml%(50):csize=81:so2=29:so3=62
+14 s80$=space$(80)
 
 20 gosub 100
 30 gosub 9700
 40 if fo then gosub 2210
-45 gosub 2600:goto 40
+45 c$=inkey$:if c$<>"" then 45 else gosub 2600:goto 40
+
+50 data 6,1E,B8,0,B8,8E,C0,8E,D8,BE,A0,0,31,FF,FC,B9,30,7,F3,A5,B4,7,B1,50,F3,AB,1F,7,CB
+52 data 6,1E,B8,0,B8,8E,C0,8E,D8,BE,5E,E,BF,FE,E,B9,30,7,FD,F3,A5,B4,7,B1,50,31,FF,FC,F3,AB,1F,7,CB
+54 data 1E,31,C0,8E,D8,A1,6C,4,83,C0,32,3B,6,6C,4,73,FA,1F,CB
 
 100 cls
 110 locate 23,23:print "Press Ctrl + P to get help":locate 6,10
@@ -20,9 +24,10 @@
 114 PRINT "     €€€€€€  ‹€ﬂﬂ€‹ ﬂﬂ€€ﬂﬂ   ‹€ﬂﬂ€‹  €€ﬂﬂ€‹   ﬂﬂﬂ€‹  ‹€ﬂﬂ€€  ‹‹€€‹‹  ‹‹ﬂﬂ€€ "
 116 PRINT "     €€ ﬂ€€  €€  €€   €€ ‹‹  €€ﬂﬂﬂﬂ  €€‹‹€ﬂ  ‹€ﬂﬂ€€  €€  €€    €€    ﬂﬂﬂﬂ€€ﬂ"
 118 PRINT "     ﬂﬂ  ﬂﬂ   ﬂﬂﬂﬂ     ﬂﬂﬂ    ﬂﬂﬂﬂﬂ  €€       ﬂﬂﬂﬂﬂ   ﬂﬂﬂﬂﬂ              ﬂﬂ "
-150 locate 11,62:print "IBM PC Edition";
-154 locate 12,46:print "v1, by litwr, (c) 2014-15 gnu gpl"
-170 for i=1 to 5000:next:if z<>timer then while timer-z<3:wend
+150 locate 11,66:print "IBM PC Edition";
+154 locate 12,50:print "v1, by litwr, (c) 2015 gnu gpl"
+160 for i=0 to csize-1:read c$:poke varptr(ml%(0))+i,val("&h"+c$):next i
+170 k=varptr(ml%(0))+so3:call k
 180 c$=inkey$:if c$<>"" then 180
 190 return
 
@@ -55,16 +60,11 @@
 2330 c$=c$+" "+d$:d$=str$(lc):mid$(d$,1,1)="/":c$=c$+d$:l=mc-len(c$)
 2350 locate 25,l-2:print "   "c$;:return
 
-2400 if CSRLIN=24 then 2420
-2405 print a$(i);:if pos(0)<>1 then print
+2400 print a$(i);:if pos(0)<>1 and csrlin<>24 then print
 2410 return
-2420 if len(a$(i))<mc then print a$(i);:return
-2430 print left$(a$(i),79);:def seg=&HB800:poke 3838,asc(right$(a$(i),1)):def seg:return
 
 2500 rem show line #i
-2510 locate i-ty+1,1:if csrlin=24 then 2520 else print s80$;
-2515 locate i-ty+1,1:print a$(i);:return
-2520 print s79$;:def seg=&HB800:poke 3838,32:def seg:goto 2515
+2510 locate i-ty+1,1:print a$(i)space$(80-len(a$(i)));:return
 
 2600 locate cy-ty+1,cx+1,1
 2604 c$=inkey$:if c$="" then 2604
@@ -98,9 +98,9 @@
 
 3000 rem load
 3010 cls:s$="":print"PATH: "un$dr$:print"enter file name to load":input s$:if s$="" goto 3100
-3014 f$=s$:gosub 5900
 3016 on error goto 3350
-3020 open "R",#1,un$+dr$+f$,1:field #1,1 as c$:cls
+3018 c$=s$:open un$+dr$+c$ for input as #1:close#1:f$=s$
+3020 open "R",#1,un$+dr$+f$,1:field #1,1 as c$:cls:gosub 5900
 3025 on error goto 3700
 3030 get#1
 3040 if c$="" goto 3070
@@ -138,7 +138,7 @@
 3330 close#1
 3340 goto 3095
 
-3350 cls:print "cannot open "un$dr$f$
+3350 cls:print "cannot open "un$dr$c$
 3360 c$=inkey$:if c$="" then 3360 else resume 3095
 
 3400 rem change drive letter
@@ -153,7 +153,7 @@
 3520 files un$+dr$+dm$
 3530 on error goto 0
 3640 s$="":input "Filename (empty string = exit)";s$:if s$="" then 3100
-3650 goto 3014
+3650 goto 3016
 3670 resume 3530
 
 3700 if err=14 then print " No memory - next lines are ignored" else print" Error 14"
@@ -182,12 +182,12 @@
 4010 if cx<len(a$(cy))-1 then cx=cx+1 else goto 4050
 4020 goto 2310
 
-4050 k=cy:gosub 4200
+4050 k=cy:gosub 4210
 4060 if k<>cy then cx=0:goto 2310
 4070 return
 
 4100 rem cursor left
-4110 if cx>0 then cx=cx-1 else if cy>0 then cx=len(a$(cy-1))-1:goto 4300
+4110 if cx>0 then cx=cx-1 else if cy>0 then cx=len(a$(cy-1))-1:goto 4305
 4120 goto 2310
 
 4150 if cx>=len(a$(cy)) then cx=len(a$(cy))-1
@@ -198,14 +198,16 @@
 4220 if cy<lc-1 then cy=cy+1
 4230 if cy-ty>23 then ty=ty+1:e=1
 4240 gosub 4150
-4250 if e then gosub 2200
+4250 if e then k=varptr(ml%(0)):call k:locate 24,1:print a$(ty+23);
 4260 goto 2310
 
 4300 rem cursor up
 4305 e=0
 4310 if cy>0 then cy=cy-1
 4320 if cy-ty<0 then ty=ty-1:e=1
-4330 goto 4240
+4330 gosub 4150
+4340 if e then k=varptr(ml%(0))+so2:call k:locate 1,1:print a$(ty);
+4350 goto 2310
 
 4400 rem cursor home
 4410 cy=ty:cx=0
@@ -364,12 +366,16 @@
 8800 rem esc+v
 8810 if ty>=lc-1 then return
 8820 ty=ty+1:if cy<ty then cy=ty
-8830 goto 2200
+8825 k=varptr(ml%(0)):call k
+8830 if ty+23<lc then locate 24,1:print a$(ty+23);
+8840 goto 2310
 
 8900 rem esc+w
 8910 if ty=0 then return
 8920 ty=ty-1:if cy-ty>23 then cy=cy-1
-8930 goto 2200
+8925 k=varptr(ml%(0))+so2:call k
+8930 locate 1,1:print a$(ty);
+8440 goto 2310
 
 9000 rem esc+a
 9010 im=1:mo$="ins"
@@ -446,5 +452,3 @@
 10235 if c$=right$(s$,i) and d$=left$(g$,l3-i) then fi=mc-i+1:return
 10240 next
 10250 return
-
-11000 x$=inkey$:if x$="" goto 11000 else return
