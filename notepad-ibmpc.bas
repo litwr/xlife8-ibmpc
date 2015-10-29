@@ -5,17 +5,18 @@
  7 rem *** the initial banner was made by Text Resizer by MIRKOSOFT
  8 defint a-w:cl=119
 10 mc=80:cc$=chr$(176):cf$=chr$(178):mo$="ins":im=1:dr$="\patterns\"
-12 ml=500:dim a$(ml):dim ml%(50):csize=95:so2=29:so3=62:so4=81
+12 ml=600:dim a$(ml):dim ml%(50):csize=95:so2=29:so3=62:so4=81
 
 20 gosub 100
 30 gosub 9700
 40 if fo then gosub 2210
-45 gosub 2600:goto 40
+45 c$=inkey$:if c$<>"" then 45 else gosub 2600:goto 40
 
 50 data 6,1E,B8,0,B8,8E,C0,8E,D8,BE,A0,0,31,FF,FC,B9,30,7,F3,A5,B4,7,B1,50,F3,AB,1F,7,CB
 52 data 6,1E,B8,0,B8,8E,C0,8E,D8,BE,5E,E,BF,FE,E,B9,30,7,FD,F3,A5,B4,7,B1,50,31,FF,FC,F3,AB,1F,7,CB
 54 data 1E,31,C0,8E,D8,A1,6C,4,83,C0,32,3B,6,6C,4,73,FA,1F,CB
 56 data B4,19,CD,21,89,E5,8B,5E,4,88,7,CA,2,0
+
 100 cls
 110 locate 23,23:print "Press Ctrl + P to get help":locate 6,10
 112 PRINT "     ллм лл           лл                                 лл    мм       млл "
@@ -121,7 +122,7 @@
 3190 a$(lc)=d$+left$(c$,mc-l):c$=mid$(c$,mc-l+1):goto 7100
 
 3200 rem save
-3210 cls:s$="":print"PATH: "un$dr$
+3210 cls:s$="":print"PATH: "un$dr$f$
 3212 print"Enter filename to save":print"  empty string - use the current one":print"  * - exit"
 3214 input s$:c$=s$:if s$="*" then 3100
 3216 if s$="" then c$=f$ else f$=c$
@@ -145,7 +146,7 @@
 3410 cls
 3415 u=u+1:if u>4 then u=0
 3420 un$=chr$(u+65)+":"
-3430 goto 2205
+3430 goto 2250
 
 3500 rem directory & load
 3510 cls:dm$="":print"path "un$dr$:print"enter directory mask (*.TXT by default)":input dm$:if dm$="" then dm$="*.txt"
