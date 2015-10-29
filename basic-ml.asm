@@ -45,3 +45,9 @@ jnc l1
 pop ds
 retf
 
+mov ah,19h
+int 21h
+mov bp,sp
+mov bx,[bp+4]
+mov [bx],al
+retf 2

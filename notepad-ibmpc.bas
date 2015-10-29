@@ -5,19 +5,17 @@
  7 rem *** the initial banner was made by Text Resizer by MIRKOSOFT
  8 defint a-w:cl=119
 10 mc=80:cc$=chr$(176):cf$=chr$(178):mo$="ins":im=1:dr$="\patterns\"
-11 un$=chr$(u+65)+":"
-12 ml=500:dim a$(ml):dim ml%(50):csize=81:so2=29:so3=62
-14 s80$=space$(80)
+12 ml=500:dim a$(ml):dim ml%(50):csize=95:so2=29:so3=62:so4=81
 
 20 gosub 100
 30 gosub 9700
 40 if fo then gosub 2210
-45 c$=inkey$:if c$<>"" then 45 else gosub 2600:goto 40
+45 gosub 2600:goto 40
 
 50 data 6,1E,B8,0,B8,8E,C0,8E,D8,BE,A0,0,31,FF,FC,B9,30,7,F3,A5,B4,7,B1,50,F3,AB,1F,7,CB
 52 data 6,1E,B8,0,B8,8E,C0,8E,D8,BE,5E,E,BF,FE,E,B9,30,7,FD,F3,A5,B4,7,B1,50,31,FF,FC,F3,AB,1F,7,CB
 54 data 1E,31,C0,8E,D8,A1,6C,4,83,C0,32,3B,6,6C,4,73,FA,1F,CB
-
+56 data B4,19,CD,21,89,E5,8B,5E,4,88,7,CA,2,0
 100 cls
 110 locate 23,23:print "Press Ctrl + P to get help":locate 6,10
 112 PRINT "     €€‹ €€           €€                                 €€    ‹‹       ‹€€ "
@@ -26,8 +24,9 @@
 118 PRINT "     ﬂﬂ  ﬂﬂ   ﬂﬂﬂﬂ     ﬂﬂﬂ    ﬂﬂﬂﬂﬂ  €€       ﬂﬂﬂﬂﬂ   ﬂﬂﬂﬂﬂ              ﬂﬂ "
 150 locate 11,66:print "IBM PC Edition";
 154 locate 12,50:print "v1, by litwr, (c) 2015 gnu gpl"
-160 for i=0 to csize-1:read c$:poke varptr(ml%(0))+i,val("&h"+c$):next i
+160 for u=0 to csize-1:read c$:poke varptr(ml%(0))+u,val("&h"+c$):next
 170 k=varptr(ml%(0))+so3:call k
+175 k=varptr(ml%(0))+so4:call k(u):un$=chr$(u+65)+":"
 180 c$=inkey$:if c$<>"" then 180
 190 return
 
@@ -80,7 +79,7 @@
 2700 if i=13 then 4900
 2710 if i=9 then 8000
 2720 if i=16 then 2000
-2730 if i=17 then print chr$(12)"Welcome to Basic":end
+2730 if i=17 then system
 2740 if i=2 then 9300
 2750 if i=5 then 9400
 2760 if i=201 then 9500
@@ -94,6 +93,7 @@
 2840 if i=3 then 3500
 2850 if i=211 then 3800
 2860 if i=4 then 3900
+2870 if i=207 then 7700
 2890 goto 2600
 
 3000 rem load
@@ -314,6 +314,11 @@
 7600 a$(cy)=left$(a$(cy),cx)+cc$:a$(cy+1)=cf$
 7610 cx=0:gosub 7100
 7630 goto 4200
+
+7700 rem End-key
+7710 cy = ty + 23: if cy >= lc then cy = lc-1
+7720 cx = len(a$(cy))-1
+7730 goto 2310
 
 8000 rem esc
 8010 c$=inkey$:if c$="" goto 8010
