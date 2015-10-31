@@ -114,13 +114,6 @@
 3095 on error goto 0
 3100 gosub 2205:goto 2310
 
-3160 if len(c$)>mc then gosub 7210:goto 3160
-3165 d$=c$:l=len(d$):if efs then gosub 3140 else return
-3170 if l+l2<255 then c$=d$+c$:return
-3180 if l2>254 then gosub 3190:goto 3160
-
-3190 a$(lc)=d$+left$(c$,mc-l):c$=mid$(c$,mc-l+1):goto 7100
-
 3200 rem save
 3210 cls:s$="":print"PATH: "un$dr$f$
 3212 print"Enter filename to save":print"  empty string - use the current one":print"  * - exit"
@@ -157,13 +150,9 @@
 3650 goto 3016
 3670 resume 3530
 
-3700 if err=14 then print " No memory - next lines are ignored" else print" Error 14"
+3700 if err=14 then print " No memory - next lines are ignored" else print" Error";err
 3702 print "Hit a key"
 3705 c$=inkey$:if c$="" then 3705 else resume 3080
-
-3710 if err=7 or err=14 then print " No memory - remove several lines" else print" Error";err
-3712 print "Hit a key"
-3715 c$=inkey$:if c$="" then 3715 else resume 3320
 
 3800 rem delete char
 3810 if mid$(a$(cy),cx+1,1)=cf$ then return
@@ -381,7 +370,7 @@
 8920 ty=ty-1:if cy-ty>23 then cy=cy-1
 8925 k=varptr(ml%(0))+so2:call k
 8930 locate 1,1:print a$(ty);
-8440 goto 2310
+8940 goto 2310
 
 9000 rem esc+a
 9010 im=1:mo$="ins"
