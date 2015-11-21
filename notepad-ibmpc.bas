@@ -5,19 +5,19 @@
  7 rem *** the initial banner was made by Text Resizer by MIRKOSOFT
  8 defint a-w:cl=119
 10 mc=80:cc$=chr$(176):cf$=chr$(178):mo$="ins":im=1:dr$="\patterns\"
-12 ml=600:dim a$(ml):dim ml%(80):csize=148:so2=29:so3=62:so4=81:so5=95
+12 ml=600:dim a$(ml):dim ml%(80):csize=141:so2=26:so3=57:so4=76:so5=91
 
 20 gosub 100
 30 gosub 9700
 40 if fo then gosub 2210
 45 gosub 2600:goto 40
 
-50 data 6,1E,B8,0,B8,8E,C0,8E,D8,BE,A0,0,31,FF,FC,B9,30,7,F3,A5,B4,7,B1,50,F3,AB,1F,7,CB
-52 data 6,1E,B8,0,B8,8E,C0,8E,D8,BE,5E,E,BF,FE,E,B9,30,7,FD,F3,A5,B4,7,B1,50,31,FF,FC,F3,AB,1F,7,CB
+50 data 1E,B8,0,B8,8E,C0,8E,D8,BE,A0,0,31,FF,B9,30,7,F3,A5,B4,7,B1,50,F3,AB,1F,CB
+52 data 1E,B8,0,B8,8E,C0,8E,D8,BE,5E,E,BF,FE,E,B9,30,7,FD,F3,A5,B4,7,B1,50,31,FF,FC,F3,AB,1F,CB
 54 data 1E,31,C0,8E,D8,A1,6C,4,83,C0,32,3B,6,6C,4,73,FA,1F,CB
-56 data B4,19,CD,21,89,E5,8B,5E,4,88,7,CA,2,0
-58 data 6,B8,0,B8,8E,C0,B4,3,31,DB,CD,10,B0,A0,F6,E6,89,C7,89,E5,8B,76,6,FC,AC,31,C9,88,C1,B3,50,28,CB
-60 data AD,89,C6,B4,7,AC,AB,E2,FC,8,D9,74,4,B0,20,F3,AB,7,CA,2,0
+56 data B4,19,CD,21,89,E3,36,8B,5F,4,88,7,CA,2,0
+58 data B8,0,B8,8E,C0,B4,3,31,DB,CD,10,B0,A0,F6,E6,89,C7,89,E3,36,8B,77,4,AD,89,C1,B3,50,28,CB
+60 data AD,89,C6,B4,7,AC,AB,E2,FC,8,D9,74,4,B0,20,F3,AB,CA,2,0
 
 100 cls
 110 locate 23,23:print "Press Ctrl + P to get help":locate 6,10
@@ -28,8 +28,8 @@
 150 locate 11,66:print "IBM PC Edition";
 154 locate 12,50:print "v1, by litwr, (c) 2015 gnu gpl"
 160 for u=0 to csize-1:read c$:poke varptr(ml%(0))+u,val("&h"+c$):next
-170 k=varptr(ml%(0))+so3:call k
-175 k=varptr(ml%(0))+so4:call k(u):un$=chr$(u+65)+":"
+170 k=varptr(ml%(0))+so3:call absolute(k)
+175 k=varptr(ml%(0))+so4:call absolute (u,k):un$=chr$(u+65)+":"
 180 c$=inkey$:if c$<>"" then 180
 190 return
 
@@ -63,7 +63,7 @@
 2350 locate 25,l-2:print "   "c$;:return
 
 2500 rem show line #i
-2510 locate i-ty+1,1:l4=varptr(ml%(0))+so5:call l4(a$(i)):return
+2510 locate i-ty+1,1:l4=varptr(ml%(0))+so5:call absolute(a$(i),l4):return
 
 2600 locate cy-ty+1,cx+1,1
 2604 c$=inkey$:if c$="" then 2604
@@ -135,10 +135,9 @@
 3360 c$=inkey$:if c$="" then 3360 else resume 3095
 
 3400 rem change drive letter
-3410 cls
-3415 u=u+1:if u>4 then u=0
+3410 u=u+1:if u>4 then u=0
 3420 un$=chr$(u+65)+":"
-3430 goto 2250
+3430 goto 2205
 
 3500 rem directory & load
 3510 cls:dm$="":print"path "un$dr$:print"enter directory mask (*.TXT by default)":input dm$:if dm$="" then dm$="*.txt"
@@ -187,7 +186,7 @@
 4220 if cy<lc-1 then cy=cy+1
 4230 if cy-ty>23 then ty=ty+1:e=1
 4240 gosub 4150
-4250 if e then k=varptr(ml%(0)):call k:locate 24,1:print a$(ty+23);
+4250 if e then k=varptr(ml%(0)):call absolute(k):locate 24,1:print a$(ty+23);
 4260 goto 2310
 
 4300 rem cursor up
@@ -195,7 +194,7 @@
 4310 if cy>0 then cy=cy-1
 4320 if cy-ty<0 then ty=ty-1:e=1
 4330 gosub 4150
-4340 if e then k=varptr(ml%(0))+so2:call k:locate 1,1:print a$(ty);
+4340 if e then k=varptr(ml%(0))+so2:call absolute(k):locate 1,1:print a$(ty);
 4350 goto 2310
 
 4400 rem cursor home
@@ -360,14 +359,14 @@
 8800 rem esc+v
 8810 if ty>=lc-1 then return
 8820 ty=ty+1:if cy<ty then cy=ty
-8825 k=varptr(ml%(0)):call k
+8825 k=varptr(ml%(0)):call absolute(k)
 8830 if ty+23<lc then locate 24,1:print a$(ty+23);
 8840 goto 2310
 
 8900 rem esc+w
 8910 if ty=0 then return
 8920 ty=ty-1:if cy-ty>23 then cy=cy-1
-8925 k=varptr(ml%(0))+so2:call k
+8925 k=varptr(ml%(0))+so2:call absolute(k)
 8930 locate 1,1:print a$(ty);
 8940 goto 2310
 
