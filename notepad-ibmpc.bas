@@ -1,21 +1,23 @@
  1 rem *** CP437 8-bit encoding
  2 rem *** notepad+4 ibm pc edition, the text file editor, v1
  4 rem *** converted from Commodore plus/4
- 6 rem *** by litwr, 2014-15, (C) GNU GPL
+ 6 rem *** by litwr, 2015, (C) GNU GPL
  7 rem *** the initial banner was made by Text Resizer by MIRKOSOFT
  8 defint a-w:cl=119
 10 mc=80:cc$=chr$(176):cf$=chr$(178):mo$="ins":im=1:dr$="\patterns\"
-12 ml=600:dim a$(ml):dim ml%(50):csize=95:so2=29:so3=62:so4=81
+12 ml=600:dim a$(ml):dim ml%(80):csize=148:so2=29:so3=62:so4=81:so5=95
 
 20 gosub 100
 30 gosub 9700
 40 if fo then gosub 2210
-45 c$=inkey$:if c$<>"" then 45 else gosub 2600:goto 40
+45 gosub 2600:goto 40
 
 50 data 6,1E,B8,0,B8,8E,C0,8E,D8,BE,A0,0,31,FF,FC,B9,30,7,F3,A5,B4,7,B1,50,F3,AB,1F,7,CB
 52 data 6,1E,B8,0,B8,8E,C0,8E,D8,BE,5E,E,BF,FE,E,B9,30,7,FD,F3,A5,B4,7,B1,50,31,FF,FC,F3,AB,1F,7,CB
 54 data 1E,31,C0,8E,D8,A1,6C,4,83,C0,32,3B,6,6C,4,73,FA,1F,CB
 56 data B4,19,CD,21,89,E5,8B,5E,4,88,7,CA,2,0
+58 data 6,B8,0,B8,8E,C0,B4,3,31,DB,CD,10,B0,A0,F6,E6,89,C7,89,E5,8B,76,6,FC,AC,31,C9,88,C1,B3,50,28,CB
+60 data AD,89,C6,B4,7,AC,AB,E2,FC,8,D9,74,4,B0,20,F3,AB,7,CA,2,0
 
 100 cls
 110 locate 23,23:print "Press Ctrl + P to get help":locate 6,10
@@ -31,7 +33,7 @@
 180 c$=inkey$:if c$<>"" then 180
 190 return
 
-2000 cls:print chr$(12)tab(24)"Notepad +4 IBM PC Edition commands list":print
+2000 cls:print tab(24)"Notepad +4 IBM PC Edition commands list":print
 2005 print tab(30);:color 0,7:print "With the CONTROL key":color 7,0
 2010 print "P - help"tab(20)"N - new"tab(40)"L/S - load/save"tab(60)"B/E - to begin/end"
 2020 print "F - find forward"tab(20)"R - repeat find"tab(40)"C - cat & load"tab(60)"V - change disk"
@@ -40,14 +42,14 @@
 2050 print "  A/C - toggle insert/overwrite mode"tab(42)"D/I - delete/insert a line"
 2060 print "  J/K - to start/end of line"tab(42)"P/Q - erase begin/end of line"
 2070 print "  V/W - scroll up/down"tab(42)"Any other key - cancel TAB":print
-2090 print "Delete, Insert, Home, Page Up, Page Down, Enter, cursors, ..."
+2090 print "Delete, Insert, Home, Page Up/Down, Enter, cursors, ..."
 2100 print:print:print tab(28)"Hit any key to continue"
 2120 c$=inkey$:if c$="" then 2120
 
 2200 rem show screen
 2205 fo=1:return
 2210 i=ty:cls
-2220 if i<lc and i-ty<24 then gosub 2400:i=i+1:goto 2220
+2220 if i<lc and i-ty<24 then gosub 2510:i=i+1:goto 2220
 2230 gosub 2310
 
 2250 locate 25,1:print f$,fre(0);:locate 25,38:print mo$;:locate 25,43:print un$dr$;:return
@@ -60,11 +62,8 @@
 2330 c$=c$+" "+d$:d$=str$(lc):mid$(d$,1,1)="/":c$=c$+d$:l=mc-len(c$)
 2350 locate 25,l-2:print "   "c$;:return
 
-2400 print a$(i);:if pos(0)<>1 and csrlin<>24 then print
-2410 return
-
 2500 rem show line #i
-2510 locate i-ty+1,1:print a$(i)space$(80-len(a$(i)));:return
+2510 locate i-ty+1,1:l4=varptr(ml%(0))+so5:call l4(a$(i)):return
 
 2600 locate cy-ty+1,cx+1,1
 2604 c$=inkey$:if c$="" then 2604
@@ -80,7 +79,7 @@
 2700 if i=13 then 4900
 2710 if i=9 then 8000
 2720 if i=16 then 2000
-2730 if i=17 then system
+2730 if i=17 then cls:system
 2740 if i=2 then 9300
 2750 if i=5 then 9400
 2760 if i=201 then 9500
@@ -400,7 +399,7 @@
 9600 rem page down
 9610 cx=0:l=ty+24:if l>=lc then l=lc-24
 9620 if l<0 then l=0
-9630 cy=cy+l-ty:if cy>=lc then cy=lc-1
+9630 cy=cy+24:if cy>=lc then cy=lc-1
 9640 goto 9420
 
 9700 rem new
@@ -419,10 +418,10 @@
 
 9900 rem repeat find
 9910 if fs$="" then return
-9920 print chr$(12)"seek "fs$:l=len(fs$):goto 9830
+9920 cls:print "searching "fs$:l=len(fs$):goto 9830
 
 10000 for j=cy to lc-1
-10010 s$=a$(j):gosub 10100:print chr$(13) j+1;
+10010 s$=a$(j):gosub 10100:locate 2,1:print j+1;
 10020 fi=instr(l2,s$,fs$):if fi=0 and len(s$)=mc then gosub 10200
 10030 if fi then return
 10040 l2=1

@@ -51,3 +51,33 @@ mov bp,sp
 mov bx,[bp+4]
 mov [bx],al
 retf 2
+
+push es
+mov ax,0b800h
+mov es,ax
+mov ah,3
+xor bx,bx
+int 10h
+mov al,160
+mul dh
+mov di,ax
+mov bp,sp
+mov si,[bp+6]
+cld
+lodsb
+xor cx,cx
+mov cl,al
+mov bl,80
+sub bl,cl
+lodsw
+mov si,ax
+mov ah,7
+l3:lodsb
+stosw
+loop l3
+or cl,bl
+jz l2
+mov al,32
+rep stosw
+l2:pop es
+retf 2

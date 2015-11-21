@@ -254,7 +254,7 @@ help:    call totext
          db 0dh,10,red,'g',green
          db ' toggle run/stop mode'
          db 0dh,10,red,'h',green
-         db ' toggle hide mode - about 20% faster'
+         db ' toggle hide mode - about 10% faster'
          db 0dh,10,red,'l',green
          db ' load and transform file'
          db 0dh,10,red,'L',green
