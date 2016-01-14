@@ -1908,7 +1908,8 @@ crsrclr: ;;tstb @#zoom
          and dx,1100011000b
          shr dl,1
          or dh,dl
-         shl dh,4
+         mov cl,4
+         shl dh,cl
          and al,0fh
          inc di
          jmp .c4

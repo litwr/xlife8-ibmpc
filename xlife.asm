@@ -952,9 +952,9 @@ crsrpgmk  db 1   ;0 - do not draw cursor during showscnz, 1 - draw
 svfn      db 0,0,0,0,0,0,0,0,0,0,0,0
 drives    rb 26
 curdrv    db 0
-patpath   db '/patterns',0
-rootpath  db '/',0
-cf        db '/colors.cfg',0
-copyleft  db '/CR.TXT',0
+patpath   db '\PATTERNS',0
+rootpath  db '\',0
+cf        db '\COLORS.CFG',0
+copyleft  db '\CR.TXT',0
 nofnchar  db '?,./:;<=>[\]|'
 stringbuf rb 19     ;must be after nofnchar
