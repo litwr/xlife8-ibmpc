@@ -163,7 +163,8 @@
 3900 rem set working directory
 3910 cls:print"current directory path: "dr$
 3920 print"enter directory path (* - exit)";:input c$
-3930 if c$<>"*" then dr$=c$
+3930 if c$="*" then 2205 else dr$=c$
+3935 if right$(dr$,1)<>"\" then dr$=dr$+"\"
 3940 goto 2205
 
 4000 rem cursor right

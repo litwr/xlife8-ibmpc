@@ -1096,22 +1096,22 @@ showrect:
          call showtent
 .c11:    call crsrflash
          call getkey2
-         cmp ax,4b00h    ;cursor left
+         cmp ah,4bh    ;cursor left
          jz .c100
 
-         cmp ax,4d00h  ;cursor right
+         cmp ah,4dh  ;cursor right
          jz .c100
 
-         cmp ax,4800h  ;cursor up
+         cmp ah,48h  ;cursor up
          jz .c100
 
-         cmp ax,5000h   ;cursor down
+         cmp ah,50h   ;cursor down
          jz .c100
 
          cmp al,'.'     ;to center
          jz .c100
 
-         cmp ax,4700h     ;to home
+         cmp ah,47h     ;to home
          jz .c100
 
          cmp al,'r'

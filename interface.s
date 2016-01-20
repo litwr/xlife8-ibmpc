@@ -193,7 +193,7 @@ dispatcher: call getkey2
 ;;         return
 .c200:   jmp tograph
 
-.c16:    cmp ax,4d00h   ;cursor right
+.c16:    cmp ah,4dh   ;cursor right
          jnz .c160
 
 ;;         call @#crsrclr
@@ -247,7 +247,7 @@ dispatcher: call getkey2
 .c71:   mov cl,80h
         jmp .c72
 
-.c160:  cmp ax,4b00h ;cursor left
+.c160:  cmp ah,4bh ;cursor left
         jnz .c161
 
 ;;         call @#crsrclr
@@ -325,7 +325,7 @@ dispatcher: call getkey2
 .c74:    mov [bx],cl
          jmp .c270
 
-.c161:   cmp ax,4800h  ;cursor up
+.c161:   cmp ah,48h  ;cursor up
          jnz .c162
 
 ;;         call @#crsrclr
@@ -374,7 +374,7 @@ dispatcher: call getkey2
 .c77:    mov cl,7
          jmp .c72
 
-.c162:   cmp ax,5000h  ;cursor down
+.c162:   cmp ah,50h  ;cursor down
          jnz .c17
 
 ;;         call @#crsrclr
@@ -535,7 +535,7 @@ dispatcher: call getkey2
 .c270:   call crsrset
          jmp crsrcalc
 
-.c171:   cmp ax,4700h    ;home
+.c171:   cmp ah,47h    ;home
          jnz .c172
 
          call crsrclr
@@ -690,11 +690,13 @@ dispatcher: call getkey2
 
 ;;         mov @r0,@#crsrtile
 ;;20$:     return
-shift:   push ds
-         xor ax,ax
-         mov ds,ax
-         mov al,[417h]
-         pop ds
+shift:   ;push ds
+         ;xor ax,ax
+         ;mov ds,ax
+         ;mov al,[417h]
+         ;pop ds
+         mov ah,2
+         int 16h
          test al,43h
          jz .l1
 
