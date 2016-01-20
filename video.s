@@ -158,35 +158,35 @@ indens:  call totext
          db black,'SELECT DENSITY OR PRESS ',red,'ESC',black,' TO EXIT'
 ;         .byte 10,9,145,'0,147
 ;         .ascii " - 12.5%"
-         db 0dh,10,9,red,'0',green,' - 12.5%'
+         db 0dh,10,t9,red,'0',green,' - 12.5%'
 ;         .byte 10,9,145,'1,147
 ;         .ascii " - 28%"
-         db 0dh,10,9,red,'1',green,' - 28%'
+         db 0dh,10,t9,red,'1',green,' - 28%'
 ;         .byte 10,9,145,'2,147
 ;         .ascii " - 42%"
-         db 0dh,10,9,red,'2',green,' - 42%'
+         db 0dh,10,t9,red,'2',green,' - 42%'
 ;         .byte 10,9,145,'3,147
 ;         .ascii " - 54%"
-         db 0dh,10,9,red,'3',green,' - 54%'
+         db 0dh,10,t9,red,'3',green,' - 54%'
 ;         .byte 10,9,145,'4,147
 ;         .ascii " - 64%"
-         db 0dh,10,9,red,'4',green,' - 64%'
+         db 0dh,10,t9,red,'4',green,' - 64%'
 ;         .byte 10,9,145,'5,147
 ;         .ascii " - 73%"
-         db 0dh,10,9,red,'5',green,' - 73%'
+         db 0dh,10,t9,red,'5',green,' - 73%'
 ;         .byte 10,9,145,'6,147
 ;         .ascii " - 81%"
-         db 0dh,10,9,red,'6',green,' - 81%'
+         db 0dh,10,t9,red,'6',green,' - 81%'
 ;         .byte 10,9,145,'7,147
 ;         .ascii " - 88.5%"
-         db 0dh,10,9,red,'7',green,' - 88.5%'
+         db 0dh,10,t9,red,'7',green,' - 88.5%'
 ;         .byte 10,9,145,'8,147
 ;         .ascii " - 95%"
-         db 0dh,10,9,red,'8',green,' - 95%'
+         db 0dh,10,t9,red,'8',green,' - 95%'
 ;         .byte 10,9,145,'9,147
 ;         .asciz " - 100%"
 ;         .byte 0
-         db 0dh,10,9,red,'9',green,' - 100%',black,'$'
+         db 0dh,10,t9,red,'9',green,' - 100%',black,'$'
 ;1$:      call @#getkey
 ;         cmpb #9,r0
 ;         beq 2$
@@ -234,7 +234,7 @@ inmode:  call printstr
 
 help:    call totext
          call printstr
-         db 9,black,bold,'*** XLIFE COMMANDS ***',normal
+         db black,bold,t9,'*** XLIFE COMMANDS ***',normal
          db 0dh,10,red,'!',green
          db ' randomize screen'
          db 0dh,10,red,'%',green

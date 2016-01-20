@@ -13,16 +13,16 @@ maketent:   ;in: si
 
 ramdisk: call printstr
          db ansiclrscn,green,'ENTER FILE# OR HIT '
-         db red,'ESC',0dh,10,9,'0',black
-         db ' GLIDER GUN',0dh,10,red,9,'1',black
-         db ' SMALL FISH',0dh,10,red,9,'2',black
-         db ' HEAVYWEIGHT SPACESHIP',0dh,10,red,9,'3',black
-         db ' R-PENTOMINO',0dh,10,red,9,'4',black
-         db ' BUNNIES',0dh,10,red,9,'5',black
-         db ' LIDKA',0dh,10,red,9,'6',black
-         db ' BIG GLIDER',0dh,10,red,9,'7',black
-         db ' BI-GUN',0dh,10,red,9,'8',black
-         db ' ACORN',0dh,10,red,9,'9',black
+         db red,'ESC',0dh,10,t9,'0',black
+         db ' GLIDER GUN',0dh,10,red,t9,'1',black
+         db ' SMALL FISH',0dh,10,red,t9,'2',black
+         db ' HEAVYWEIGHT SPACESHIP',0dh,10,red,t9,'3',black
+         db ' R-PENTOMINO',0dh,10,red,t9,'4',black
+         db ' BUNNIES',0dh,10,red,t9,'5',black
+         db ' LIDKA',0dh,10,red,t9,'6',black
+         db ' BIG GLIDER',0dh,10,red,t9,'7',black
+         db ' BI-GUN',0dh,10,red,t9,'8',black
+         db ' ACORN',0dh,10,red,t9,'9',black
          db ' SWITCH ENGINE PUFFER',0dh,10,'$'
 
 .c1:     call getkey
