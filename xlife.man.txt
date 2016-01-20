@@ -3,7 +3,8 @@
 \bNAME
 
 \g Xlife - Conway's Game of Life and other cellular automata for IBM PC with Intel
-8088 CPU and CGA graphics.
+8088 CPU and CGA graphics. It is for DOS compatible OS with ANSI.SYS driver ins-
+talled.
 
 \bDESCRIPTION
 
@@ -33,7 +34,8 @@
     in various ways before incorporating it into  main  pattern.   (To  indicate
     this, it's  surrounded by a bounding box.)  Clear the  universe if you  want
     to start from scratch.  It is possible either to select pattern at the  dir-
-    ectory list directly or to enter the pattern name.
+    ectory list directly or to enter the pattern name. The file maybe only taken
+    from the PATTERNS subdirectory of the root directory.
  \xL  Immediately reload, at the cursor, a copy of the  last  pattern  loaded.  It
     doesn't work for ramdisk pattern.
  \xo  Forward one generation.
