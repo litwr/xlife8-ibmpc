@@ -1,12 +1,10 @@
 D=../fd0.img               #name of the disk image file
 M=/mnt/loop                #mount point
-./compile
+#./compile
 sudo mount -t msdos -o loop,fmask=111,dmask=000 $D $M && \
-#rm -f $M/xlife.com $M/cr.txt $M/manpage.com && \
-#compile manpage.asm && \
-cp xlife.com $M && \
-#cp xlife.com cr.txt manpage.com $M && \
-sudo sync 
-#ls -l $M/xlife.com $M/manpage.com
-ls -l $M/xlife.com
+rm -f $M/xlife.com $M/cr.txt $M/manpage.com $M/autoexec.bat $M/np4.exe&& \
+sed 's/$/\r/' autoexec.bat >$M/autoexec.bat && \
+cp NP4.EXE xlife.com cr.txt manpage.com waitkey.com $M && \
+sudo sync
+ls -l $M/xlife.com $M/manpage.com
 sudo umount $M
