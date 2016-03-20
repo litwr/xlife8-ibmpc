@@ -10,7 +10,6 @@ mv m.com manpage.com
 gcc -DIBMPC genvistab.c && ./a.out >vistab.s && \
 gcc -DIBMPC geninitiles.c && ./a.out >initiles.s #&& \
 gcc -DIBMPC gengentab.c && ./a.out >gentab.s && \
-#gcc -DBK0011 gengentab.c && ./a.out >gentab.s && \
 gcc -DIBMPC gentab12.c && ./a.out >tab12.s && \
 fasm xlife.asm -s xlife.fas && \
 fasm-listing xlife.fas xlife.lst # &&\
@@ -24,4 +23,4 @@ fasm-listing xlife.fas xlife.lst # &&\
 #ls -l $M/xlife*.com $M/manpage.com
 #sudo umount $M
 rm initiles.s gentab.s tab12.s vistab.s a.out *.fas manpage.txt
-grep -n ': 0F' *.lst|grep -v -w d[bw]
+grep -n ': 0F' *.lst|grep -v -w d[bw]   #it checks for non-8088 opcodes

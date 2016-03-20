@@ -1,6 +1,6 @@
 Xlife for IBM PC/CGA/8088 v1 ported to 8/16-bit universe by litwr
 
-(c) 2014,15 GNU GPL
+(c) 2014-16 GNU GPL
 
 The 1st version of the original xlife for Unix was developed at CMU at the
 1989 by Jon Bennett & Chuck Silvers

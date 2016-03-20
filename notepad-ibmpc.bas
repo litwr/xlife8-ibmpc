@@ -1,7 +1,8 @@
  1 rem *** CP437 8-bit encoding
  2 rem *** notepad+4 ibm pc edition, the text file editor, v1
+ 3 rem *** for compilation by Microsoft QuickBasic (v4.5 is tested)
  4 rem *** converted from Commodore plus/4
- 6 rem *** by litwr, 2015, (C) GNU GPL
+ 6 rem *** by litwr, 2015-16, (C) GNU GPL
  7 rem *** the initial banner was made by Text Resizer by MIRKOSOFT
  8 defint a-w:cl=119
 10 mc=80:cc$=chr$(176):cf$=chr$(178):mo$="ins":im=1:dr$="\patterns\"
@@ -33,7 +34,7 @@
 180 c$=inkey$:if c$<>"" then 180
 190 return
 
-2000 cls:print tab(24)"Notepad +4 IBM PC Edition commands list":print
+2000 cls:print tab(25)"Notepad +4 IBM PC Edition commands":print
 2005 print tab(30);:color 0,7:print "With the CONTROL key":color 7,0
 2010 print "P - help"tab(20)"N - new"tab(40)"L/S - load/save"tab(60)"B/E - to begin/end"
 2020 print "F - find forward"tab(20)"R - repeat find"tab(40)"C - cat & load"tab(60)"V - change disk"
