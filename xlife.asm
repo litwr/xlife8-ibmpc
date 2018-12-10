@@ -82,7 +82,7 @@ mainloop:
 
          call generate     ;hide
          call cleanup
-         jmp mainloop.e1
+         jmp .e1
 
 .c5:     call zerocc
          call generate
@@ -808,9 +808,8 @@ cleanup0:
 
 .delel:   dec [tilecnt]
 ;;          mov #count0,r1
-          mov di,count0
 ;;          add r0,r1
-          add di,bx
+          lea di,[count0+bx]
           xor ax,ax
           mov cx,16
 .c2c:
@@ -839,20 +838,10 @@ cleanup0:
          mov [startp],bx
 
 ;;         tst @#tilecnt
-         or [tilecnt],0
+         cmp [tilecnt],0
          jnz .c1
          retn
 
-;ttab      db 0,1,2,3,3,4,5,6,7,8,8,9,16,17,18,19,19,20
-;          db 21,22,23,24,24,25,32,33,34,35,35,36
-;          db 37,38,39,40,40,41,48,49,50,51,51,52
-;          db 53,54,55,56,56,57,64,65,66,67,67,68
-;          db 69,70,71,72,72,73,80,81,82,83,83,84
-;          db 85,86,87,88,88,89,96,97,98,99,99,100
-;          db 101,102,103,104,104,105,112,113,114,115,115,116
-;          db 117,118,119,120,120,121,128,129,130,131,131,132
-;          db 133,134,135,136,136,137,144,145,146,147,147,148
-;          db 149,150,151,152,152,153
 ttab:     repeat hormax*vermax/4
           zv = (%-1)*400/hormax/vermax
           db (zv/10)*16 + zv mod 10

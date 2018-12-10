@@ -128,11 +128,10 @@ dispatcher: call getkey2
 
          mov word [x0],ax
          call inmode
-         js .c402
-         jnz .c400
-         jmp .c500
+         je .c500
+         ja .c400
 
-.c402:   call start_timer
+         call start_timer
 .c146:   cmp [tilecnt],0
          jnz .c147
 

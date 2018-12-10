@@ -242,23 +242,23 @@ help:    call totext
          db 0dh,10,red,'+',green,'/',red,'-',green
          db ' zoom in/out'
          db 0dh,10,red,'.',green,'/',red,'Home',green
-         db ' center/home cursor'
+         db ' center/home the cursor'
          db 0dh,10,red,'?',green
          db ' show this help'
          db 0dh,10,red,'B',green
          db ' benchmark'
          db 0dh,10,red,'C',green
-         db ' clear screen'
+         db ' clear the screen'
          db 0dh,10,red,'E',green
-         db ' toggle pseudocolor mode'
+         db ' toggle the pseudocolor mode'
          db 0dh,10,red,'g',green
-         db ' toggle run/stop mode'
+         db ' toggle the run/stop mode'
          db 0dh,10,red,'h',green
-         db ' toggle hide mode - about 10% faster'
+         db ' toggle the hiding (fastest) mode'
          db 0dh,10,red,'l',green
-         db ' load and transform file'
+         db ' load and transform a pattern'
          db 0dh,10,red,'L',green
-         db ' reload pattern'
+         db ' reload a pattern'
          db 0dh,10,red,'o',green
          db ' one step'
          db 0dh,10,red,'Q',green
@@ -272,15 +272,15 @@ help:    call totext
          db 0dh,10,red,'v',green
          db ' show some info'
          db 0dh,10,red,'V',green
-         db ' show comments to the pattern'
+         db ' show comments to a pattern'
          db 0dh,10,red,'X',green,'/',red,'Z',green
-         db ' reload/set&save palette'
+         db ' reload/set&save a palette'
          db 0dh,10,0dh,10,black
          db 'Use ',red,'cursor keys'
-         db black, ' to set the position and '
+         db black, ' to set a position and a '
          db red, 'space key', black
          db ' to toggle the current cell. '
-         db 'Use ',red, 'shift', black
+         db 'Use a ',red, 'shift', black
          db ' to speed up the movement$'
          call curoff
          call getkey
@@ -588,7 +588,7 @@ showscn:  call infoout
 
 ;;          tst @#tilecnt
 ;;          beq gexit
-.l1:      or [tilecnt],0
+.l1:      cmp [tilecnt],0
           jz gexit
 
 ;;          tstb @#pseudoc
@@ -2374,7 +2374,7 @@ showtent:mov ax,word [x0]
 
 printfloat: mov si,stringbuf
         xor cx,cx
-        mov cl,[stringbuf]
+        mov cl,[si]
         mov ah,2
         cmp cl,1
         jnz .l3
