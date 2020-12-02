@@ -1,4 +1,4 @@
-Xlife for IBM PC/CGA/8088 v1 ported to 8/16-bit universe by litwr
+Xlife for IBM PC/CGA/8088 v2 ported to 8/16-bit universe by litwr
 
 (c) 2014-16 GNU GPL
 

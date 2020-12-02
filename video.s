@@ -130,7 +130,7 @@ inborn:  call printstr
          db ' VALUES.  FOR EXAMPLE, ',purple
          db 'CONWAYS''S LIFE',green,' HAS BORN=3 AND STAY=23, '
          db  purple,'SEEDS',green,' - BORN=2 AND EMPTY STAY, '
-         db purple,'HIGHLIFE,',green,' - BORN=36 AND STAY=23, '
+         db purple,'HIGHLIFE',green,' - BORN=36 AND STAY=23, '
          db purple,'LIFE WITHOUT DEATH',green
          db ' - BORN=3 AND STAY=012345678, ...',0dh,10,black
          db 'BORN = $'
@@ -418,38 +418,13 @@ calcx:   ;;movb @#crsrbit,r1  ;$80 -> 0, $40 -> 1, ...
          jnc .c1
          retn
 
-showscnz:
-;;xlimit   = $14
-;;ylimit   = $15
-;;         #assign16 i1,viewport
-         mov si,[viewport]
-
-;;         lda #5
-;;         sta xlimit
+showscnz:mov si,[viewport]
          mov bl,5
-
-;;         lda pseudoc
-;;         bne showscnzp
+         xor di,di
          cmp [pseudoc],0
          jnz showscnzp
 
-;;         lda #$c
-;;         sta cont2+2
-;;         lda #0
-;;         sta cont2+1
-         xor di,di
-
-;;loop3    lda #3
-;;         sta ylimit
 .loop3:  mov bh,3
-
-;;loop4    ldy #0              ;check sum?
-;;loop2    lda (i1),y
-;;         ldx #0
-;;loop1    asl
-;;         sta 7
-;;         lda #32
-;;         bcc cont2
 .loop4:  mov cx,8
 .loop2:  lodsb
          mov dl,8
@@ -460,72 +435,29 @@ showscnz:
          shl dh,1
          jnc .cont2
 
-;;         lda #81         ;live cell char
-;;cont2    sta $c00,x
-;;         lda 7
-;;         inx
-;;         cpx #8
-;;         bne loop1
          mov al,9   ;live cell char and attribute
 .cont2:  stosw
          dec dl
          jnz .loop1
 
-;;         lda #39    ;CY=1
-;;         adc cont2+1
-;;         sta cont2+1
-;;         bcc nocy1
          add di,80-16
-
-;;         inc cont2+2
-;;nocy1    iny
-;;         cpy #8
-;;         bne loop2
          loop .loop2
 
-;;         dec ylimit
-;;         beq cont3
          dec bh
          jz .cont3
 
-;;         lda #<tilesize*20-1 ;CY=1
-;;         adc i1
-;;         sta i1
-;;         lda i1+1
-;;         adc #>tilesize*20
-;;         sta i1+1
-;;         bcc loop4
          add si,tilesize*hormax-8
          jmp .loop4
 
-;;cont3    dec xlimit
-;;         bne cont11
-;;         rts
 .cont3:  dec bl         ;xlimit
          jnz .cont11
          retn
 
-;;cont11   lda cont2+1    ;CY=1
-;;         sbc #<952
-;;         sta cont2+1
-;;         lda cont2+2
-;;         sbc #>952
-;;         sta cont2+2
-;;         lda i1   ;CY=1
-;;         sbc #<tilesize*39
-;;         sta i1
-;;         lda i1+1
-;;         sbc #>tilesize*39
-;;         sta i1+1
-;;         bne loop3
 .cont11: sub di,24*80-16
          sub si,tilesize*(hormax*2-1)+8
          jmp .loop3
 
 showscnzp:
-         mov si,[viewport]
-         mov dl,5  ;xlimit
-         xor di,di
 .loop3:  mov dh,3   ;ylimit
 .loop4:  mov cl,8
          lea bp,[si+count0]
@@ -541,24 +473,23 @@ showscnzp:
          or ch,ah
          lodsb
          add bp,4
-         mov bl,8
+         mov dl,8
          mov bh,al
-.loop1:  shl ch,1
-         rcr al,1
-         shl bh,1
-         rcr al,1
-         mov ah,[zfg]
-         test al,0c0h
+.loop1:  mov ah,[zfg]
          mov al,20h   ;space char and attribute
+         or bh,bh
          jns .cont2
 
          mov al,9    ;live cell char
-         jpe .cont2
+         or ch,ch
+         js .cont2
 
          mov ah,[zfgnc]    ;new cell attr
-.cont2:  or ah,[czbg]
+.cont2:  shl ch,1
+         shl bh,1
+         or ah,[czbg]
          stosw
-         dec bl
+         dec dl
          jnz .loop1
 
          add di,80-16
@@ -571,7 +502,7 @@ showscnzp:
          add si,tilesize*hormax-8
          jmp .loop4
 
-.cont3:  dec dl         ;xlimit
+.cont3:  dec bl        ;xlimit
          jnz .cont11
          retn
 
@@ -2085,7 +2016,7 @@ crsrcalc:
 ;;        add #44*tilesize,r3
 ;;        cmp r1,r3
 ;;        beq 30$
-        add bx,44*tilesize
+        add bx,(2*hormax+4)*tilesize
         cmp bx,di
         jz .c30
 
