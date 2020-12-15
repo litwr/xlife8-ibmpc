@@ -267,7 +267,7 @@ help:    call totext
          db ' set the rules'
          db 0dh,10,red,'S',green
          db ' save'
-         db 0dh,10,red,'t',green
+         db 0dh,10,red,'T',green
          db ' toggle plain/torus topology'
          db 0dh,10,red,'v',green
          db ' show some info'
@@ -912,8 +912,10 @@ menu2:   call setdirmsk
          mov ch,10
 .l2:     mul ch
          add al,[si]
+         adc ah,0
          inc si
          sub al,'0'
+         sbb ah,0
          dec cl
          jnz .l2
 
@@ -2188,7 +2190,7 @@ chgcolors:
          int 10h
          call printstr
          db green,'PRESS ',red,'ENTER',green
-         db ' TO USE THE DEFAULT VALUE OR INPUT THE DECIMAL NUMBER.',0dh,10,purple
+         db ' TO USE THE DEFAULT VALUE OR INPUT A DECIMAL NUMBER.',0dh,10,purple
          db 'PALETTE# FOR ZOOM OUT MODE (0-1)[',cyan,'$'
          mov al,[palette]
          mov ch,2
