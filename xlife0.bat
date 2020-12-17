@@ -30,4 +30,4 @@ call autoexec.bat
 cls
 %D%:
 subst a: /d
-pause
+rem pause

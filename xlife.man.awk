@@ -33,6 +33,10 @@ BEGIN {
          b = b purple
          e = substr(e, p + 2)
       }
+      else if (m == "y") {
+         b = b yellow
+         e = substr(e, p + 2)
+      }
       else if (m == "r") {
          b = b bold
          e = substr(e, p + 2)

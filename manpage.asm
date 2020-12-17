@@ -24,6 +24,12 @@ start:   mov ax,3
 
 .l1:     xor ah,ah
          int 16h
+         cmp al,27
+         je .exit
+
+         cmp al,'q'
+         je .exit
+
          xor bp,bp
          mov [lines],24
 .l2:     mov ah,2
@@ -46,7 +52,9 @@ start:   mov ax,3
          mov [es:3998],dx
          jmp .l1
 
-.eof:    mov ah,1
+.eof:    xor ah,ah
+         int 16h
+.exit:   mov ah,1
          mov cx,607h
          int 10h
          int 20h
