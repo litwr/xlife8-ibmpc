@@ -33,9 +33,9 @@ ver installed.
     pattern is (default) initially considered tentative, and  maybe  manipulated
     in various ways before incorporating it into  main  pattern.   (To  indicate
     this, it's  surrounded by a bounding box.)  Clear the  universe if you  want
-    to start from scratch. It is possible either to select a pattern in the dir-
-    ectory list directly or to enter a pattern name.  A file may only  be  taken
-    from a \pPATTERNS\g subdirectory of the root directory on any disk.
+    to start from scratch. It is possible either to select a pattern in a direc-
+    tory list directly or to enter a pattern name. A file may only be taken from
+    \pPATTERNS\g subdirectory of root directory on any disk.
  \xL  Immediately reload, at the cursor, a copy of the  last  pattern  loaded.  It
     doesn't work for ramdisk patterns.
  \xo  Forward one generation.
@@ -54,7 +54,7 @@ ver installed.
  \xZ  Set and optionally save a palette.
 
  Use (\rshift\n\g +) \rcursor\n\g, \rHome\n\g,  and \r.\n\g keys to move the cursor.  Use  \rspace bar\n\g  to
- change the cell under cursor.
+ change a cell under the cursor.
 
 \bSTATUS BAR
 
@@ -64,12 +64,12 @@ ver installed.
 
 \bLIMITS
 
- \gIt is possible to see only up to 999 files from the disk directory.  Use a mask
- to show only matched files.
+ \gIt is possible to see only up to 999 files from a disk directory. Use a mask to
+ show only matched files.
 
- The tentative pattern may show only up to 1536 cells.  The other cells are  not
- shown but loaded later.  This quantity is enough to show every cell from a pat-
- tern file with the size that is equal approximately to 3 KB.
+ The tentative pattern may show only up to 1536 cells. Other cells are not shown
+ but loaded later.  This quantity is enough to show every cell  from  a  pattern
+ file with the size that is equal approximately to 3 KB.
 
  The universe size is 248x192.
 
@@ -81,8 +81,8 @@ ver installed.
 
  \gThe first two bytes of a pattern file are its width and height.  The  next  two
  bytes describes "stay alive on" condition,  and the next  two - "born on".  The
- next contents are the sequence of X and Y coordinate pairs of live  cells.  The
- patterns must have \p8XL\g filename extension.
+ next contents are the sequence of X and Y coordinate pairs of live  cells. Pat-
+ terns must have \p8XL\g filename extension.
 
  A file with comments must have the same name as the corresponding pattern file-
  name. A comment file is a common plain text file.  It may be edited by any text
@@ -111,7 +111,7 @@ ver installed.
 
  \gIt contains 10 patterns:
 
-\pglider gun\g  The Gosper glider gun is the first known gun, and indeed  the  first
+\pglider gun\g  The Gosper glider gun is the first known gun,  and indeed the  first
         known finite pattern with unbounded growth, found by Bill Gosper in Nov-
         ember 1970.
 
@@ -125,15 +125,14 @@ ver installed.
 \pr-pentomino\g a methuselah that was found by John Conway in 1970. It is by far the
         most active polyomino with fewer than six cells; all of the others  sta-
         bilize in at most 10 generations, but the  R-pentomino does  not  do  so
-        until generation 1103, by which time it has a population  of  116.   The
-        glider it releases in generation 69, was the  first  glider ever  obser-
-        ved.
+        until generation 1103, by which time it has a population of 116.  A gli-
+        der it releases in generation 69, was the first glider ever observed.
 
 \pbunnies\g, \plidka\g, \pacorn\g methuselahs with 17332,  29055,  5206 generations lifespan
         respectively.
 
 \pbig glider\g The big glider was found by Dean Hickerson in December 1989  and  was
-        the first known  diagonal spaceship other than the glider. 
+        the first known diagonal spaceship other than the glider. 
 
 \pbi-gun\g  a double-barreled glider gun, a glider generator.  It produces two  gli-
         ders for 46 generations.
@@ -167,8 +166,7 @@ ver installed.
 
 \bFILES
 
-  \pcolors.cfg\g   this file contains the palette. It's a binary file.  May be omit-
-              ted.
+  \pcolors.cfg\g   this file contains a palette. It's a binary file. May be omitted.
 
   \pcr.txt\g       the text file with copyright and historical  information.  Should
               not be omitted!
