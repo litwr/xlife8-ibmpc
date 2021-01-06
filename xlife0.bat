@@ -1,3 +1,4 @@
+D=A
 curdrv
 if errorlevel 1 set D=B
 if errorlevel 2 set D=C
@@ -24,10 +25,14 @@ if errorlevel 22 set D=W
 if errorlevel 23 set D=X
 if errorlevel 24 set D=Y
 if errorlevel 25 set D=Z
+if %D%==A goto C1
 subst a: .
 a:
+:C1
 call autoexec.bat
 cls
+if %D%==A goto C2
 %D%:
 subst a: /d
+:C2
 rem pause
