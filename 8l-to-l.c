@@ -1,3 +1,8 @@
+/*
+This utility converts binary files for Xlife-8 for the Amstrad CPC, IBM PC, and Commodore Amiga
+into a textual format of original Xlife
+*/
+
 #include<stdio.h>
 int main(int argc, char **argv) {
     unsigned char buf[65536];

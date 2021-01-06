@@ -709,9 +709,18 @@ shift:   ;push ds
 
 benchcalc: call stop_timer
          mov ax,20480    ;=4096*5=TIMERV*5
+         mul [timercnt+2]
+         mov cx,ax
+         mov ax,20480
          mul [timercnt]
+         add dx,cx
          mov cx,59659    ;=1193180/20
-         div cx
+         cmp dx,cx
+         jb .ok
+
+         xor dx,dx       ;reset if overflow
+         xor ax,ax       ;oveflow = approx. 655.36 s
+.ok:     div cx
          inc ax
          shr cx,1
          cmp dx,cx
