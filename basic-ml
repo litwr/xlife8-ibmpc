@@ -1,0 +1,11 @@
+fasm -s basic-ml.fas basic-ml.asm
+fasm-listing basic-ml.fas basic-ml.lst
+awk '{print substr($0,10,14)}' basic-ml.lst|awk '{
+   for(i=1;i<=NF;i++){
+      s=$i
+      if(substr($i,1,1)=="0")s=substr($i,2,1)
+      r=r","s
+   }
+   if($1=="" && r!=""){print " data "substr(r,2);r=""}}' >basic-data.bas
+rm basic-ml.bin basic-ml.fas
+
