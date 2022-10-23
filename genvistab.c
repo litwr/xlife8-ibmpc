@@ -1,1 +1,1 @@
-/home/micro/retro/bk/xlife-bk0011/genvistab.c
+../bk0011/genvistab.c
