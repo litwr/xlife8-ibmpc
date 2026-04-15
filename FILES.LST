@@ -1,0 +1,9 @@
+patterns/    - a folder with patterns
+autoexec.bat - start the Xlife-8 system
+config.sys   - should add ANSI.SYS
+cr.txt       - copyright and other information
+manpage.com  - the manual page
+np4.exe      - Notepad+4 text editor
+waitkey.com  - utility for batch-file
+xlife.com    - the main program
+FILES.LST    - this file
